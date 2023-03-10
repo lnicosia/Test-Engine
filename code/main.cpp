@@ -25,7 +25,7 @@ void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels);
 
 Point2<int>	winSize(800, 600);
 Point2<float>	oldMouse;
-float		mouseSpeed = 0.001;
+float		mouseSpeed = 0.001f;
 uint32_t*	pixels;
 SDLEvents	events;
 std::vector<std::vector<int>>	map
@@ -46,13 +46,14 @@ struct Player
 {
 private:
 	Vector2<float>	direction;
+	Point2<float>	pos;
 	float	angle;
 	float	fov;
 	float	topRayAngle;
 	float	bottomRayAngle;
+	float	speed;
 
 public:
-	Point2<float>	pos;
 
 	Player():
 		pos(5, 5),
@@ -60,7 +61,8 @@ public:
 		angle(0),
 		fov((float)M_PI / 2),
 		topRayAngle(angle + fov / 2),
-		bottomRayAngle(angle - fov / 2)
+		bottomRayAngle(angle - fov / 2),
+		speed(0.05f)
 	{
 	}
 
@@ -73,7 +75,7 @@ public:
 		this->bottomRayAngle = angle - fov / 2;
 	}
 
-	void	draw()
+	void	draw() const
 	{
 		Point2<int> winPos(winSize.w / 2, winSize.h / 2);
 		Point2<int> end(winPos.x + cos(angle) * 70, winPos.y + sin(angle) * 70);
@@ -82,6 +84,28 @@ public:
 		drawLine(winPos, end, 0xFFFFFFFF, pixels);
 		end = Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
 		drawLine(winPos, end, 0xFFFFFFFF, pixels);
+	}
+
+	void	forward()
+	{
+		this->pos.x += this->direction.x * this->speed;
+		this->pos.y += this->direction.y * this->speed;
+	}
+
+	void	backward()
+	{
+		this->pos.x -= this->direction.x * this->speed;
+		this->pos.y -= this->direction.y * this->speed;
+	}
+
+	const Point2<float>& getPos() const
+	{
+		return pos;
+	}
+
+	const Vector2<float>& getDirection() const
+	{
+		return direction;
 	}
 };
 
@@ -131,9 +155,9 @@ void	drawMap(const std::vector<std::vector<int>>& map)
 {
 	Point2<int> size(50, 50);
 	Point2<int> pos;
-	Point2<int> startPos(winSize.w / 2  - player.pos.x * size.x,
-		winSize.h / 2  - player.pos.y * size.y);
-	Point2<float> startPos2(player.pos.x - (map.size()), (player.pos.y - map.size()));
+	Point2<int> startPos(winSize.w / 2  - player.getPos().x * size.x,
+		winSize.h / 2  - player.getPos().y * size.y);
+	Point2<float> startPos2(player.getPos().x - (map.size()), (player.getPos().y - map.size()));
 	pos.y = startPos.y;
 	for (size_t y = 0; y < map.size(); y++)
 	{
@@ -179,6 +203,16 @@ void	clearImg()
 	}
 }
 
+void Forward()
+{
+	player.forward();
+}
+
+void Backward()
+{
+	player.backward();
+}
+
 int main()
 {
 	std::cout << "Hello CMake." << std::endl;
@@ -201,6 +235,14 @@ int main()
 	if (!texture)
 		throw std::runtime_error("Could not create texture");
 
+
+	Binding forward("forward", SDLK_UP, SDLK_w, true);
+	forward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Forward)));
+	events.bindings.push_back(forward);
+
+	Binding backward("forward", SDLK_DOWN, SDLK_s, true);
+	backward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Backward)));
+	events.bindings.push_back(backward);
 
 	bool running = true;
 	while (running)

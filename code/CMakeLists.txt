@@ -34,6 +34,8 @@ target_link_libraries(${PROJECT_NAME}
 	SDL3::SDL3
 )
 
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+
 if (WIN32)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -41,8 +43,8 @@ if (WIN32)
 			${CMAKE_CURRENT_BINARY_DIR})
 endif (WIN32)
 
-if (UNIX)
-	set(CMAKE_CXX_FLAGS "-std=c++2a")
-endif (UNIX)
+if (MSVC)
+	add_compile_options(/std:c++2a)
+endif(MSVC)
 
 # TODO: Add tests and install targets if needed.
