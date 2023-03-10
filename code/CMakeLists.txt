@@ -15,9 +15,15 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL3)
 
 # Add source to this project's executable.
+
 add_executable (${PROJECT_NAME}
 	"main.cpp"
-)
+	"Inputs/Binding.class.cpp"
+	"Inputs/SDLEvents.class.cpp"
+	"Inputs/SDLEvents.class.hpp"
+	"Inputs/Binding.class.hpp"
+	"Inputs/Action.class.hpp"
+	"Inputs/math.hpp")
 
 
 target_link_directories(${PROJECT_NAME}
@@ -34,5 +40,9 @@ if (WIN32)
 			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/sdl3.dll"
 			${CMAKE_CURRENT_BINARY_DIR})
 endif (WIN32)
+
+if (UNIX)
+	set(CMAKE_CXX_FLAGS "-std=c++2a")
+endif (UNIX)
 
 # TODO: Add tests and install targets if needed.
