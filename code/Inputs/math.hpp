@@ -26,6 +26,14 @@ struct Point2
 	Point2(T x, T y): x(x), y(y)
 	{
 	}
+	template < typename U >
+	Point2(U x, U y): x(x), y(y)
+	{
+	}
+	template < typename U >
+	Point2(Point2<U> p): x(p.x), y(p.y)
+	{
+	}
 	Point2() : x(), y()
 	{
 	}
@@ -75,6 +83,11 @@ public:
 	}
 
 	Vector2(Point2<T> p1, Point2<T> p2): x(p2.x - p1.x), y(p2.y - p1.y), norm(sqrt(x * x + y * y))
+	{
+	}
+
+	template < typename U >
+	Vector2(Point2<U> p1, Point2<U> p2): x(p2.x - p1.x), y(p2.y - p1.y), norm(sqrt(x * x + y * y))
 	{
 	}
 

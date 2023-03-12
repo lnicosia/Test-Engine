@@ -32,84 +32,55 @@ std::vector<std::vector<int>>	map
 {
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
 	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+	{ 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 },
 	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+	{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 1 },
 	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-	{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+	{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 1 },
+	{ 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 },
+	{ 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 },
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
 };
+float	mapScale = 55;
+int	mapMaxX = 9;
+int	mapMaxY = 9;
+bool running = true;
+bool rotate = true;
 
-struct Player
+float	pointDistance(const Point2<int>& p1, const Point2<int>& p2)
 {
-private:
-	Vector2<float>	direction;
-	Point2<float>	pos;
-	float	angle;
-	float	fov;
-	float	topRayAngle;
-	float	bottomRayAngle;
-	float	speed;
+	float x = p2.x - p1.x;
+	float y = p2.y - p1.y;
+	return sqrt(x * x + y * y);
+}
 
-public:
+void	drawCircle(const Point2<int> pos, float radius, uint32_t color)
+{
+	Point2<int> p;
+	float rad2;
 
-	Player():
-		pos(5, 5),
-		direction(1, 0),
-		angle(0),
-		fov((float)M_PI / 2),
-		topRayAngle(angle + fov / 2),
-		bottomRayAngle(angle - fov / 2),
-		speed(0.05f)
+	rad2 = radius * radius;
+	for (int y = pos.y - radius; y < pos.y + radius; y++)
 	{
+		for (int x = pos.x - radius; x < pos.x + radius; x++)
+		{
+			p.x = x;
+			p.y = y;
+			float xDiff = pos.x - x;
+			float yDiff = pos.y - y;
+			if (xDiff * xDiff + yDiff * yDiff < rad2 &&
+				x >= 0 && x < winSize.w && y >= 0 && y < winSize.h)
+				pixels[x + y * winSize.w] = color;
+		}
 	}
+}
 
-	void	updateAngle()
-	{
-		this->angle += (events.mouseGlobalPos.x - oldMouse.x) * mouseSpeed;
-		this->direction.x = cos(this->angle);
-		this->direction.y = sin(this->angle);
-		this->topRayAngle = angle + fov / 2;
-		this->bottomRayAngle = angle - fov / 2;
-	}
+/* Draw circle with inside and outline color
+*/
+void	drawCircle(Point2<int> pos, float radius, uint32_t insideColor, uint32_t outsideColor)
+{
 
-	void	draw() const
-	{
-		Point2<int> winPos(winSize.w / 2, winSize.h / 2);
-		Point2<int> end(winPos.x + cos(angle) * 70, winPos.y + sin(angle) * 70);
-		drawLine(winPos, end, 0xFF0000FF, pixels); 
-		end = Point2<int>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
-		drawLine(winPos, end, 0xFFFFFFFF, pixels);
-		end = Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
-		drawLine(winPos, end, 0xFFFFFFFF, pixels);
-	}
-
-	void	forward()
-	{
-		this->pos.x += this->direction.x * this->speed;
-		this->pos.y += this->direction.y * this->speed;
-	}
-
-	void	backward()
-	{
-		this->pos.x -= this->direction.x * this->speed;
-		this->pos.y -= this->direction.y * this->speed;
-	}
-
-	const Point2<float>& getPos() const
-	{
-		return pos;
-	}
-
-	const Vector2<float>& getDirection() const
-	{
-		return direction;
-	}
-};
-
-Player	player;
+}
 
 void	drawRectangle(Point2<int> pos, Point2<int> size, uint32_t color)
 {
@@ -151,13 +122,191 @@ void	drawRectangle(Point2<int> pos, Point2<int> size, uint32_t outsideColor, uin
 	}
 }
 
+void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
+{
+	Vector2<float> v(p1, p2);
+	float x = p1.x;
+	float y = p1.y;
+	v.normalize();
+	while ((int)x != p2.x || (int)y != p2.y)
+	{
+		if (x >= 0 && x < winSize.w && y >= 0 && y < winSize.h)
+			pixels[(int)x + (int)y * winSize.w] = color;
+		if ((int)x != p2.x)
+			x += v.x;
+		if ((int)y != p2.y)
+			y += v.y;
+	}
+}
+
+void	drawRay(Point2<float> pos, float angle, uint32_t color, uint32_t* pixels)
+{
+	Vector2<float> v(cos(angle), sin(angle));
+	float mapX = pos.x;
+	float mapY = pos.y;
+	float newMapX = mapX, newMapY = mapY;
+	Point2<int> screen(winSize.w / 2, winSize.h / 2);
+	Point2<int> end;
+	bool hit = false;
+	v.normalize();
+	//printf("Ray starting from [%f %f] with angle = %f\n", pos.x, pos.y, angle / M_PI * 180);
+	//printf("Vector = [%f %f]\n", v.x, v.y);
+	int count = 0;
+	while (hit == false && ((int)mapX < mapMaxX && (int)mapY < mapMaxY
+		&& (int)mapX >= 1 && (int)mapY >= 1))
+	{
+		//printf("Screen pos = [%d %d]\n", screenX, screenY);
+		//if (screenX >= 0 && screenX < winSize.w && screenY >= 0 && screenY < winSize.h)
+		//	pixels[screenX + screenY * winSize.w] = color;
+		float diffX;
+		float diffY;
+		//printf("ceil(%f) = %f\n", 5.0f, ceil(5.0f));
+		float nextX;
+		if (v.x > 0)
+			nextX = floor(mapX) + 1;
+		else
+			nextX = ceil(mapX) - 1;
+		float nextY;
+		if (v.y > 0)
+			nextY = floor(mapY) + 1;
+		else
+			nextY = ceil(mapY) - 1;
+		diffX = (nextX - mapX) / v.x;
+		diffY = (nextY - mapY) / v.y;
+		if (diffX < diffY)
+		{
+			newMapX += v.x * diffX;
+			newMapY += v.y * diffX;
+		}
+		else
+		{
+			newMapX += v.x * diffY;
+			newMapY += v.y * diffY;
+		}
+		//printf("Map pos = [%f %f]\n", newMapX, newMapY);
+		end.x = screen.x + (newMapX - mapX) * mapScale;
+		end.y = screen.y + (newMapY - mapY) * mapScale;
+		mapX = newMapX;
+		mapY = newMapY;
+		
+		//printf("Line from = [%d %d] to [%d %d]\n", screen.x, screen.y, end.x, end.y);
+		//color = 0xFF << 24 | (uint8_t)(0x10 * count) << 16 | 0 << 8 | 0xFF;
+		drawLine(screen, end, color, pixels);
+		Point2<int> coord(mapX, mapY);
+		//printf("Coord = [%d %d]\n", coord.x, coord.y);
+		if (diffX < diffY && v.x < 0)
+			coord.x = ceil(mapX) - 1;
+		if (diffY < diffX && v.y < 0)
+			coord.y = ceil(mapY) - 1;
+		//printf("Coord = [%d %d] (%d)\n", coord.x, coord.y, map[coord.y][coord.x]);
+		if (map[coord.y][coord.x] == 0)
+		{
+			//drawCircle(end, 4, 0xFFFFFFFF);
+		}
+		else
+		{
+			drawCircle(end, 4, 0x00FF00FF);
+			hit = true;
+		}
+		//drawCircle(end, 4, 0x00FF00FF);
+		screen = end;
+		count++;
+		//if (count == 2)
+		//break;
+	}
+}
+
+struct Player
+{
+private:
+	Vector2<float>	direction;
+	Point2<float>	pos;
+	float	angle;
+	float	fov;
+	float	topRayAngle;
+	float	bottomRayAngle;
+	float	speed;
+
+public:
+
+	Player():
+		pos(5, 5),
+		direction(1, 0),
+		angle(0),
+		fov((float)M_PI / 2),
+		topRayAngle(angle + fov / 2),
+		bottomRayAngle(angle - fov / 2),
+		speed(0.05f)
+	{
+	}
+
+	void	updateAngle()
+	{
+		this->angle += (events.mouseGlobalPos.x - oldMouse.x) * mouseSpeed;
+		this->direction.x = cos(this->angle);
+		this->direction.y = sin(this->angle);
+		this->bottomRayAngle = angle + fov / 2;
+		this->topRayAngle = angle - fov / 2;
+	}
+
+	void	draw() const
+	{
+		Point2<int> winPos(winSize.w / 2, winSize.h / 2);
+		Point2<int> end(winPos.x + cos(angle) * 70, winPos.y + sin(angle) * 70);
+		drawLine(winPos, end, 0xFF0000FF, pixels); 
+		end = Point2<int>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
+		//drawLine(winPos, end, 0xFFFFFFFF, pixels);
+		end = Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
+		//drawLine(winPos, end, 0xFFFFFFFF, pixels);
+		drawCircle(winPos, 10, 0xFFFFFFFF);
+	}
+
+	void	drawRays() const
+	{
+		float ratio = fov / winSize.w;
+		float currAngle = this->angle + fov / 2;
+		for (int x = 0; x < winSize.w; x++)
+		{
+			Point2<int> winPos(winSize.w / 2, winSize.h / 2);
+			currAngle -= ratio;
+			Point2<int> end(winPos.x + cos(currAngle) * 100, winPos.y + sin(currAngle) * 100);
+			drawRay(pos, currAngle, 0xFFFF00FF, pixels);
+			//break;
+		}
+	}
+
+	void	forward()
+	{
+		this->pos.x += this->direction.x * this->speed;
+		this->pos.y += this->direction.y * this->speed;
+	}
+
+	void	backward()
+	{
+		this->pos.x -= this->direction.x * this->speed;
+		this->pos.y -= this->direction.y * this->speed;
+	}
+
+	const Point2<float>& getPos() const
+	{
+		return pos;
+	}
+
+	const Vector2<float>& getDirection() const
+	{
+		return direction;
+	}
+};
+
+Player	player;
+
 void	drawMap(const std::vector<std::vector<int>>& map)
 {
-	Point2<int> size(50, 50);
+	Point2<int> size(mapScale, mapScale);
 	Point2<int> pos;
 	Point2<int> startPos(winSize.w / 2  - player.getPos().x * size.x,
 		winSize.h / 2  - player.getPos().y * size.y);
-	Point2<float> startPos2(player.getPos().x - (map.size()), (player.getPos().y - map.size()));
+	Point2<float> startPos2(player.getPos().x - map.size(), player.getPos().y - map.size());
 	pos.y = startPos.y;
 	for (size_t y = 0; y < map.size(); y++)
 	{
@@ -174,21 +323,6 @@ void	drawMap(const std::vector<std::vector<int>>& map)
 			pos.x += size.x;
 		}
 		pos.y += size.y;
-	}
-}
-
-void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
-{
-	if (p1.x > p2.x)
-		std::swap(p1, p2);
-	float ratio = (p2.y - p1.y) / (float)(p2.x - p1.x);
-	float y = (float)p1.y;
-	while (p1.x < p2.x && p1.x < winSize.w)
-	{
-		if ((int)y < winSize.h)
-			pixels[p1.x + (int)y * winSize.w] = color;
-		p1.x++;
-		y += ratio;
 	}
 }
 
@@ -211,6 +345,11 @@ void Forward()
 void Backward()
 {
 	player.backward();
+}
+
+void ChangeRotate()
+{
+	rotate = rotate == true ? false : true;
 }
 
 int main()
@@ -244,7 +383,14 @@ int main()
 	backward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Backward)));
 	events.bindings.push_back(backward);
 
-	bool running = true;
+	MouseBinding leftB("Mouse left", SDL_BUTTON_LEFT, 0, false);
+	leftB.onRelease = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(ChangeRotate)));
+	events.mouseBindings.push_back(leftB);
+
+	Binding updateRotate("updateRotate", SDLK_r, 0, true);
+	updateRotate.onRelease = leftB.onRelease;
+	events.bindings.push_back(updateRotate);
+
 	while (running)
 	{
 
@@ -253,10 +399,12 @@ int main()
 
 		clearImg();
 
-		player.updateAngle();
-		player.draw();
-
 		drawMap(map);
+
+		if (rotate == true)
+			player.updateAngle();
+		player.draw();
+		player.drawRays();
 
 		oldMouse = events.mouseGlobalPos;
 
