@@ -8,6 +8,8 @@
 #include <math.h>
 
 #include "SDL.h"
+#define STB_IMAGE_IMPLEMENTATION
+# include "stb_image.h"
 #include "Inputs/SDLEvents.class.hpp"
 
 void SetupGLOptions()
@@ -23,11 +25,51 @@ void SetupGLOptions()
 }
 
 void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels);
+float	drawRay(Point2<float> pos, float angle, int x, uint32_t color, uint32_t* pixels);
 
 enum GameState
 {
 	PLAYING,
 	PAUSED
+};
+
+class Texture
+{
+private:
+	unsigned char* img;
+	int w;
+	int h;
+	int nChannels;
+
+public:
+	Texture() = delete;
+	Texture(unsigned char *img, int w, int h, int nChannels): img(img), w(w), h(h), nChannels(nChannels)
+	{}
+
+	const int getWidth() const
+	{
+		return w;
+	}
+
+	const int getHeight() const
+	{
+		return h;
+	}
+
+	const int getChannels() const
+	{
+		return nChannels;
+	}
+
+	const unsigned char* getImg() const
+	{
+		return img;
+	}
+
+	void free()
+	{
+		stbi_image_free(img);
+	}
 };
 
 Point2<int>	winSize(800, 600);
@@ -56,6 +98,7 @@ int	mapMaxX = 9;
 int	mapMaxY = 9;
 bool running = true;
 GameState gameState = PLAYING;
+std::vector<Texture> textures;
 
 float	pointDistance(const Point2<float>& p1, const Point2<float>& p2)
 {
@@ -216,6 +259,58 @@ void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
 	}
 }
 
+void	drawImg(Point2<int> pos, const Texture& texture, uint32_t* pixels)
+{
+	Point2<int> coord;
+	const unsigned char* img = texture.getImg();
+	for (int h = 0; h < texture.getHeight(); h++)
+	{
+		for (int w = 0; w < texture.getWidth(); w++)
+		{
+			coord.x = pos.x + w;
+			coord.y = pos.y + h;
+			if (coord.x >= 0 && coord.x < winSize.w && coord.y >= 0 && coord.y < winSize.h)
+			{
+				uint8_t R, G, B;
+				int imgCoord = texture.getChannels() * (w + h * texture.getWidth());
+				R = img[imgCoord];
+				G = img[imgCoord + 1];
+				B = img[imgCoord + 2];
+				pixels[coord.x + coord.y * winSize.w] = R << 24 | G << 16 | B << 8 | 0xFF;
+			}
+		}
+	}
+}
+
+void	drawColumnOfImg(Point2<int> start, int length, float column, bool side, const Texture& texture, uint32_t* pixels)
+{
+	int i = 0;
+	const unsigned char* img = texture.getImg();
+	int columnIndex = column * texture.getWidth();
+	//printf("column index = %d\n", columnIndex);
+	while (i < length)
+	{
+		int rowIndex = (i / (float)length) * texture.getHeight();
+		if (start.y + i >= 0 && start.y + i < winSize.h)
+		{
+			uint8_t R, G, B;
+			int imgCoord = texture.getChannels() * (int)(columnIndex + rowIndex * texture.getWidth());
+
+			R = img[imgCoord];
+			G = img[imgCoord + 1];
+			B = img[imgCoord + 2];
+			if (side == false)
+			{
+				R /= 2;
+				G /= 2;
+				B /= 2;
+			}
+			pixels[start.x + (start.y + i) * winSize.w] = R << 24 | G << 16 | B << 8 | 0xFF;
+		}
+		i++;
+	}
+}
+
 void	drawLineOnMap(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
 {
 	Vector2<float> v(p1, p2);
@@ -232,87 +327,6 @@ void	drawLineOnMap(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pix
 		if ((int)y != p2.y)
 			y += v.y;
 	}
-}
-
-float	drawRay(Point2<float> pos, float angle, bool& side, uint32_t color, uint32_t* pixels)
-{
-	Vector2<float> v(cos(angle), sin(angle));
-	float mapX = pos.x;
-	float mapY = pos.y;
-	float newMapX = mapX, newMapY = mapY;
-	Point2<int> screen(mapCenter);
-	Point2<int> end;
-	bool hit = false;
-	float dist = -1;
-	v.normalize();
-	//printf("Ray starting from [%f %f] with angle = %f\n", pos.x, pos.y, angle / M_PI * 180);
-	//printf("Vector = [%f %f]\n", v.x, v.y);
-	int count = 0;
-	while (hit == false && ((int)mapX < mapMaxX && (int)mapY < mapMaxY
-		&& (int)mapX >= 1 && (int)mapY >= 1))
-	{
-		//printf("Screen pos = [%d %d]\n", screenX, screenY);
-		//if (screenX >= 0 && screenX < winSize.w && screenY >= 0 && screenY < winSize.h)
-		//	pixels[screenX + screenY * winSize.w] = color;
-		float diffX;
-		float diffY;
-		//printf("ceil(%f) = %f\n", 5.0f, ceil(5.0f));
-		float nextX;
-		if (v.x > 0)
-			nextX = floor(mapX) + 1;
-		else
-			nextX = ceil(mapX) - 1;
-		float nextY;
-		if (v.y > 0)
-			nextY = floor(mapY) + 1;
-		else
-			nextY = ceil(mapY) - 1;
-		diffX = (nextX - mapX) / v.x;
-		diffY = (nextY - mapY) / v.y;
-		if (diffX < diffY)
-		{
-			newMapX += v.x * diffX;
-			newMapY += v.y * diffX;
-			side = true;
-		}
-		else
-		{
-			newMapX += v.x * diffY;
-			newMapY += v.y * diffY;
-			side = false;
-		}
-		//printf("Map pos = [%f %f]\n", newMapX, newMapY);
-		end.x = screen.x + (newMapX - mapX) * mapScale;
-		end.y = screen.y + (newMapY - mapY) * mapScale;
-		mapX = newMapX;
-		mapY = newMapY;
-
-		drawLineOnMap(screen, end, color, pixels);
-		
-		Point2<int> coord(mapX, mapY);
-		//printf("Coord = [%d %d]\n", coord.x, coord.y);
-		if (diffX < diffY && v.x < 0)
-			coord.x = ceil(mapX) - 1;
-		if (diffY < diffX && v.y < 0)
-			coord.y = ceil(mapY) - 1;
-		//printf("Coord = [%d %d] (%d)\n", coord.x, coord.y, map[coord.y][coord.x]);
-		if (map[coord.y][coord.x] == 0)
-		{
-			//drawCircle(end, 4, 0xFFFFFFFF);
-		}
-		else
-		{
-			//drawCircleOnMap(end, mapScale / (float)10, 0x00FF00FF);
-			hit = true;
-		}
-		//drawCircle(end, 4, 0x00FF00FF);
-		screen = end;
-		count++;
-		//if (count == 2)
-		//break;
-	}
-	//printf("Intersects at map[%f %f]\n", mapX, mapY);
-	return pointDistance(pos, Point2<float>(mapX, mapY));
 }
 
 struct Player
@@ -381,17 +395,13 @@ public:
 		for (int x = 0; x < winSize.w; x++)
 		{
 			Point2<int> winPos(winSize.w / 2, winSize.h / 2);
-			currAngle -= ratio;
+			
 			Point2<int> end(winPos.x + cos(currAngle) * 100, winPos.y + sin(currAngle) * 100);
-			dist = drawRay(pos, currAngle, side, 0xFFFF00FF, pixels);
+			dist = drawRay(pos, currAngle, x, 0xFFFF00FF, pixels);
 			//printf("Dist[%d] = %f\n", x, dist);
-			if (side == true)
-				color = 0x000088FF;
-			else
-				color = 0x0000FFFF;
-			drawLine(Point2<int>(winSize.w - 1 - x, winSize.h / 2 - 200 / dist),
-					Point2<int>(winSize.w - 1 - x, winSize.h / 2 + 200 / dist),
-				color, pixels);
+			//printf("angle = %f\n", (this->angle - currAngle) / (float)M_PI * 180);
+			//if (cos(dist) == )
+			currAngle -= ratio;
 		}
 	}
 
@@ -427,9 +437,128 @@ public:
 	{
 		return direction;
 	}
+
+	const float& getAngle() const
+	{
+		return angle;
+	}
 };
 
 Player	player;
+
+float	drawRay(Point2<float> pos, float angle, int x, uint32_t color, uint32_t* pixels)
+{
+	Vector2<float> v(cos(angle), sin(angle));
+	float mapX = pos.x;
+	float mapY = pos.y;
+	float diffX;
+	float diffY;
+	float newMapX = mapX, newMapY = mapY;
+	Point2<int> screen(mapCenter);
+	Point2<int> end;
+	bool hit = false;
+	float dist;
+	v.normalize();
+	//printf("Ray starting from [%f %f] with angle = %f\n", pos.x, pos.y, angle / M_PI * 180);
+	//printf("Vector = [%f %f]\n", v.x, v.y);
+	int count = 0;
+	int textIndex;
+	while (hit == false && ((int)mapX < mapMaxX && (int)mapY < mapMaxY
+		&& (int)mapX >= 1 && (int)mapY >= 1))
+	{
+		//printf("Screen pos = [%d %d]\n", screenX, screenY);
+		//if (screenX >= 0 && screenX < winSize.w && screenY >= 0 && screenY < winSize.h)
+		//	pixels[screenX + screenY * winSize.w] = color;
+		//printf("ceil(%f) = %f\n", 5.0f, ceil(5.0f));
+		float nextX;
+		if (v.x > 0)
+			nextX = floor(mapX) + 1;
+		else
+			nextX = ceil(mapX) - 1;
+		float nextY;
+		if (v.y > 0)
+			nextY = floor(mapY) + 1;
+		else
+			nextY = ceil(mapY) - 1;
+		diffX = (nextX - mapX) / v.x;
+		diffY = (nextY - mapY) / v.y;
+		if (diffX < diffY)
+		{
+			newMapX += v.x * diffX;
+			newMapY += v.y * diffX;
+		}
+		else
+		{
+			newMapX += v.x * diffY;
+			newMapY += v.y * diffY;
+		}
+		//printf("Map pos = [%f %f]\n", newMapX, newMapY);
+		end.x = (int)(screen.x + (newMapX - mapX) * mapScale);
+		end.y = (int)(screen.y + (newMapY - mapY) * mapScale);
+		mapX = newMapX;
+		mapY = newMapY;
+
+		drawLineOnMap(screen, end, color, pixels);
+
+		Point2<int> coord(mapX, mapY);
+		//printf("Coord = [%d %d]\n", coord.x, coord.y);
+		if (diffX < diffY && v.x < 0)
+			coord.x = (int)(ceil(mapX) - 1);
+		if (diffY < diffX && v.y < 0)
+			coord.y = (int)(ceil(mapY) - 1);
+		//printf("Coord = [%d %d] (%d)\n", coord.x, coord.y, map[coord.y][coord.x]);
+		if (map[coord.y][coord.x] == 0)
+		{
+			//drawCircle(end, 4, 0xFFFFFFFF);
+		}
+		else
+		{
+			//drawCircleOnMap(end, mapScale / (float)10, 0x00FF00FF);
+			hit = true;
+			textIndex = map[coord.y][coord.x] - 1;
+		}
+		//drawCircle(end, 4, 0x00FF00FF);
+		screen = end;
+		count++;
+		//if (count == 2)
+		//break;
+	}
+	if (hit == false)
+		return 0.0f;
+	///printf("Intersects at map[%f %f]\n", mapX, mapY);
+	// TODO Could be replaced by cos/sin formula (cheaper)
+	dist = pointDistance(pos, Point2<float>(mapX, mapY));
+	
+	float distCorrec = dist;// *cos(player.getAngle() - angle);
+	int size;
+	if (distCorrec < 400 / winSize.h)
+		size = winSize.h / 2;
+	else
+		size = (int)(200 / distCorrec);
+	float column;
+	float dummy;
+	bool side;
+	if (diffX < diffY)
+	{
+		color = 0x000088FF;
+		column = modf(mapY, &dummy);
+		side = true;
+	}
+	else
+	{
+		color = 0x0000FFFF;
+		column = modf(mapX, &dummy);
+		side = false;
+	}
+	//printf("column = %f\n", column);
+	/*drawLine(Point2<int>(winSize.w - 1 - x, winSize.h / 2 - size),
+		Point2<int>(winSize.w - 1 - x, winSize.h / 2 + size),
+		color, pixels);*/
+	
+	drawColumnOfImg(Point2<int>(winSize.w - 1 - x, winSize.h / 2 - size), size * 2, column,
+		side, textures[textIndex], pixels);
+	return pointDistance(pos, Point2<float>(mapX, mapY));
+}
 
 void	drawMap(const std::vector<std::vector<int>>& map)
 {
@@ -557,6 +686,27 @@ int main()
 	updateRotate.onRelease = leftB.onRelease;
 	events.bindings.push_back(updateRotate);
 
+	stbi_set_flip_vertically_on_load(true);
+
+	Point2<int> imgSize;
+	int nChannels;
+#ifdef __unix__
+	std::string path = "../../../resources/textures/bigdoor2.bmp";
+#else
+	std::string path = "../../../../resources/textures/bigdoor2.bmp";
+#endif
+	unsigned char* img = stbi_load(path.c_str(),
+		&imgSize.x, &imgSize.y, &nChannels, 0);
+	if (!img)
+	{
+		std::cerr << std::endl << "Failed to load texture '" + path << " '" << std::endl;
+		std::cerr << stbi_failure_reason() << std::endl;
+		stbi_image_free(img);
+		return -1;
+	}
+	Texture currTexture(img, imgSize.x, imgSize.y, nChannels);
+	textures.push_back(currTexture);
+
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	while (running)
@@ -582,6 +732,8 @@ int main()
 	}
 
 	delete[] pixels;
+	for (auto t : textures)
+		t.free();
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();

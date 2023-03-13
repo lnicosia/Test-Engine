@@ -34,6 +34,10 @@ target_link_libraries(${PROJECT_NAME}
 	SDL3::SDL3
 )
 
+target_include_directories(${PROJECT_NAME}
+	PRIVATE "external"
+)
+
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 if (WIN32)
