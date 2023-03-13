@@ -43,6 +43,11 @@ struct Point2
 		return Point2<T>(this->x + v.x, this->y + v.y);
 	}
 
+	constexpr Point2<T> operator+(const Point2<T>& v) const
+	{
+		return Point2<T>(this->x + v.x, this->y + v.y);
+	}
+
 	template < typename U >
 	constexpr Point2<T> operator+(const Vector2<U>& v) const
 	{
@@ -52,6 +57,11 @@ struct Point2
 	constexpr Point2<T> operator*(const T& v) const
 	{
 		return Point2<T>(this->x * v, this->y * v);
+	}
+
+	constexpr Point2<T> operator/(const T& v) const
+	{
+		return Point2<T>(this->x / v, this->y / v);
 	}
 };
 

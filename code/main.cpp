@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <exception>
+#include <algorithm>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -23,6 +24,12 @@ void SetupGLOptions()
 
 void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels);
 
+enum GameState
+{
+	PLAYING,
+	PAUSED
+};
+
 Point2<int>	winSize(800, 600);
 Point2<float>	oldMouse;
 float		mouseSpeed = 0.001f;
@@ -41,13 +48,16 @@ std::vector<std::vector<int>>	map
 	{ 1, 1, 1, 0, 0, 0, 0, 0, 0, 1 },
 	{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
 };
-float	mapScale = 55;
+float	mapScale = 20;
+Point2<int>	mapPos(0, 0);
+Point2<int>	mapSize(200, 200);
+Point2<int> mapCenter(mapPos + mapSize / 2);
 int	mapMaxX = 9;
 int	mapMaxY = 9;
 bool running = true;
-bool rotate = true;
+GameState gameState = PLAYING;
 
-float	pointDistance(const Point2<int>& p1, const Point2<int>& p2)
+float	pointDistance(const Point2<float>& p1, const Point2<float>& p2)
 {
 	float x = p2.x - p1.x;
 	float y = p2.y - p1.y;
@@ -70,6 +80,28 @@ void	drawCircle(const Point2<int> pos, float radius, uint32_t color)
 			float yDiff = pos.y - y;
 			if (xDiff * xDiff + yDiff * yDiff < rad2 &&
 				x >= 0 && x < winSize.w && y >= 0 && y < winSize.h)
+				pixels[x + y * winSize.w] = color;
+		}
+	}
+}
+
+void	drawCircleOnMap(const Point2<int> pos, float radius, uint32_t color)
+{
+	Point2<int> p;
+	float rad2;
+
+	rad2 = radius * radius;
+	for (int y = pos.y - radius; y < pos.y + radius; y++)
+	{
+		for (int x = pos.x - radius; x < pos.x + radius; x++)
+		{
+			p.x = x;
+			p.y = y;
+			float xDiff = pos.x - x;
+			float yDiff = pos.y - y;
+			if (xDiff * xDiff + yDiff * yDiff < rad2 &&
+				x >= mapPos.x && x < mapPos.x + mapSize.x
+				&& y >= mapPos.y && y < mapPos.y + mapSize.y)
 				pixels[x + y * winSize.w] = color;
 		}
 	}
@@ -122,6 +154,51 @@ void	drawRectangle(Point2<int> pos, Point2<int> size, uint32_t outsideColor, uin
 	}
 }
 
+void	drawRectangleOnMap(Point2<int> pos, Point2<int> size, uint32_t color)
+{
+	Point2<int> coord;
+
+	for (int y = 0; y < size.h; y++)
+	{
+		coord.x = pos.x;
+		coord.y = pos.y + y;
+		if (coord.x >= mapPos.x && coord.x < mapPos.x + mapSize.x
+			&& coord.y >= mapPos.y && coord.y < mapPos.y + mapSize.y)
+			pixels[coord.x + coord.y * winSize.w] = color;
+		coord.x = pos.x + size.w;
+		coord.y = pos.y + y;
+		if (coord.x >= mapPos.x && coord.x < mapPos.x + mapSize.x
+			&& coord.y >= mapPos.y && coord.y < mapPos.y + mapSize.y)
+			pixels[coord.x + coord.y * winSize.w] = color;
+	}
+	for (int x = 0; x < size.w && pos.x + x < winSize.w; x++)
+	{
+		coord.x = pos.x + x;
+		coord.y = pos.y;
+		if (coord.x >= mapPos.x && coord.x < mapPos.x + mapSize.x
+			&& coord.y >= mapPos.y && coord.y < mapPos.y + mapSize.y)
+			pixels[coord.x + coord.y * winSize.w] = color;
+		coord.x = pos.x + x;
+		coord.y = pos.y + size.y;
+		if (coord.x >= mapPos.x && coord.x < mapPos.x + mapSize.x
+			&& coord.y >= mapPos.y && coord.y < mapPos.y + mapSize.y)
+			pixels[coord.x + coord.y * winSize.w] = color;
+	}
+}
+
+void	drawRectangleOnMap(Point2<int> pos, Point2<int> size, uint32_t outsideColor, uint32_t insideColor)
+{
+	for (int y = pos.y; y < pos.y + size.h; y++)
+	{
+		for (int x = pos.x; x < pos.x + size.w; x++)
+		{
+			if (x >= mapPos.x && x < mapPos.x + mapSize.x
+				&& y >= mapPos.y && y < mapPos.y + mapSize.y)
+				pixels[x + y * winSize.w] = insideColor;
+		}
+	}
+}
+
 void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
 {
 	Vector2<float> v(p1, p2);
@@ -139,15 +216,34 @@ void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
 	}
 }
 
-void	drawRay(Point2<float> pos, float angle, uint32_t color, uint32_t* pixels)
+void	drawLineOnMap(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
+{
+	Vector2<float> v(p1, p2);
+	float x = p1.x;
+	float y = p1.y;
+	v.normalize();
+	while ((int)x != p2.x || (int)y != p2.y)
+	{
+		if (x >= mapPos.x && x < mapPos.x + mapSize.x
+			&& y >= mapPos.y && y < mapPos.y + mapSize.y)
+			pixels[(int)x + (int)y * winSize.w] = color;
+		if ((int)x != p2.x)
+			x += v.x;
+		if ((int)y != p2.y)
+			y += v.y;
+	}
+}
+
+float	drawRay(Point2<float> pos, float angle, bool& side, uint32_t color, uint32_t* pixels)
 {
 	Vector2<float> v(cos(angle), sin(angle));
 	float mapX = pos.x;
 	float mapY = pos.y;
 	float newMapX = mapX, newMapY = mapY;
-	Point2<int> screen(winSize.w / 2, winSize.h / 2);
+	Point2<int> screen(mapCenter);
 	Point2<int> end;
 	bool hit = false;
+	float dist = -1;
 	v.normalize();
 	//printf("Ray starting from [%f %f] with angle = %f\n", pos.x, pos.y, angle / M_PI * 180);
 	//printf("Vector = [%f %f]\n", v.x, v.y);
@@ -177,21 +273,22 @@ void	drawRay(Point2<float> pos, float angle, uint32_t color, uint32_t* pixels)
 		{
 			newMapX += v.x * diffX;
 			newMapY += v.y * diffX;
+			side = true;
 		}
 		else
 		{
 			newMapX += v.x * diffY;
 			newMapY += v.y * diffY;
+			side = false;
 		}
 		//printf("Map pos = [%f %f]\n", newMapX, newMapY);
 		end.x = screen.x + (newMapX - mapX) * mapScale;
 		end.y = screen.y + (newMapY - mapY) * mapScale;
 		mapX = newMapX;
 		mapY = newMapY;
+
+		drawLineOnMap(screen, end, color, pixels);
 		
-		//printf("Line from = [%d %d] to [%d %d]\n", screen.x, screen.y, end.x, end.y);
-		//color = 0xFF << 24 | (uint8_t)(0x10 * count) << 16 | 0 << 8 | 0xFF;
-		drawLine(screen, end, color, pixels);
 		Point2<int> coord(mapX, mapY);
 		//printf("Coord = [%d %d]\n", coord.x, coord.y);
 		if (diffX < diffY && v.x < 0)
@@ -205,7 +302,7 @@ void	drawRay(Point2<float> pos, float angle, uint32_t color, uint32_t* pixels)
 		}
 		else
 		{
-			drawCircle(end, 4, 0x00FF00FF);
+			//drawCircleOnMap(end, mapScale / (float)10, 0x00FF00FF);
 			hit = true;
 		}
 		//drawCircle(end, 4, 0x00FF00FF);
@@ -214,6 +311,8 @@ void	drawRay(Point2<float> pos, float angle, uint32_t color, uint32_t* pixels)
 		//if (count == 2)
 		//break;
 	}
+	//printf("Intersects at map[%f %f]\n", mapX, mapY);
+	return pointDistance(pos, Point2<float>(mapX, mapY));
 }
 
 struct Player
@@ -242,36 +341,52 @@ public:
 
 	void	updateAngle()
 	{
-		this->angle += (events.mouseGlobalPos.x - oldMouse.x) * mouseSpeed;
+		this->angle += (events.mousePos.x - oldMouse.x) * mouseSpeed;
 		this->direction.x = cos(this->angle);
 		this->direction.y = sin(this->angle);
 		this->bottomRayAngle = angle + fov / 2;
 		this->topRayAngle = angle - fov / 2;
 	}
 
+	void	drawOnMap() const
+	{
+		Point2<int> winPos(mapCenter.x , mapCenter.y);
+		Point2<int> end(winPos.x + cos(angle) * 70, winPos.y + sin(angle) * 70);
+		drawLineOnMap(winPos, end, 0xFF0000FF, pixels); 
+		/*end = Point2<int>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
+		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);
+		end = Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
+		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);*/
+		drawCircleOnMap(winPos, mapScale / (float)8, 0xFFFFFFFF);
+	}
+
 	void	draw() const
 	{
-		Point2<int> winPos(winSize.w / 2, winSize.h / 2);
-		Point2<int> end(winPos.x + cos(angle) * 70, winPos.y + sin(angle) * 70);
-		drawLine(winPos, end, 0xFF0000FF, pixels); 
-		end = Point2<int>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
-		//drawLine(winPos, end, 0xFFFFFFFF, pixels);
-		end = Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
-		//drawLine(winPos, end, 0xFFFFFFFF, pixels);
-		drawCircle(winPos, 10, 0xFFFFFFFF);
+		drawOnMap();
 	}
 
 	void	drawRays() const
 	{
 		float ratio = fov / winSize.w;
 		float currAngle = this->angle + fov / 2;
+		float dist;
+		bool side;
+		uint32_t color;
+
 		for (int x = 0; x < winSize.w; x++)
 		{
 			Point2<int> winPos(winSize.w / 2, winSize.h / 2);
 			currAngle -= ratio;
 			Point2<int> end(winPos.x + cos(currAngle) * 100, winPos.y + sin(currAngle) * 100);
-			drawRay(pos, currAngle, 0xFFFF00FF, pixels);
-			//break;
+			dist = drawRay(pos, currAngle, side, 0xFFFF00FF, pixels);
+			//printf("Dist[%d] = %f\n", x, dist);
+			if (side == true)
+				color = 0x000088FF;
+			else
+				color = 0x0000FFFF;
+			drawLine(Point2<int>(winSize.w - 1 - x, winSize.h / 2 - 200 / dist),
+					Point2<int>(winSize.w - 1 - x, winSize.h / 2 + 200 / dist),
+				color, pixels);
 		}
 	}
 
@@ -304,8 +419,8 @@ void	drawMap(const std::vector<std::vector<int>>& map)
 {
 	Point2<int> size(mapScale, mapScale);
 	Point2<int> pos;
-	Point2<int> startPos(winSize.w / 2  - player.getPos().x * size.x,
-		winSize.h / 2  - player.getPos().y * size.y);
+	Point2<int> startPos(mapCenter.x  - player.getPos().x * size.x,
+		mapCenter.y  - player.getPos().y * size.y);
 	Point2<float> startPos2(player.getPos().x - map.size(), player.getPos().y - map.size());
 	pos.y = startPos.y;
 	for (size_t y = 0; y < map.size(); y++)
@@ -315,24 +430,32 @@ void	drawMap(const std::vector<std::vector<int>>& map)
 		{
 			if (map[y][x] == 1)
 			{
-				drawRectangle(pos, size, 0, 0xFF0000FF);
-				drawRectangle(pos, size, 0xFFFFFFFF);
+				drawRectangleOnMap(pos, size, 0, 0xFF0000FF);
+				drawRectangleOnMap(pos, size, 0xFFFFFFFF);
 			}
 			else
-				drawRectangle(pos, size, 0xFFFFFFFF);
+				drawRectangleOnMap(pos, size, 0xFFFFFFFF);
 			pos.x += size.x;
 		}
 		pos.y += size.y;
 	}
+	drawRectangle(mapPos, mapSize, 0xFFFFFFFF);
 }
 
 void	clearImg()
 {
-	for (int y = 0; y < winSize.h; y++)
+	for (int y = 0; y < winSize.h / 2; y++)
 	{
 		for (int x = 0; x < winSize.w; x++)
 		{
-			pixels[x + y * (int)winSize.w] = 0;
+			pixels[x + y * (int)winSize.w] = 0x253342FF;
+		}
+	}
+	for (int y = winSize.h / 2; y < winSize.h; y++)
+	{
+		for (int x = 0; x < winSize.w; x++)
+		{
+			pixels[x + y * (int)winSize.w] = 0x5C62D6FF;
 		}
 	}
 }
@@ -347,9 +470,18 @@ void Backward()
 	player.backward();
 }
 
-void ChangeRotate()
+void ChangeGameState()
 {
-	rotate = rotate == true ? false : true;
+	if (gameState == PLAYING)
+	{
+		gameState = PAUSED;
+		SDL_SetRelativeMouseMode(SDL_FALSE);
+	}
+	else
+	{
+		gameState = PLAYING;
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+	}
 }
 
 int main()
@@ -384,12 +516,14 @@ int main()
 	events.bindings.push_back(backward);
 
 	MouseBinding leftB("Mouse left", SDL_BUTTON_LEFT, 0, false);
-	leftB.onRelease = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(ChangeRotate)));
+	leftB.onRelease = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(ChangeGameState)));
 	events.mouseBindings.push_back(leftB);
 
-	Binding updateRotate("updateRotate", SDLK_r, 0, true);
+	Binding updateRotate("updateRotate", SDLK_ESCAPE, 0, true);
 	updateRotate.onRelease = leftB.onRelease;
 	events.bindings.push_back(updateRotate);
+
+	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	while (running)
 	{
@@ -401,12 +535,15 @@ int main()
 
 		drawMap(map);
 
-		if (rotate == true)
+		if (gameState == PLAYING)
 			player.updateAngle();
 		player.draw();
 		player.drawRays();
 
-		oldMouse = events.mouseGlobalPos;
+		oldMouse = events.mousePos;
+		printf("Mouse pos = [%f %f]\n", events.mousePos.x, events.mousePos.y);
+		printf("Mouse global pos = [%f %f]\n", events.mouseGlobalPos.x, events.mouseGlobalPos.y);
+		printf("Mouse relative pos = [%f %f]\n", events.mouseRelativePos.x, events.mouseRelativePos.y);
 
 		SDL_UpdateTexture(texture, nullptr, pixels, sizeof(Uint32) * winSize.x);
 		SDL_RenderTexture(renderer, texture, NULL, NULL);

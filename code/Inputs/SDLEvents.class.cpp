@@ -91,6 +91,7 @@ int	SDLEvents::updateInputsState()
 		mouseState = InputState::NRE_RELEASED;
 	SDL_GetMouseState(&mousePos.x, &mousePos.y);
 	SDL_GetGlobalMouseState(&mouseGlobalPos.x, &mouseGlobalPos.y);
+	SDL_GetRelativeMouseState(&mouseRelativePos.x, &mouseRelativePos.y);
 	while (SDL_PollEvent(&e))
 	{
 		switch (e.type)

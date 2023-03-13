@@ -33,6 +33,7 @@ public:
 
 	Point2<float>	mousePos;
 	Point2<float>	mouseGlobalPos;
+	Point2<float>	mouseRelativePos;
 	InputState	mouseState;
 
 	std::vector<Binding>	bindings;
