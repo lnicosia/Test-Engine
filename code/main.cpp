@@ -319,6 +319,7 @@ struct Player
 {
 private:
 	Vector2<float>	direction;
+	Vector2<float>	rightDirection;
 	Point2<float>	pos;
 	float	angle;
 	float	fov;
@@ -331,12 +332,14 @@ public:
 	Player():
 		pos(5, 5),
 		direction(1, 0),
+		rightDirection(direction.x + cos(M_PI / 2), direction.y + sin(M_PI / 2)),
 		angle(0),
 		fov((float)M_PI / 2),
 		topRayAngle(angle + fov / 2),
 		bottomRayAngle(angle - fov / 2),
 		speed(0.05f)
 	{
+		direction.normalize();
 	}
 
 	void	updateAngle()
@@ -346,6 +349,8 @@ public:
 		this->direction.y = sin(this->angle);
 		this->bottomRayAngle = angle + fov / 2;
 		this->topRayAngle = angle - fov / 2;
+		this->rightDirection.x = cos(this->angle + M_PI / 2);
+		this->rightDirection.y = sin(this->angle + M_PI / 2);
 	}
 
 	void	drawOnMap() const
@@ -402,6 +407,17 @@ public:
 		this->pos.y -= this->direction.y * this->speed;
 	}
 
+	void	left()
+	{
+		this->pos.x -= this->rightDirection.x * this->speed;
+		this->pos.y -= this->rightDirection.y * this->speed;
+	}
+
+	void	right()
+	{
+		this->pos.x += this->rightDirection.x * this->speed;
+		this->pos.y += this->rightDirection.y * this->speed;
+	}
 	const Point2<float>& getPos() const
 	{
 		return pos;
@@ -470,6 +486,16 @@ void Backward()
 	player.backward();
 }
 
+void Right()
+{
+	player.right();
+}
+
+void Left()
+{
+	player.left();
+}
+
 void ChangeGameState()
 {
 	if (gameState == PLAYING)
@@ -511,9 +537,17 @@ int main()
 	forward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Forward)));
 	events.bindings.push_back(forward);
 
-	Binding backward("forward", SDLK_DOWN, SDLK_s, true);
+	Binding backward("backward", SDLK_DOWN, SDLK_s, true);
 	backward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Backward)));
 	events.bindings.push_back(backward);
+
+	Binding left("left", SDLK_LEFT, SDLK_a, true);
+	left.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Left)));
+	events.bindings.push_back(left);
+
+	Binding right("right", SDLK_RIGHT, SDLK_d, true);
+	right.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Right)));
+	events.bindings.push_back(right);
 
 	MouseBinding leftB("Mouse left", SDL_BUTTON_LEFT, 0, false);
 	leftB.onRelease = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(ChangeGameState)));
@@ -541,9 +575,6 @@ int main()
 		player.drawRays();
 
 		oldMouse = events.mousePos;
-		printf("Mouse pos = [%f %f]\n", events.mousePos.x, events.mousePos.y);
-		printf("Mouse global pos = [%f %f]\n", events.mouseGlobalPos.x, events.mouseGlobalPos.y);
-		printf("Mouse relative pos = [%f %f]\n", events.mouseRelativePos.x, events.mouseRelativePos.y);
 
 		SDL_UpdateTexture(texture, nullptr, pixels, sizeof(Uint32) * winSize.x);
 		SDL_RenderTexture(renderer, texture, NULL, NULL);
