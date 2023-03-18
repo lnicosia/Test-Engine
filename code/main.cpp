@@ -4,10 +4,13 @@
 #include <iostream>
 #include <exception>
 #include <algorithm>
+#include <chrono>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
 #include "SDL.h"
+#include "SDL_ttf.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 # include "stb_image.h"
 #include "Inputs/SDLEvents.class.hpp"
@@ -129,8 +132,11 @@ Point2<int> mapCenter(mapPos + mapSize / 2);
 int	mapMaxX = 24;
 int	mapMaxY = 24;
 bool running = true;
+bool showFps = true;
 GameState gameState = PLAYING;
 std::vector<Texture> textures;
+uint64_t frameTime;
+uint16_t	fps;
 
 double	pointDistance(const Point2<double>& p1, const Point2<double>& p2)
 {
@@ -686,12 +692,52 @@ void ChangeGameState()
 	}
 }
 
+void	updateFrameStats()
+{
+	static uint64_t lastUpdate = frameTime;
+
+	using namespace std::chrono;
+	uint64_t newTime = duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
+	uint64_t frameDuration = newTime - frameTime;
+
+	double currFps = 1000.0 / frameDuration;
+	//printf("%f fps\n", fps);
+
+
+	if (frameTime - lastUpdate >= 1000)
+	{
+		lastUpdate = newTime;
+		fps = currFps;
+	}
+	frameTime = newTime;
+}
+
+void	drawFps(TTF_Font* font, SDL_Renderer* renderer)
+{
+	SDL_Surface* surf;
+	char	buff[10];
+
+	snprintf(buff, 10, "%hu", fps);
+	SDL_Color color{ 255, 255, 255 };
+	surf = TTF_RenderText_Blended(font, buff, color);
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
+	int texW = 0;
+	int texH = 0;
+	SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+	SDL_FRect pos{ winSize.w - texW - 10, winSize.h - texH - 10, texW, texH };
+	SDL_RenderTexture(renderer, texture, nullptr, &pos);
+	SDL_DestroyTexture(texture);
+	SDL_DestroySurface(surf);
+}
+
 int main()
 {
-	std::cout << "Hello CMake." << std::endl;
-	if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) != 0) {
-		throw std::runtime_error( "Couldn't initialize SDL : \n" + std::string(SDL_GetError()) );
-	}
+	if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) != 0)
+		throw std::runtime_error( "Couldn't initialize SDL : \n" + std::string(SDL_GetError()));
+
+	if (TTF_Init() == -1)
+		throw std::runtime_error( "Couldn't initialize SDL_ttf : \n" + std::string(TTF_GetError()));
+
 	SetupGLOptions();
 	SDL_Window *window = SDL_CreateWindow("Yop", winSize.w, winSize.h, 0);
 	if (!window)
@@ -736,42 +782,50 @@ int main()
 	stbi_set_flip_vertically_on_load(true);
 
 #ifdef __unix__
-	std::string basePath = "../../../resources/textures/wolfenstein/";
+	std::string basePath = "../../../resources/";
 #else
-	std::string basePath = "../../../../resources/textures/wolfenstein/";
+	std::string basePath = "../../../../resources/";
 #endif
 	
-	std::string path = basePath + "bluestone.png";
+	std::string texturesBasePath = basePath + "textures/wolfenstein/";
+
+	std::string path = texturesBasePath + "bluestone.png";
 	Texture currTexture(path);
 	textures.push_back(currTexture);
 
-	path = basePath + "colorstone.png";
+	path = texturesBasePath + "colorstone.png";
 	currTexture = Texture(path);
 	textures.push_back(currTexture);
 
-	path = basePath + "eagle.png";
+	path = texturesBasePath + "eagle.png";
 	currTexture = Texture(path);
 	textures.push_back(currTexture);
 
-	path = basePath + "greystone.png";
+	path = texturesBasePath + "greystone.png";
 	currTexture = Texture(path);
 	textures.push_back(currTexture);
 
-	path = basePath + "mossy.png";
+	path = texturesBasePath + "mossy.png";
 	currTexture = Texture(path);
 	textures.push_back(currTexture);
 
-	path = basePath + "purplestone.png";
+	path = texturesBasePath + "purplestone.png";
 	currTexture = Texture(path);
 	textures.push_back(currTexture);
 
-	path = basePath + "redbrick.png";
+	path = texturesBasePath + "redbrick.png";
 	currTexture = Texture(path);
 	textures.push_back(currTexture);
 
-	path = basePath + "wood.png";
+	path = texturesBasePath + "wood.png";
 	currTexture = Texture(path);
 	textures.push_back(currTexture);
+
+	std::string fontsBasePath = basePath + "fonts/";
+	path = fontsBasePath + "Alice-Regular.ttf";
+	TTF_Font* font1 = TTF_OpenFont(path.c_str(), 12);
+	if (!font1)
+		throw std::runtime_error( "Couldn't load " + path + "\n");
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
@@ -792,8 +846,12 @@ int main()
 
 		oldMouse = events.mousePos;
 
+		updateFrameStats();
+
 		SDL_UpdateTexture(texture, nullptr, pixels, sizeof(Uint32) * winSize.x);
 		SDL_RenderTexture(renderer, texture, NULL, NULL);
+		if (showFps)
+			drawFps(font1, renderer);
 		SDL_RenderPresent(renderer);
 	}
 
@@ -802,6 +860,8 @@ int main()
 		t.free();
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
+	TTF_CloseFont(font1);
+	TTF_Quit();
 	SDL_Quit();
 	return 0;
 }
