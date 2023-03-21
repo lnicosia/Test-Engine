@@ -54,6 +54,24 @@ struct Point2
 		return Point2<T>(this->x + static_cast<T>(v.x), this->y + static_cast<T>(v.y));
 	}
 
+	template < typename U >
+	constexpr Point2<T> operator+=(const Vector2<U>& v) const
+	{
+		return Point2<T>(this->x + static_cast<T>(v.x), this->y + static_cast<T>(v.y));
+	}
+
+	template < typename U >
+	constexpr Point2<T> operator-(const Vector2<U>& v) const
+	{
+		return Point2<T>(this->x - static_cast<T>(v.x), this->y - static_cast<T>(v.y));
+	}
+
+	template < typename U >
+	constexpr Point2<T> operator-=(const Vector2<U>& v) const
+	{
+		return Point2<T>(this->x - static_cast<T>(v.x), this->y - static_cast<T>(v.y));
+	}
+
 	constexpr Point2<T> operator*(const T& v) const
 	{
 		return Point2<T>(this->x * v, this->y * v);

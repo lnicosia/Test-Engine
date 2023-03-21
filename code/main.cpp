@@ -331,7 +331,9 @@ void	drawColumnOfImg(Point2<int> start, int length, double column, bool side, co
 	while (i < length)
 	{
 		int rowIndex = (i / (double)length) * texture.getHeight();
-		if (start.y + i >= 0 && start.y + i < winSize.h)
+		if (start.y + i >= 0 && start.y + i < winSize.h
+			&& pixels[start.x + (start.y + i) * winSize.w] != 0xFFFF00FF
+			&& pixels[start.x + (start.y + i) * winSize.w] != 0x00FF00FF)
 		{
 			uint8_t R, G, B;
 			int imgCoord = texture.getChannels() * (int)(columnIndex + rowIndex * texture.getWidth());
@@ -411,12 +413,15 @@ public:
 	{
 		Point2<int> winPos(mapCenter.x , mapCenter.y);
 		Point2<int> end(winPos.x + cos(angle) * 70, winPos.y + sin(angle) * 70);
-		drawLineOnMap(winPos, end, 0xFF0000FF, pixels); 
+		//drawLineOnMap(winPos, end, 0xFF0000FF, pixels); 
 		/*end = Point2<int>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
 		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);
 		end = Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
 		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);*/
-		drawCircleOnMap(winPos, mapScale / (double)8, 0xFFFFFFFF);
+		end = winPos + rightDirection * 150;
+		Point2<int> pos = winPos - rightDirection * 150;
+		drawLineOnMap(winPos, end, 0x00FF00FF, pixels);
+		drawCircleOnMap(winPos, mapScale / 8.0, 0xFFFFFFFF);
 	}
 
 	void	draw() const
@@ -442,6 +447,7 @@ public:
 			//printf("angle = %f\n", (this->angle - currAngle) / (double)M_PI * 180);
 			//if (cos(dist) == )
 			currAngle += ratio;
+			//break;
 		}
 	}
 
@@ -478,6 +484,11 @@ public:
 		return direction;
 	}
 
+	const Vector2<double>& getRightDirection() const
+	{
+		return rightDirection;
+	}
+
 	const double& getAngle() const
 	{
 		return angle;
@@ -501,6 +512,7 @@ double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t
 	double newMapX = mapX, newMapY = mapY;
 	Point2<double> screen(mapCenter);
 	Point2<double> end;
+	Point2<int> coord;
 	bool hit = false;
 	double dist;
 	v.normalize();
@@ -545,7 +557,8 @@ double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t
 
 		drawLineOnMap(screen, end, color, pixels);
 
-		Point2<int> coord(mapX, mapY);
+		coord.x = mapX;
+		coord.y = mapY;
 		//printf("Coord = [%d %d]\n", coord.x, coord.y);
 		if (diffX < diffY && v.x < 0)
 			coord.x = (int)(ceil(mapX) - 1);
@@ -558,13 +571,13 @@ double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t
 		}
 		else
 		{
-			//drawCircleOnMap(end, mapScale / (double)20, 0x00FF00FF);
+			drawCircleOnMap(end, mapScale / 10.0, 0x00FF00FF);
 			hit = true;
 			//printf("Hit on [%f %f]\n", mapX, mapY);
 			//printf("End = [%f %f]\n", end.x, end.y);
 			textIndex = map[coord.y][coord.x] - 1;
 		}
-		//drawCircle(end, 4, 0x00FF00FF);
+		//drawCircleOnMap(end, 4, 0x00FF00FF);
 		screen = end;
 		count++;
 		//if (count == 2)
@@ -572,7 +585,7 @@ double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t
 	}
 	if (hit == false)
 		return 0.0f;
-	//printf("Intersects at map[%f %f]\n", mapX, mapY);
+	//printf("Intersects at map[%f %f] ([%d %d]\n", mapX, mapY, coord.x, coord.y);
 	// TODO Could be replaced by cos/sin formula (cheaper)
 	dist = pointDistance(pos, Point2<double>(mapX, mapY));
 	//dist = abs(mapX - pos.x) / v.x;
@@ -582,7 +595,8 @@ double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t
 	//printf("Player angle = %f\n", player.getAngle());
 	//printf("Current angle = %f\n", angle);
 	//printf("Dist = %f\n", dist);
-	double distCorrec = dist *cos((angle - player.getAngle()) / (1.33333));
+	double distCorrec = dist *cos((angle - player.getAngle()) / (1.0));
+	//printf("Correc dist = %f\n", distCorrec);
 	double size;
 	if (distCorrec < 400 / winSize.h)
 		size = winSize.h / 2;
@@ -642,19 +656,97 @@ void	drawMap(const std::vector<std::vector<int>>& map)
 
 void	clearImg()
 {
+	uint8_t R, G, B;
+	double distance;
+	Texture ceilingTex = textures[7];
+	const unsigned char* img = ceilingTex.getImg();
 	for (int y = 0; y < winSize.h / 2; y++)
 	{
+		distance = (0.5 * winSize.h) / (winSize.h * 0.5 - y);
+		double leftX = player.getPos().x + (player.getDirection().x - player.getRightDirection().x) * distance;
+		double rightX = player.getPos().x + (player.getDirection().x + player.getRightDirection().x) * distance;
+		double leftY = player.getPos().y + (player.getDirection().y - player.getRightDirection().y) * distance;
+		double rightY = player.getPos().y + (player.getDirection().y + player.getRightDirection().y) * distance;
+		distance = (0.5 * winSize.h) / (winSize.h * 0.5 - y);
 		for (int x = 0; x < winSize.w; x++)
 		{
-			pixels[x + y * (int)winSize.w] = 0x253342FF;
+			/*R = 0x25 / distance;
+			G = 0x33 / distance;
+			B = 0x42 / distance;
+			pixels[x + y * (int)winSize.w] = R << 24 | G << 16 | B << 8 | 0xFF;*/
+			double currX = leftX + (rightX - leftX) * (x / (double)winSize.w);
+			double currY = leftY + (rightY - leftY) * (x / (double)winSize.w);
+			//printf("y = %d, x = %d, current pos = [%f %f]\n", y, x, currX, currY);
+			//currX = (int)currX % floorTex.getWidth();
+			//currY = (int)currY % floorTex.getHeight();
+			//printf("y = %d x = %d pos = [%f %f]\n", y, x, currX, currY);
+			currX = currX - (int)currX;
+			currY = currY - (int)currY;
+			//printf("pos = [%f %f]\n", currX, currY);
+			currX *= ceilingTex.getWidth();
+			currY *= ceilingTex.getHeight();
+			int coordX = (int)currX % ceilingTex.getWidth();
+			int coordY = (int)currY % ceilingTex.getHeight();
+			//if (coordX >= ceilingTex.getWidth())
+			//	coordX = ceilingTex.getWidth() - 1;
+			//if (coordY >= ceilingTex.getHeight())
+			//	coordY = ceilingTex.getHeight() - 1;
+
+			//printf("pos = [%d %d]\n", coordX, coordY);
+			int imgCoord = ceilingTex.getChannels() * (int)(coordX + coordY * ceilingTex.getWidth());
+
+			R = img[imgCoord] >> 2;
+			G = img[imgCoord + 1] >> 2;
+			B = img[imgCoord + 2] >> 2;
+			//R = 0x5C / distance;
+			//G = 0x62 / distance;
+			//B = 0xD6 / distance;
+			pixels[x + y * (int)winSize.w] = R << 24 | G << 16 | B << 8 | 0xFF;
 		}
 	}
+	distance = std::numeric_limits<double>::infinity();
+	Texture floorTex = textures[3];
+	img = floorTex.getImg();
+	//printf("Right dir = [%f %f]\n", player.getRightDirection().x, player.getRightDirection().y);
 	for (int y = winSize.h / 2; y < winSize.h; y++)
 	{
+		distance = (0.5 * winSize.h) / (y - winSize.h * 0.5);
+		double leftX = player.getPos().x + (player.getDirection().x - player.getRightDirection().x) * distance;
+		double rightX = player.getPos().x + (player.getDirection().x + player.getRightDirection().x) * distance;
+		double leftY = player.getPos().y + (player.getDirection().y - player.getRightDirection().y) * distance;
+		double rightY = player.getPos().y + (player.getDirection().y + player.getRightDirection().y) * distance;
+		//double currY = player.getPos().y + player.getDirection().y * distance;
+		//printf("y = %d, left x = %f, right x = %f\n", y, leftX, rightX);
+		//printf("y = %d, left y = %f, right y = %f\n", y, leftY, rightY);
+		//printf("distance = %f\n", distance);
 		for (int x = 0; x < winSize.w; x++)
 		{
-			pixels[x + y * (int)winSize.w] = 0x5C62D6FF;
+			double currX = leftX + (rightX - leftX) * (x / (double)winSize.w);
+			double currY = leftY + (rightY - leftY) * (x / (double)winSize.w);
+			//printf("y = %d, x = %d, current pos = [%f %f]\n", y, x, currX, currY);
+			//currX = (int)currX % floorTex.getWidth();
+			//currY = (int)currY % floorTex.getHeight();
+			//printf("y = %d x = %d pos = [%f %f]\n", y, x, currX, currY);
+			currX = currX - (int)currX;
+			currY = currY - (int)currY;
+			//printf("pos = [%f %f]\n", currX, currY);
+			currX *= floorTex.getWidth();
+			currY *= floorTex.getHeight();
+			int coordX = (int)currX % floorTex.getWidth();
+			int coordY = (int)currY % floorTex.getHeight();
+			
+			//printf("pos = [%d %d]\n", coordX, coordY);
+			int imgCoord = floorTex.getChannels() * (int)(coordX + coordY * floorTex.getWidth());
+
+			R = img[imgCoord] >> 2;
+			G = img[imgCoord + 1] >> 2;
+			B = img[imgCoord + 2] >> 2;
+			//R = 0x5C / distance;
+			//G = 0x62 / distance;
+			//B = 0xD6 / distance;
+			pixels[x + y * (int)winSize.w] = R << 24 | G << 16 | B << 8 | 0xFF;
 		}
+		//break;
 	}
 }
 
@@ -837,12 +929,11 @@ int main()
 
 		clearImg();
 
-		drawMap(map);
-
 		if (gameState == PLAYING)
 			player.updateAngle();
 		player.draw();
 		player.drawRays();
+		drawMap(map);
 
 		oldMouse = events.mousePos;
 
