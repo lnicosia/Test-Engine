@@ -26,12 +26,35 @@ FetchContent_MakeAvailable(SDL_ttf)
 
 add_executable (${PROJECT_NAME}
 	"main.cpp"
-	"Inputs/Binding.class.cpp"
-	"Inputs/SDLEvents.class.cpp"
-	"Inputs/SDLEvents.class.hpp"
-	"Inputs/Binding.class.hpp"
-	"Inputs/Action.class.hpp"
-	"Inputs/math.hpp")
+	"Inputs/Binding.cpp"
+	"Inputs/SDLEvents.cpp"
+	"Inputs/SDLEvents.hpp"
+	"Inputs/Binding.hpp"
+	"Inputs/Action.hpp"
+	"maths/math.hpp" 
+	"Rendering/SoftwareRendering/Raycaster.hpp"
+	"Rendering/Renderer.hpp"
+	"Rendering/SoftwareRenderer.hpp"
+	"Rendering/Window.hpp"
+	"Rendering/SDLWindow.hpp"
+	"Rendering/GLRenderer.hpp"
+	"Rendering/VulkanRenderer.hpp"
+	"Textures/Texture.hpp"
+	"Log.hpp"
+	"Inputs/Events.hpp"
+	"Inputs/Events.cpp"
+	"Rendering/SoftwareRendering/Raycaster.cpp"
+	"Rendering/SoftwareRenderer.cpp"
+	"Rendering/Window.cpp"
+	"Rendering/SDLWindow.cpp"
+	"Rendering/Renderer.cpp"
+	"Rendering/GLRenderer.cpp"
+	"Rendering/VulkanRenderer.cpp"
+	"Rendering/Camera.hpp"
+	"Rendering/Camera.cpp"
+	 "Textures/Texture.cpp"
+	 "Rendering/SoftwareRendering/DrawUtils.cpp"
+	  "Maths/math.cpp")
 
 
 target_link_directories(${PROJECT_NAME}
@@ -46,6 +69,7 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE "external"
+	PRIVATE "./"
 )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)

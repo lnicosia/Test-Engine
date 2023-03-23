@@ -1,5 +1,5 @@
-#ifndef _ACTION_CLASS_H_
-#define _ACTION_CLASS_H_
+#ifndef _ACTION_HPP_
+# define _ACTION_HPP_
 
 #include <functional>
 #include <tuple>
@@ -22,14 +22,14 @@ public:
     }
 };
 
-template < typename ... Args>
+template < typename ReturnType, typename ... Args>
 class Action: public ActionWrapper
 {
 public:
     Action(): ActionWrapper(), func(), args()
     {}
 
-    Action(std::function<void(Args...)> func, Args... args):
+    Action(std::function<ReturnType(Args...)> func, Args... args):
         ActionWrapper(), func(func), args(std::forward<Args>(args)...)
     {
 
@@ -37,10 +37,12 @@ public:
 
     ~Action() {}
 
-    void execute( void ) const override
+    ReturnType execute( void ) const override
     {
         if (this->func)
-            std::apply(this->func, this->args);
+        {
+            return std::apply(this->func, this->args);
+        }
     }
 
     operator bool() const
@@ -48,7 +50,7 @@ public:
         return this->func;
     }
 
-    Action<Args...>& operator=(const Action<Args...>& ref)
+    Action<ReturnType, Args...>& operator=(const Action<ReturnType, Args...>& ref)
     {
         this->func = ref.func;
         this->args = ref.args;
@@ -56,8 +58,8 @@ public:
     }
 
 private:
-    std::function<void(Args...)> func;
+    std::function<ReturnType(Args...)> func;
     std::tuple<Args...> args;
 };
 
-#endif // !_ACTION_CLASS_H_
+#endif // _ACTION_HPP_

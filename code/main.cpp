@@ -1,6 +1,4 @@
-﻿// code.cpp : Defines the entry point for the application.
-//
-
+﻿
 #include <iostream>
 #include <exception>
 #include <algorithm>
@@ -11,9 +9,11 @@
 #include "SDL.h"
 #include "SDL_ttf.h"
 
-#define STB_IMAGE_IMPLEMENTATION
+#include "Inputs/SDLEvents.hpp"
+#include "Rendering/SoftwareRenderer.hpp"
+#include "Rendering/SoftwareRendering/Raycaster.hpp"
+
 # include "stb_image.h"
-#include "Inputs/SDLEvents.class.hpp"
 
 void SetupGLOptions()
 {
@@ -27,8 +27,8 @@ void SetupGLOptions()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 }
 
-void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels);
-double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t* pixels);
+void	drawLine(te::Point2<int> p1, te::Point2<int> p2, uint32_t color, uint32_t* pixels);
+double	drawRay(te::Point2<double> pos, double angle, int x, uint32_t color, uint32_t* pixels);
 
 enum GameState
 {
@@ -36,68 +36,11 @@ enum GameState
 	PAUSED
 };
 
-class Texture
-{
-private:
-	unsigned char* img;
-	int w;
-	int h;
-	int nChannels;
-	bool loaded;
-
-public:
-	Texture() = delete;
-	Texture(const std::string& path): img(0), w(0), h(0), nChannels(0), loaded(false)
-	{
-		img = stbi_load(path.c_str(),
-			&w, &h, &nChannels, 0);
-		if (!img)
-		{
-			std::cerr << std::endl << "Failed to load texture '" + path << " '" << std::endl;
-			std::cerr << stbi_failure_reason() << std::endl;
-			stbi_image_free(img);
-			return ;
-		}
-		loaded = true;
-	}
-
-	const int getWidth() const
-	{
-		return w;
-	}
-
-	const int getHeight() const
-	{
-		return h;
-	}
-
-	const int getChannels() const
-	{
-		return nChannels;
-	}
-
-	const unsigned char* getImg() const
-	{
-		return img;
-	}
-
-	const bool isLoaded() const
-	{
-		return loaded;
-	}
-
-	void free()
-	{
-		stbi_image_free(img);
-		loaded = false;
-	}
-};
-
-Point2<int>	winSize(800, 600);
-Point2<double>	oldMouse;
+te::Point2<int>	winSize(800, 600);
+te::Point2<double>	oldMouse;
 double		mouseSpeed = 0.001f;
 uint32_t*	pixels;
-SDLEvents	events;
+te::SDLEvents	events;
 std::vector<std::vector<int>>	map
 {
 	{8,8,8,8,8,8,8,8,8,8,8,4,4,6,4,4,6,4,6,4,4,4,6,4},
@@ -126,28 +69,21 @@ std::vector<std::vector<int>>	map
 	{2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,5,5,5,5,5,5,5,5,5}
 };
 double	mapScale = 20;
-Point2<int>	mapPos(0, 0);
-Point2<int>	mapSize(200, 200);
-Point2<int> mapCenter(mapPos + mapSize / 2);
+te::Point2<int>	mapPos(0, 0);
+te::Point2<int>	mapSize(200, 200);
+te::Point2<int> mapCenter(mapPos + mapSize / 2);
 int	mapMaxX = 24;
 int	mapMaxY = 24;
 bool running = true;
 bool showFps = true;
 GameState gameState = PLAYING;
-std::vector<Texture> textures;
+std::vector<te::Texture> textures;
 uint64_t frameTime;
 uint16_t	fps;
 
-double	pointDistance(const Point2<double>& p1, const Point2<double>& p2)
+void	drawCircle(const te::Point2<int> pos, double radius, uint32_t color)
 {
-	double x = p2.x - p1.x;
-	double y = p2.y - p1.y;
-	return sqrt(x * x + y * y);
-}
-
-void	drawCircle(const Point2<int> pos, double radius, uint32_t color)
-{
-	Point2<int> p;
+	te::Point2<int> p;
 	double rad2;
 
 	rad2 = radius * radius;
@@ -166,9 +102,9 @@ void	drawCircle(const Point2<int> pos, double radius, uint32_t color)
 	}
 }
 
-void	drawCircleOnMap(const Point2<int> pos, double radius, uint32_t color)
+void	drawCircleOnMap(const te::Point2<int> pos, double radius, uint32_t color)
 {
-	Point2<int> p;
+	te::Point2<int> p;
 	double rad2;
 
 	rad2 = radius * radius;
@@ -190,14 +126,14 @@ void	drawCircleOnMap(const Point2<int> pos, double radius, uint32_t color)
 
 /* Draw circle with inside and outline color
 */
-void	drawCircle(Point2<int> pos, double radius, uint32_t insideColor, uint32_t outsideColor)
+void	drawCircle(te::Point2<int> pos, double radius, uint32_t insideColor, uint32_t outsideColor)
 {
 
 }
 
-void	drawRectangle(Point2<int> pos, Point2<int> size, uint32_t color)
+void	drawRectangle(te::Point2<int> pos, te::Point2<int> size, uint32_t color)
 {
-	Point2<int> coord;
+	te::Point2<int> coord;
 
 	for (int y = 0; y < size.h; y++)
 	{
@@ -223,7 +159,7 @@ void	drawRectangle(Point2<int> pos, Point2<int> size, uint32_t color)
 	}
 }
 
-void	drawRectangle(Point2<int> pos, Point2<int> size, uint32_t outsideColor, uint32_t insideColor)
+void	drawRectangle(te::Point2<int> pos, te::Point2<int> size, uint32_t outsideColor, uint32_t insideColor)
 {
 	for (int y = pos.y; y < pos.y + size.h; y++)
 	{
@@ -235,9 +171,9 @@ void	drawRectangle(Point2<int> pos, Point2<int> size, uint32_t outsideColor, uin
 	}
 }
 
-void	drawRectangleOnMap(Point2<int> pos, Point2<int> size, uint32_t color)
+void	drawRectangleOnMap(te::Point2<int> pos, te::Point2<int> size, uint32_t color)
 {
-	Point2<int> coord;
+	te::Point2<int> coord;
 
 	for (int y = 0; y < size.h; y++)
 	{
@@ -267,7 +203,7 @@ void	drawRectangleOnMap(Point2<int> pos, Point2<int> size, uint32_t color)
 	}
 }
 
-void	drawRectangleOnMap(Point2<int> pos, Point2<int> size, uint32_t outsideColor, uint32_t insideColor)
+void	drawRectangleOnMap(te::Point2<int> pos, te::Point2<int> size, uint32_t outsideColor, uint32_t insideColor)
 {
 	for (int y = pos.y; y < pos.y + size.h; y++)
 	{
@@ -280,9 +216,9 @@ void	drawRectangleOnMap(Point2<int> pos, Point2<int> size, uint32_t outsideColor
 	}
 }
 
-void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
+void	drawLine(te::Point2<int> p1, te::Point2<int> p2, uint32_t color, uint32_t* pixels)
 {
-	Vector2<double> v(p1, p2);
+	te::Vector2<double> v(p1, p2);
 	double x = p1.x;
 	double y = p1.y;
 	v.normalize();
@@ -297,9 +233,9 @@ void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
 	}
 }
 
-void	drawImg(Point2<int> pos, const Texture& texture, uint32_t* pixels)
+void	drawImg(te::Point2<int> pos, const te::Texture& texture, uint32_t* pixels)
 {
-	Point2<int> coord;
+	te::Point2<int> coord;
 	const unsigned char* img = texture.getImg();
 	for (int h = 0; h < texture.getHeight(); h++)
 	{
@@ -320,7 +256,7 @@ void	drawImg(Point2<int> pos, const Texture& texture, uint32_t* pixels)
 	}
 }
 
-void	drawColumnOfImg(Point2<int> start, int length, double column, bool side, const Texture& texture, uint32_t* pixels)
+void	drawColumnOfImg(te::Point2<int> start, int length, double column, bool side, const te::Texture& texture, uint32_t* pixels)
 {
 	if (texture.isLoaded() == false)
 		return;
@@ -353,9 +289,9 @@ void	drawColumnOfImg(Point2<int> start, int length, double column, bool side, co
 	}
 }
 
-void	drawLineOnMap(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pixels)
+void	drawLineOnMap(te::Point2<int> p1, te::Point2<int> p2, uint32_t color, uint32_t* pixels)
 {
-	Vector2<double> v(p1, p2);
+	te::Vector2<double> v(p1, p2);
 	double x = p1.x;
 	double y = p1.y;
 	v.normalize();
@@ -374,9 +310,9 @@ void	drawLineOnMap(Point2<int> p1, Point2<int> p2, uint32_t color, uint32_t* pix
 struct Player
 {
 private:
-	Vector2<double>	direction;
-	Vector2<double>	rightDirection;
-	Point2<double>	pos;
+	te::Vector2<double>	direction;
+	te::Vector2<double>	rightDirection;
+	te::Point2<double>	pos;
 	double	angle;
 	double	fov;
 	double	topRayAngle;
@@ -411,15 +347,15 @@ public:
 
 	void	drawOnMap() const
 	{
-		Point2<int> winPos(mapCenter.x , mapCenter.y);
-		Point2<int> end(winPos.x + cos(angle) * 70, winPos.y + sin(angle) * 70);
+		te::Point2<int> winPos(mapCenter.x , mapCenter.y);
+		te::Point2<int> end(winPos.x + cos(angle) * 70, winPos.y + sin(angle) * 70);
 		//drawLineOnMap(winPos, end, 0xFF0000FF, pixels); 
-		/*end = Point2<int>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
+		/*end = te::Point2<int>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
 		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);
-		end = Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
+		end = te::Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
 		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);*/
 		end = winPos + rightDirection * 150;
-		Point2<int> pos = winPos - rightDirection * 150;
+		te::Point2<int> pos = winPos - rightDirection * 150;
 		drawLineOnMap(winPos, end, 0x00FF00FF, pixels);
 		drawCircleOnMap(winPos, mapScale / 8.0, 0xFFFFFFFF);
 	}
@@ -434,17 +370,16 @@ public:
 		double ratio = fov / winSize.w;
 		double currAngle = this->angle - fov / 2;
 		double dist;
-		bool side;
 		uint32_t color;
 
 		for (int x = 0; x < winSize.w; x++)
 		{
-			Point2<int> winPos(winSize.w / 2, winSize.h / 2);
+			te::Point2<int> winPos(winSize.w / 2, winSize.h / 2);
 			
-			Point2<int> end(winPos.x + cos(currAngle) * 100, winPos.y + sin(currAngle) * 100);
+			te::Point2<int> end(winPos.x + cos(currAngle) * 100, winPos.y + sin(currAngle) * 100);
 			dist = drawRay(pos, currAngle, x, 0xFFFF00FF, pixels);
 			//printf("Dist[%d] = %f\n", x, dist);
-			//printf("angle = %f\n", (this->angle - currAngle) / (double)M_PI * 180);
+			printf("angle = %f\n", (this->angle - currAngle) / (double)M_PI * 180);
 			//if (cos(dist) == )
 			currAngle += ratio;
 			//break;
@@ -474,17 +409,18 @@ public:
 		this->pos.x += this->rightDirection.x * this->speed;
 		this->pos.y += this->rightDirection.y * this->speed;
 	}
-	const Point2<double>& getPos() const
+
+	const te::Point2<double>& getPos() const
 	{
 		return pos;
 	}
 
-	const Vector2<double>& getDirection() const
+	const te::Vector2<double>& getDirection() const
 	{
 		return direction;
 	}
 
-	const Vector2<double>& getRightDirection() const
+	const te::Vector2<double>& getRightDirection() const
 	{
 		return rightDirection;
 	}
@@ -502,17 +438,17 @@ public:
 
 Player	player;
 
-double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t* pixels)
+double	drawRay(te::Point2<double> pos, double angle, int x, uint32_t color, uint32_t* pixels)
 {
-	Vector2<double> v(cos(angle), sin(angle));
+	te::Vector2<double> v(cos(angle), sin(angle));
 	double mapX = pos.x;
 	double mapY = pos.y;
 	double diffX;
 	double diffY;
 	double newMapX = mapX, newMapY = mapY;
-	Point2<double> screen(mapCenter);
-	Point2<double> end;
-	Point2<int> coord;
+	te::Point2<double> screen(mapCenter);
+	te::Point2<double> end;
+	te::Point2<int> coord;
 	bool hit = false;
 	double dist;
 	v.normalize();
@@ -587,7 +523,7 @@ double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t
 		return 0.0f;
 	//printf("Intersects at map[%f %f] ([%d %d]\n", mapX, mapY, coord.x, coord.y);
 	// TODO Could be replaced by cos/sin formula (cheaper)
-	dist = pointDistance(pos, Point2<double>(mapX, mapY));
+	dist = pointDistance(pos, te::Point2<double>(mapX, mapY));
 	//dist = abs(mapX - pos.x) / v.x;
 	//double alpha = player.getAngle() - angle;
 	//dist = abs(pos.x - mapX) / cos(player.getFov());
@@ -618,22 +554,22 @@ double	drawRay(Point2<double> pos, double angle, int x, uint32_t color, uint32_t
 		side = false;
 	}
 	//printf("column = %f\n", column);
-	/*drawLine(Point2<int>(winSize.w - 1 - x, winSize.h / 2 - size),
-		Point2<int>(winSize.w - 1 - x, winSize.h / 2 + size),
+	/*drawLine(te::Point2<int>(winSize.w - 1 - x, winSize.h / 2 - size),
+		te::Point2<int>(winSize.w - 1 - x, winSize.h / 2 + size),
 		color, pixels);*/
 	
-	drawColumnOfImg(Point2<int>(x, winSize.h / 2 - size / 2), size, column,
+	drawColumnOfImg(te::Point2<int>(x, winSize.h / 2 - size / 2), size, column,
 		side, textures[textIndex], pixels);
-	return pointDistance(pos, Point2<double>(mapX, mapY));
+	return pointDistance(pos, te::Point2<double>(mapX, mapY));
 }
 
 void	drawMap(const std::vector<std::vector<int>>& map)
 {
-	Point2<int> size(mapScale, mapScale);
-	Point2<int> pos;
-	Point2<int> startPos(mapCenter.x  - player.getPos().x * size.x,
+	te::Point2<int> size(mapScale, mapScale);
+	te::Point2<int> pos;
+	te::Point2<int> startPos(mapCenter.x  - player.getPos().x * size.x,
 		mapCenter.y  - player.getPos().y * size.y);
-	Point2<double> startPos2(player.getPos().x - map.size(), player.getPos().y - map.size());
+	te::Point2<double> startPos2(player.getPos().x - map.size(), player.getPos().y - map.size());
 	pos.y = startPos.y;
 	for (size_t y = 0; y < map.size(); y++)
 	{
@@ -654,11 +590,11 @@ void	drawMap(const std::vector<std::vector<int>>& map)
 	drawRectangle(mapPos, mapSize, 0xFFFFFFFF);
 }
 
-void	clearImg()
+void	drawFloorAndCeiling()
 {
 	uint8_t R, G, B;
 	double distance;
-	Texture ceilingTex = textures[7];
+	te::Texture ceilingTex = textures[7];
 	const unsigned char* img = ceilingTex.getImg();
 	for (int y = 0; y < winSize.h / 2; y++)
 	{
@@ -705,7 +641,7 @@ void	clearImg()
 		}
 	}
 	distance = std::numeric_limits<double>::infinity();
-	Texture floorTex = textures[3];
+	te::Texture floorTex = textures[3];
 	img = floorTex.getImg();
 	//printf("Right dir = [%f %f]\n", player.getRightDirection().x, player.getRightDirection().y);
 	for (int y = winSize.h / 2; y < winSize.h; y++)
@@ -816,13 +752,18 @@ void	drawFps(TTF_Font* font, SDL_Renderer* renderer)
 	int texW = 0;
 	int texH = 0;
 	SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
-	SDL_FRect pos{ winSize.w - texW - 10, winSize.h - texH - 10, texW, texH };
+	SDL_FRect pos{
+		(float)(winSize.w - texW - 10),
+		(float)(winSize.h - texH - 10),
+		(float)(texW),
+		(float)(texH)
+	};
 	SDL_RenderTexture(renderer, texture, nullptr, &pos);
 	SDL_DestroyTexture(texture);
 	SDL_DestroySurface(surf);
 }
 
-int main()
+int raycasting()
 {
 	if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) != 0)
 		throw std::runtime_error( "Couldn't initialize SDL : \n" + std::string(SDL_GetError()));
@@ -847,27 +788,27 @@ int main()
 		throw std::runtime_error("Could not create texture");
 
 
-	Binding forward("forward", SDLK_UP, SDLK_w, true);
-	forward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Forward)));
+	te::Binding forward("forward", SDLK_UP, SDLK_w, true);
+	forward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void>(std::function<void()>(Forward)));
 	events.bindings.push_back(forward);
 
-	Binding backward("backward", SDLK_DOWN, SDLK_s, true);
-	backward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Backward)));
+	te::Binding backward("backward", SDLK_DOWN, SDLK_s, true);
+	backward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void>(std::function<void()>(Backward)));
 	events.bindings.push_back(backward);
 
-	Binding left("left", SDLK_LEFT, SDLK_a, true);
-	left.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Left)));
+	te::Binding left("left", SDLK_LEFT, SDLK_a, true);
+	left.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void>(std::function<void()>(Left)));
 	events.bindings.push_back(left);
 
-	Binding right("right", SDLK_RIGHT, SDLK_d, true);
-	right.whenPressed = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(Right)));
+	te::Binding right("right", SDLK_RIGHT, SDLK_d, true);
+	right.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void>(std::function<void()>(Right)));
 	events.bindings.push_back(right);
 
-	MouseBinding leftB("Mouse left", SDL_BUTTON_LEFT, 0, false);
-	leftB.onRelease = std::shared_ptr<ActionWrapper>(new Action<>(std::function<void()>(ChangeGameState)));
+	te::MouseBinding leftB("Mouse left", SDL_BUTTON_LEFT, 0, false);
+	leftB.onRelease = std::shared_ptr<ActionWrapper>(new Action<void>(std::function<void()>(ChangeGameState)));
 	events.mouseBindings.push_back(leftB);
 
-	Binding updateRotate("updateRotate", SDLK_ESCAPE, 0, true);
+	te::Binding updateRotate("updateRotate", SDLK_ESCAPE, 0, true);
 	updateRotate.onRelease = leftB.onRelease;
 	events.bindings.push_back(updateRotate);
 
@@ -882,35 +823,35 @@ int main()
 	std::string texturesBasePath = basePath + "textures/wolfenstein/";
 
 	std::string path = texturesBasePath + "bluestone.png";
-	Texture currTexture(path);
+	te::Texture currTexture(path);
 	textures.push_back(currTexture);
 
 	path = texturesBasePath + "colorstone.png";
-	currTexture = Texture(path);
+	currTexture = te::Texture(path);
 	textures.push_back(currTexture);
 
 	path = texturesBasePath + "eagle.png";
-	currTexture = Texture(path);
+	currTexture = te::Texture(path);
 	textures.push_back(currTexture);
 
 	path = texturesBasePath + "greystone.png";
-	currTexture = Texture(path);
+	currTexture = te::Texture(path);
 	textures.push_back(currTexture);
 
 	path = texturesBasePath + "mossy.png";
-	currTexture = Texture(path);
+	currTexture = te::Texture(path);
 	textures.push_back(currTexture);
 
 	path = texturesBasePath + "purplestone.png";
-	currTexture = Texture(path);
+	currTexture = te::Texture(path);
 	textures.push_back(currTexture);
 
 	path = texturesBasePath + "redbrick.png";
-	currTexture = Texture(path);
+	currTexture = te::Texture(path);
 	textures.push_back(currTexture);
 
 	path = texturesBasePath + "wood.png";
-	currTexture = Texture(path);
+	currTexture = te::Texture(path);
 	textures.push_back(currTexture);
 
 	std::string fontsBasePath = basePath + "fonts/";
@@ -927,7 +868,7 @@ int main()
 		if (events.handle() == 1)
 			running = false;
 
-		clearImg();
+		drawFloorAndCeiling();
 
 		if (gameState == PLAYING)
 			player.updateAngle();
@@ -948,11 +889,21 @@ int main()
 
 	delete[] pixels;
 	for (auto t : textures)
-		t.free();
+		t.unload();
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
 	TTF_CloseFont(font1);
 	TTF_Quit();
 	SDL_Quit();
+	return 0;
+}
+
+int main()
+{
+	te::SoftwareRenderer renderer;
+	te::Raycaster	raycaster(&renderer);
+	raycaster.render();
+	//return raycasting();
 	return 0;
 }
