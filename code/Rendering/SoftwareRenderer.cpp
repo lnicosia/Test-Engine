@@ -1,5 +1,7 @@
 #include "SoftwareRenderer.hpp"
 #include "Inputs/SDLEvents.hpp"
+#include "Assets/Fonts/TTFFont.hpp"
+#include "Assets/AssetManager.hpp"
 
 namespace te
 {
@@ -35,10 +37,17 @@ namespace te
 		pixels = new uint32_t[window->getWidth() * window->getHeight()];
 		if (!pixels)
 			throw std::runtime_error("Could not allocate pixel array");
+
+		AssetManager& assetManager = AssetManager::getInstance();
+		uiFont = assetManager.loadAsset<TTFFont>("../../../../resources/fonts/Alice-Regular.ttf");
+		
 	}
 
 	SoftwareRenderer::~SoftwareRenderer()
 	{
+		uiFont.reset();
+		AssetManager::getInstance().clear();
+
 		LOG("Freeing pixel array");
 		delete[] pixels;
 
@@ -63,5 +72,45 @@ namespace te
 		SDL_UpdateTexture(SDLTexturePtr, nullptr, pixels, sizeof(Uint32) * window->getWidth());
 		SDL_RenderTexture(SDLRendererPtr, SDLTexturePtr, NULL, NULL);
 		SDL_RenderPresent(SDLRendererPtr);
+		frameData.updateFrameStats();
+		showFrameStats();
+	}
+
+	void	SoftwareRenderer::showFrameStats()
+	{
+		if (debugLevel == TE_SHOW_FPS)
+		{
+			char	buff[10];
+
+			snprintf(buff, 10, "%llu", frameData.fps);
+			renderText(buff, uiFont, Point2<int>(), 16);
+		}
+	}
+
+	/* TODO: protections
+	*/
+	void	SoftwareRenderer::renderText(const char* text, std::shared_ptr<Font> font,
+		Point2<int> pos, int size)
+	{
+		std::shared_ptr<TTFFont> ttfFont = dynamic_pointer_cast<TTFFont>(font);
+		if (!ttfFont)
+			throw std::runtime_error("Software renderer is trying to render a " + font->getAssetType()
+				+ " instead of a TTF font");
+
+		SDL_Color color{ 255, 255, 255 };
+		SDL_Surface* surf = TTF_RenderText_Blended(ttfFont->getPtr(), text, color);
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(SDLRendererPtr, surf);
+		int texW = 0;
+		int texH = 0;
+		SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+		SDL_FRect rec{
+			(float)(w - texW - 10),
+			(float)(h - texH - 10),
+			(float)(texW),
+			(float)(texH)
+		};
+		SDL_RenderTexture(SDLRendererPtr, texture, nullptr, &rec);
+		SDL_DestroyTexture(texture);
+		SDL_DestroySurface(surf);
 	}
 }

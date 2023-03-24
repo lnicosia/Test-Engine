@@ -39,7 +39,6 @@ add_executable (${PROJECT_NAME}
 	"Rendering/SDLWindow.hpp"
 	"Rendering/GLRenderer.hpp"
 	"Rendering/VulkanRenderer.hpp"
-	"Textures/Texture.hpp"
 	"Log.hpp"
 	"Inputs/Events.hpp"
 	"Inputs/Events.cpp"
@@ -52,9 +51,21 @@ add_executable (${PROJECT_NAME}
 	"Rendering/VulkanRenderer.cpp"
 	"Rendering/Camera.hpp"
 	"Rendering/Camera.cpp"
-	 "Textures/Texture.cpp"
-	 "Rendering/SoftwareRendering/DrawUtils.cpp"
-	  "Maths/math.cpp")
+	"Assets/Textures/Texture.hpp"
+	"Assets/Textures/Texture.cpp"
+	"Rendering/SoftwareRendering/DrawUtils.cpp"
+	"Maths/math.cpp"
+	"Rendering/FrameData.hpp"
+	"Rendering/FrameData.cpp"
+	"Rendering/DebugLevel.hpp"
+	"Assets/Asset.hpp"
+	"Assets/AssetManager.hpp"
+	"Assets/Fonts/Font.hpp"
+	"Assets/Fonts/Font.cpp"
+	"Assets/Asset.cpp"
+	"Assets/AssetManager.cpp"
+	"Assets/CheckFileType.hpp"
+	"Assets/CheckFileType.cpp" "Assets/Fonts/TTFFont.hpp" "Assets/Fonts/TTFFont.cpp" "Assets/Textures/SoftwareTexture.hpp" "Assets/Textures/SoftwareTexture.cpp")
 
 
 target_link_directories(${PROJECT_NAME}

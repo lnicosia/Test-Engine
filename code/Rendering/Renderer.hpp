@@ -3,6 +3,9 @@
 
 #include "Window.hpp"
 #include "Inputs/Events.hpp"
+#include "FrameData.hpp"
+#include "DebugLevel.hpp"
+#include "Assets/Fonts/Font.hpp"
 
 namespace te
 {
@@ -22,16 +25,23 @@ namespace te
 		RendererType type;
 
 		virtual void render() = 0;
+		virtual void renderText(const char* text, std::shared_ptr<Font> font,
+			Point2<int> pos, int size) = 0;
 		int	handleEvents();
 
 		std::shared_ptr<Window> getWindow() const;
 
 		std::shared_ptr<Events> events;
 
+		FrameData frameData;
+
+		DebugLevel	debugLevel;
+
 	private:
 		
 	protected:
 		std::shared_ptr<Window> window;
+		std::shared_ptr<Font> uiFont;
 	};
 
 }

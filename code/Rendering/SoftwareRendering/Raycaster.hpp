@@ -3,7 +3,7 @@
 
 #include "Rendering/SoftwareRenderer.hpp"
 #include "Rendering/Camera.hpp"
-#include "Textures/Texture.hpp"
+#include "Assets/Textures/SoftwareTexture.hpp"
 
 namespace te
 {
@@ -23,7 +23,7 @@ namespace te
 		void	drawRays();
 		void	drawRay(Point2<double> pos, double angle, int x, uint32_t color);
 		void	drawColumnOfImg(Point2<int> start, int length, double column, bool side,
-			const Texture& texture);
+			const std::shared_ptr<SoftwareTexture> texture);
 		void	drawFloorAndCeiling();
 		void	drawMap();
 		void	drawPlayerOnMinimap() const;
@@ -38,12 +38,11 @@ namespace te
 		double	mapScale;
 		GameState	gameState;
 		Point2<double>	oldMouse;
-
 		
 	private:
 		SoftwareRenderer* renderer;
 		Camera	camera;
-		std::vector<Texture> textures;
+		std::vector<std::shared_ptr<SoftwareTexture>> textures;
 	};
 
 }

@@ -1,30 +1,30 @@
 #ifndef _TEXTURE_HPP_
 # define _TEXTURE_HPP_
 
+#include "Assets/Asset.hpp"
 #include <string>
 
 namespace te
 {
-	class Texture
+	class Texture: public Asset
 	{
-	private:
-		unsigned char* img;
+	protected:
 		int w;
 		int h;
 		int nChannels;
-		bool loaded;
 
 	public:
 		Texture() = delete;
 		Texture(const std::string& path);
+		Texture(const Texture& ref) = delete;
+		Texture(Texture&& ref);
+		Texture& operator=(Texture&& ref);
+		Texture& operator=(const Texture& ref) = delete;
 		~Texture();
 
 		const int getWidth() const;
 		const int getHeight() const;
 		const int getChannels() const;
-		const unsigned char* getImg() const;
-		const bool isLoaded() const;
-		void unload();
 
 	};
 }

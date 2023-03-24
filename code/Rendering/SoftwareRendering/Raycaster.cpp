@@ -1,5 +1,6 @@
 #include "Raycaster.hpp"
 #include "DrawUtils.hpp"
+#include "Assets/AssetManager.hpp"
 
 namespace te
 {
@@ -52,37 +53,16 @@ namespace te
 
 		std::string texturesBasePath = basePath + "textures/wolfenstein/";
 
-		std::string path = texturesBasePath + "bluestone.png";
-		Texture currTexture(path);
-		textures.push_back(currTexture);
+		AssetManager& assetManager = AssetManager::getInstance();
 
-		path = texturesBasePath + "colorstone.png";
-		currTexture = Texture(path);
-		textures.push_back(currTexture);
-
-		path = texturesBasePath + "eagle.png";
-		currTexture = Texture(path);
-		textures.push_back(currTexture);
-
-		path = texturesBasePath + "greystone.png";
-		currTexture = Texture(path);
-		textures.push_back(currTexture);
-
-		path = texturesBasePath + "mossy.png";
-		currTexture = Texture(path);
-		textures.push_back(currTexture);
-
-		path = texturesBasePath + "purplestone.png";
-		currTexture = Texture(path);
-		textures.push_back(currTexture);
-
-		path = texturesBasePath + "redbrick.png";
-		currTexture = Texture(path);
-		textures.push_back(currTexture);
-
-		path = texturesBasePath + "wood.png";
-		currTexture = Texture(path);
-		textures.push_back(currTexture);
+		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "bluestone.png"));
+		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "colorstone.png"));
+		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "eagle.png"));
+		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "greystone.png"));
+		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "mossy.png"));
+		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "purplestone.png"));
+		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "redbrick.png"));
+		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "wood.png"));
 
 		SDL_SetRelativeMouseMode(SDL_TRUE);
 
@@ -217,8 +197,8 @@ namespace te
 	{
 		uint8_t R, G, B;
 		double distance;
-		Texture ceilingTex = textures[7];
-		const unsigned char* img = ceilingTex.getImg();
+		std::shared_ptr<SoftwareTexture> ceilingTex = textures[7];
+		const unsigned char* img = ceilingTex->getImg();
 		for (int y = 0; y < renderer->h / 2; y++)
 		{
 			distance = (0.5 * renderer->h) / (renderer->h * 0.5 - y);
@@ -242,17 +222,17 @@ namespace te
 				currX = abs(currX - (int)currX);
 				currY = abs(currY - (int)currY);
 				//printf("pos = [%f %f]\n", currX, currY);
-				currX *= ceilingTex.getWidth();
-				currY *= ceilingTex.getHeight();
-				int coordX = (int)currX % ceilingTex.getWidth();
-				int coordY = (int)currY % ceilingTex.getHeight();
-				if (coordX >= ceilingTex.getWidth())
-					coordX = ceilingTex.getWidth() - 1;
-				if (coordY >= ceilingTex.getHeight())
-					coordY = ceilingTex.getHeight() - 1;
+				currX *= ceilingTex->getWidth();
+				currY *= ceilingTex->getHeight();
+				int coordX = (int)currX % ceilingTex->getWidth();
+				int coordY = (int)currY % ceilingTex->getHeight();
+				if (coordX >= ceilingTex->getWidth())
+					coordX = ceilingTex->getWidth() - 1;
+				if (coordY >= ceilingTex->getHeight())
+					coordY = ceilingTex->getHeight() - 1;
 
 				//printf("pos = [%d %d]\n", coordX, coordY);
-				int imgCoord = ceilingTex.getChannels() * (int)(coordX + coordY * ceilingTex.getWidth());
+				int imgCoord = ceilingTex->getChannels() * (int)(coordX + coordY * ceilingTex->getWidth());
 
 				R = img[imgCoord] >> 2;
 				G = img[imgCoord + 1] >> 2;
@@ -264,8 +244,8 @@ namespace te
 			}
 		}
 		distance = std::numeric_limits<double>::infinity();
-		Texture floorTex = textures[3];
-		img = floorTex.getImg();
+		std::shared_ptr<SoftwareTexture> floorTex = textures[3];
+		img = floorTex->getImg();
 		//printf("Right dir = [%f %f]\n", camera.getRightVec().x, camera.getRightVec().y);
 		for (int y = renderer->h / 2; y < renderer->h; y++)
 		{
@@ -293,17 +273,17 @@ namespace te
 				if (currY < 0)
 					currY = 1 - currY;
 				//printf("pos = [%f %f]\n", currX, currY);
-				currX *= floorTex.getWidth();
-				currY *= floorTex.getHeight();
-				int coordX = (int)currX % floorTex.getWidth();
-				int coordY = (int)currY % floorTex.getHeight();
+				currX *= floorTex->getWidth();
+				currY *= floorTex->getHeight();
+				int coordX = (int)currX % floorTex->getWidth();
+				int coordY = (int)currY % floorTex->getHeight();
 				/*if (coordX < 0)
 					coordX = 0;
 				if (coordY < 0)
 					coordY = 0;*/
 
 				//printf("pos = [%d %d]\n", coordX, coordY);
-				int imgCoord = floorTex.getChannels() * (int)(coordX + coordY * floorTex.getWidth());
+				int imgCoord = floorTex->getChannels() * (int)(coordX + coordY * floorTex->getWidth());
 
 				R = img[imgCoord] >> 2;
 				G = img[imgCoord + 1] >> 2;
@@ -464,23 +444,24 @@ namespace te
 
 
 	void	Raycaster::drawColumnOfImg(Point2<int> start, int length, double column, bool side,
-		const Texture& texture)
+		const std::shared_ptr<SoftwareTexture> texture)
 	{
-		if (texture.isLoaded() == false)
+		if (texture->isLoaded() == false)
 			return;
 		int i = 0;
-		const unsigned char* img = texture.getImg();
-		int columnIndex = column * texture.getWidth();
+		const unsigned char* img = texture->getImg();
+		int columnIndex = column * texture->getWidth();
 		//printf("column index = %d\n", columnIndex);
 		while (i < length)
 		{
-			int rowIndex = (i / (double)length) * texture.getHeight();
+			int rowIndex = (i / (double)length) * texture->getHeight();
 			if (start.y + i >= 0 && start.y + i < this->renderer->h
 				&& this->renderer->pixels[start.x + (start.y + i) * this->renderer->w] != 0xFFFF00FF
 				&& this->renderer->pixels[start.x + (start.y + i) * this->renderer->w] != 0x00FF00FF)
 			{
 				uint8_t R, G, B;
-				int imgCoord = texture.getChannels() * (int)(columnIndex + rowIndex * texture.getWidth());
+				int imgCoord =
+					texture->getChannels() * (int)(columnIndex + rowIndex * texture->getWidth());
 
 				R = img[imgCoord];
 				G = img[imgCoord + 1];
