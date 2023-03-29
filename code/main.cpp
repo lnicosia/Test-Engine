@@ -11,6 +11,9 @@
 
 #include "Inputs/SDLEvents.hpp"
 #include "Rendering/SoftwareRenderer.hpp"
+#include "Rendering/VulkanRenderer.hpp"
+#include "Rendering/GLRenderer.hpp"
+#include "Rendering/D3DRenderer.hpp"
 #include "Rendering/SoftwareRendering/Raycaster.hpp"
 
 # include "stb_image.h"
@@ -18,8 +21,10 @@
 
 int main()
 {
-	te::SoftwareRenderer renderer;
-	te::Raycaster	raycaster(&renderer);
-	raycaster.render();
+	//te::SoftwareRenderer renderer;
+	//te::Raycaster	raycaster(&renderer);
+	//raycaster.render();
+	te::VulkanRenderer renderer;
+	renderer.render();
 	return 0;
 }

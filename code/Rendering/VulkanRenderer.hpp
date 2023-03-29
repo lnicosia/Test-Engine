@@ -9,8 +9,12 @@ namespace te
 	{
 	public:
 		VulkanRenderer();
+		VulkanRenderer(WindowManager wManager);
 		~VulkanRenderer();
 
+		void render() override;
+		void renderText(const char* text, std::shared_ptr<Font> font,
+			Point2<int> pos, int size) override;
 	private:
 
 	};

@@ -12,12 +12,21 @@ namespace te
 	class SDLWindow: public Window
 	{
 	public:
-		SDLWindow();
-		SDLWindow(int w, int h);
+
+		SDLWindow() = delete;
+		explicit SDLWindow(RendererType rType);
+		explicit SDLWindow(int w, int h, RendererType rType);
 		~SDLWindow();
 		SDL_Window* getWindow() const;
+
+		int	loadVulkan() override;
+		int loadOpenGL() override;
+
 	private:
+
 		SDL_Window* windowPtr;
+
+		void initWindow(RendererType rType);
 	};
 
 }

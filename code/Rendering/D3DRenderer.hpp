@@ -1,16 +1,15 @@
-#ifndef _GL_RENDERER_HPP_
-# define _GL_RENDERER_HPP_
+#ifndef _D3D_RENDERER_HPP_
+# define _D3D_RENDERER_HPP_
 
 #include "Renderer.hpp"
 
 namespace te
 {
-	class GLRenderer: public Renderer
+	class D3DRenderer: Renderer
 	{
 	public:
-		GLRenderer();
-		GLRenderer(WindowManager wManager);
-		~GLRenderer();
+		explicit D3DRenderer();
+		~D3DRenderer();
 
 		void render() override;
 		void renderText(const char* text, std::shared_ptr<Font> font,
@@ -19,6 +18,7 @@ namespace te
 	private:
 
 	};
+
 }
 
-#endif // _GL_RENDERER_HPP_
+#endif // _D3D_RENDERER_HPP_

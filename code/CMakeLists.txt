@@ -6,6 +6,7 @@ cmake_minimum_required (VERSION 3.10)
 project ("Test-Engine")
 
 include(FetchContent)
+find_package(Vulkan)
 
 FetchContent_Declare(
 	SDL3
@@ -65,7 +66,7 @@ add_executable (${PROJECT_NAME}
 	"Assets/Asset.cpp"
 	"Assets/AssetManager.cpp"
 	"Assets/CheckFileType.hpp"
-	"Assets/CheckFileType.cpp" "Assets/Fonts/TTFFont.hpp" "Assets/Fonts/TTFFont.cpp" "Assets/Textures/SoftwareTexture.hpp" "Assets/Textures/SoftwareTexture.cpp")
+	"Assets/CheckFileType.cpp" "Assets/Fonts/TTFFont.hpp" "Assets/Fonts/TTFFont.cpp" "Assets/Textures/SoftwareTexture.hpp" "Assets/Textures/SoftwareTexture.cpp" "Rendering/D3DRenderer.hpp" "Rendering/D3DRenderer.cpp" "Rendering/SDL.hpp" "Rendering/SDL.cpp" "Rendering/RendererType.hpp" "Rendering/WindowManager.hpp")
 
 
 target_link_directories(${PROJECT_NAME}
@@ -79,7 +80,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME}
-	PRIVATE "external"
+	PRIVATE "ThirdParty"
 	PRIVATE "./"
 )
 

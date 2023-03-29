@@ -2,24 +2,36 @@
 # define _WINDOW_HPP_
 
 #include "Maths/math.hpp"
+#include "RendererType.hpp"
+#include "Inputs/Events.hpp"
 
 namespace te
 {
 	class Window
 	{
 	public:
-		Window();
-		Window(int w, int h);
+		Window() = delete;
+		Window(RendererType rType);
+		Window(int w, int h, RendererType rType);
 		~Window();
 		const int getWidth() const;
 		const int getHeight() const;
 
+		int	handleEvents();
+		std::shared_ptr<Events> events;
+
+		virtual int	loadVulkan() = 0;
+		virtual int loadOpenGL() = 0;
+
 	private:
 		bool	resizable;
 		double	ratio;
+		RendererType rType;
+
 	protected:
 		int w = 1600;
 		int h = 900;
+		
 	};
 
 

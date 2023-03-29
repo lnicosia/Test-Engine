@@ -3,7 +3,7 @@
 
 namespace te
 {
-	enum DebugLevel
+	enum class DebugLevel
 	{
 		TE_NODEBUG,
 		TE_SHOW_FPS

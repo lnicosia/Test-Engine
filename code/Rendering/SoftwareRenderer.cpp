@@ -5,22 +5,14 @@
 
 namespace te
 {
-	SoftwareRenderer::SoftwareRenderer(): Renderer(TE_SOFTWARE_SDL)
+	SoftwareRenderer::SoftwareRenderer(): Renderer(RendererType::TE_SOFTWARE, WindowManager::TE_SDL)
 	{
-		LOG("Initializing all SDL systems");
-		if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) != 0)
-			throw std::runtime_error( "Couldn't initialize SDL : \n" + std::string(SDL_GetError()));
 
-		LOG("Initializing SDL_ttf");
-		if (TTF_Init() == -1)
-			throw std::runtime_error( "Couldn't initialize SDL_ttf : \n" + std::string(TTF_GetError()));
-
-		std::shared_ptr<SDLWindow> winPtr = std::shared_ptr<SDLWindow>(new SDLWindow(800, 600));
+		std::shared_ptr<SDLWindow> winPtr = std::shared_ptr<SDLWindow>(
+			new SDLWindow(800, 600, RendererType::TE_SOFTWARE));
 		window = winPtr;
 		w = window->getWidth();
 		h = window->getHeight();
-
-		events = std::shared_ptr<SDLEvents>(new SDLEvents());
 
 		LOG("Initializing SDL renderer");
 		SDLRendererPtr = SDL_CreateRenderer(winPtr->getWindow(), nullptr, SDL_RENDERER_SOFTWARE);
@@ -45,8 +37,6 @@ namespace te
 
 	SoftwareRenderer::~SoftwareRenderer()
 	{
-		uiFont.reset();
-		AssetManager::getInstance().clear();
 
 		LOG("Freeing pixel array");
 		delete[] pixels;
@@ -55,16 +45,6 @@ namespace te
 		SDL_DestroyTexture(SDLTexturePtr);
 		LOG("Destroying SDL_Renderer");
 		SDL_DestroyRenderer(SDLRendererPtr);
-		LOG("Manually releasing SDL Window");
-		window.reset();
-
-		LOG("Quitting SDL TTF");
-		TTF_Quit();
-		/* LEAK ?? */
-		LOG("Quitting SDL subsystems");
-		SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-		LOG("Quitting SDL");
-		SDL_Quit();
 	}
 
 	void	SoftwareRenderer::render()
@@ -78,7 +58,7 @@ namespace te
 
 	void	SoftwareRenderer::showFrameStats()
 	{
-		if (debugLevel == TE_SHOW_FPS)
+		if (debugLevel == DebugLevel::TE_SHOW_FPS)
 		{
 			char	buff[10];
 

@@ -98,30 +98,34 @@ namespace te
 		Binding forward("forward", SDLK_UP, SDLK_w, true);
 		std::function<void(Camera&)> func = Forward;
 		forward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void, Camera&>(func, camera));
-		renderer->events->bindings.push_back(forward);
+		renderer->getWindow()->events->bindings.push_back(forward);
 
 		Binding backward("backward", SDLK_DOWN, SDLK_s, true);
 		func = Backward;
 		backward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void, Camera&>(func, camera));
-		renderer->events->bindings.push_back(backward);
+		renderer->getWindow()->events->bindings.push_back(backward);
 
 		Binding left("left", SDLK_LEFT, SDLK_a, true);
 		func = Left;
 		left.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void, Camera&>(func, camera));
-		renderer->events->bindings.push_back(left);
+		renderer->getWindow()->events->bindings.push_back(left);
 
 		Binding right("right", SDLK_RIGHT, SDLK_d, true);
 		func = Right;
 		right.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void, Camera&>(func, camera));
-		renderer->events->bindings.push_back(right);
+		renderer->getWindow()->events->bindings.push_back(right);
 
 		MouseBinding leftB("Mouse left", SDL_BUTTON_LEFT, 0, false);
 		leftB.onRelease = std::shared_ptr<ActionWrapper>(new Action<void, GameState&>(std::function<void(GameState&)>(ChangeGameState), gameState));
-		renderer->events->mouseBindings.push_back(leftB);
+		renderer->getWindow()->events->mouseBindings.push_back(leftB);
 
 		Binding updateRotate("updateRotate", SDLK_ESCAPE, 0, true);
 		updateRotate.onRelease = leftB.onRelease;
-		renderer->events->bindings.push_back(updateRotate);
+		renderer->getWindow()->events->bindings.push_back(updateRotate);
+	}
+
+	Raycaster::~Raycaster()
+	{
 	}
 
 	void	Raycaster::drawMap()
@@ -166,24 +170,20 @@ namespace te
 		drawCircleClamped(winPos, mapScale / 8.0, 0xFFFFFFFF, renderer, minimapPos, minimapPos + minimapSize);
 	}
 
-	Raycaster::~Raycaster()
-	{
-	}
-
 	void Raycaster::render()
 	{
 		while (running == true)
 		{
-			if (renderer->handleEvents() == 1)
+			if (renderer->getWindow()->handleEvents() == 1)
 				running = false;
 
 			drawFloorAndCeiling();
 
 			if (gameState == PLAYING)
 			{
-				camera.rotateY((renderer->events->mousePos.x - oldMouse.x));
+				camera.rotateY((renderer->getWindow()->events->mousePos.x - oldMouse.x));
 			}
-			oldMouse = renderer->events->mousePos;
+			oldMouse = renderer->getWindow()->events->mousePos;
 
 			drawPlayerOnMinimap();
 			drawRays();
