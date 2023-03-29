@@ -6,7 +6,6 @@ cmake_minimum_required (VERSION 3.10)
 project ("Test-Engine")
 
 include(FetchContent)
-find_package(Vulkan)
 
 FetchContent_Declare(
 	SDL3
@@ -68,6 +67,7 @@ add_executable (${PROJECT_NAME}
 	"Assets/CheckFileType.hpp"
 	"Assets/CheckFileType.cpp" "Assets/Fonts/TTFFont.hpp" "Assets/Fonts/TTFFont.cpp" "Assets/Textures/SoftwareTexture.hpp" "Assets/Textures/SoftwareTexture.cpp" "Rendering/D3DRenderer.hpp" "Rendering/D3DRenderer.cpp" "Rendering/SDL.hpp" "Rendering/SDL.cpp" "Rendering/RendererType.hpp" "Rendering/WindowManager.hpp")
 
+find_package(Vulkan REQUIRED)
 
 target_link_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build
@@ -87,6 +87,7 @@ target_include_directories(${PROJECT_NAME}
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 if (WIN32)
+
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/SDL3.dll"
@@ -95,7 +96,19 @@ if (WIN32)
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/SDL3_ttf.dll"
 			${CMAKE_CURRENT_BINARY_DIR})
-endif (WIN32)
+
+	target_link_libraries(${PROJECT_NAME}
+		"${CMAKE_CURRENT_SOURCE_DIR}/../binaries/ThirdParty/vulkan/vulkan-1.lib"
+	)
+
+elseif (UNIX)
+
+	target_link_libraries(${PROJECT_NAME}
+		"${CMAKE_CURRENT_SOURCE_DIR}/../binaries/ThirdParty/vulkan/libvulkan.so.1"
+	)
+
+endif ()
+
 
 if (MSVC)
 	add_compile_options(/std:c++2a)

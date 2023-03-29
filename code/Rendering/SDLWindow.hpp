@@ -20,6 +20,7 @@ namespace te
 		SDL_Window* getWindow() const;
 
 		int	loadVulkan() override;
+		int getVulkanInstanceExtensions(uint32_t* count, const char** names) override;
 		int loadOpenGL() override;
 
 	private:

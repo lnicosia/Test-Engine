@@ -21,6 +21,7 @@ namespace te
 		std::shared_ptr<Events> events;
 
 		virtual int	loadVulkan() = 0;
+		virtual int getVulkanInstanceExtensions(uint32_t* count, const char** names) = 0;
 		virtual int loadOpenGL() = 0;
 
 	private:

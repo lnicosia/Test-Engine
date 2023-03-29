@@ -37,7 +37,7 @@ namespace te
 					&& std::filesystem::equivalent(asset->getPath(),
 						std::filesystem::path(path)))
 				{
-					std::shared_ptr<T> tmp = dynamic_pointer_cast<T>(this->assets[asset->getId()]);
+					std::shared_ptr<T> tmp = std::dynamic_pointer_cast<T>(this->assets[asset->getId()]);
 					//	If the cast successed, we found our asset. Return it instead of
 					//	loading it again
 					if (tmp)

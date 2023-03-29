@@ -10,18 +10,6 @@
 
 namespace te
 {
-	/* Renderer init functions */
-	int initSoftwareRenderer();
-	int initOpenGL();
-	int initVulkan();
-	int initD3D();
-	int initMetal();
-	/* Renderer destroy functions */
-	int destroySoftwareRenderer();
-	int destroyOpenGL();
-	int destroyVulkan();
-	int destroyD3D();
-	int destroyMetal();
 
 	class Renderer
 	{
@@ -44,9 +32,6 @@ namespace te
 		bool running;
 
 	private:
-
-		std::function<int()> initRenderer[6] = { &initSoftwareRenderer, &initOpenGL, &initVulkan, &initD3D, &initMetal, std::function<int()>() };
-		std::function<int()> destroyRenderer[6] = { &destroySoftwareRenderer, &destroyOpenGL, &destroyVulkan, &destroyD3D, &destroyMetal, std::function<int()>() };
 		
 	protected:
 		RendererType rType;

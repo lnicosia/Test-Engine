@@ -10,6 +10,7 @@ namespace te
 		window = winPtr;
 
 		window->loadVulkan();
+		initVulkan();
 	}
 
 	VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::TE_VULKAN, wManager)
@@ -22,6 +23,37 @@ namespace te
 	VulkanRenderer::~VulkanRenderer()
 	{
 		// TODO
+	}
+
+	void VulkanRenderer::initVulkan()
+	{
+		createInstance();
+	}
+
+	void VulkanRenderer::createInstance()
+	{
+		VkApplicationInfo appInfo{};
+		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		appInfo.pApplicationName = "Test Engine - Vulkan";
+		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.pEngineName = "Test Engine";
+		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.apiVersion = VK_API_VERSION_1_0;
+
+		VkInstanceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		createInfo.pApplicationInfo = &appInfo;
+		createInfo.enabledLayerCount = 0;
+		uint32_t extensionCount = 0;
+		const char** extensionNames = nullptr;
+		window->getVulkanInstanceExtensions(&extensionCount, extensionNames);
+		
+		// TODO: handle extensions
+
+		LOG("Creating Vulkan instance");
+		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create Vulkan instance!");
+		}
 	}
 
 	void VulkanRenderer::render()

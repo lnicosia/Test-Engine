@@ -2,6 +2,8 @@
 #include "SDL.hpp"
 #include "Inputs/SDLEvents.hpp"
 
+#include "SDL_vulkan.h"
+
 namespace te
 {
 
@@ -55,6 +57,13 @@ namespace te
 
 	int SDLWindow::loadVulkan()
 	{
+		return 0;
+	}
+
+	int SDLWindow::getVulkanInstanceExtensions(uint32_t* count, const char** names)
+	{
+		if (SDL_Vulkan_GetInstanceExtensions(count, names) == SDL_FALSE)
+			throw std::runtime_error("Could not querry Vulkan instance extensions");
 		return 0;
 	}
 

@@ -3,6 +3,8 @@
 
 #include "Renderer.hpp"
 
+#include "vulkan/vulkan.h"
+
 namespace te
 {
 	class VulkanRenderer: public Renderer
@@ -16,7 +18,10 @@ namespace te
 		void renderText(const char* text, std::shared_ptr<Font> font,
 			Point2<int> pos, int size) override;
 	private:
+		VkInstance instance;
 
+		void initVulkan();
+		void createInstance();
 	};
 }
 
