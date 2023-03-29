@@ -24,7 +24,18 @@ int main()
 	//te::SoftwareRenderer renderer;
 	//te::Raycaster	raycaster(&renderer);
 	//raycaster.render();
-	te::VulkanRenderer renderer;
-	renderer.render();
+	try
+	{
+		te::VulkanRenderer renderer;
+		renderer.render();
+	}
+	catch (std::runtime_error& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 	return 0;
 }

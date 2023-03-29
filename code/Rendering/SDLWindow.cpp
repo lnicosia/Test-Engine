@@ -60,10 +60,14 @@ namespace te
 		return 0;
 	}
 
-	int SDLWindow::getVulkanInstanceExtensions(uint32_t* count, const char** names)
+	int SDLWindow::getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names)
 	{
-		if (SDL_Vulkan_GetInstanceExtensions(count, names) == SDL_FALSE)
-			throw std::runtime_error("Could not querry Vulkan instance extensions");
+		if (SDL_Vulkan_GetInstanceExtensions(count, nullptr) == SDL_FALSE)
+			throw std::runtime_error("Could not querry Vulkan instance extensions count");
+		LOG("SDL requires " + std::to_string(*count)+ " vulkan extensions");
+		names.resize(*count);
+		if (SDL_Vulkan_GetInstanceExtensions(count, names.data()) == SDL_FALSE)
+			throw std::runtime_error("Could not querry Vulkan instance extensions names");
 		return 0;
 	}
 

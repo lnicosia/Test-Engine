@@ -22,7 +22,7 @@ namespace te
 
 	VulkanRenderer::~VulkanRenderer()
 	{
-		// TODO
+		vkDestroyInstance(instance, nullptr);
 	}
 
 	void VulkanRenderer::initVulkan()
@@ -43,12 +43,29 @@ namespace te
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
-		createInfo.enabledLayerCount = 0;
-		uint32_t extensionCount = 0;
-		const char** extensionNames = nullptr;
-		window->getVulkanInstanceExtensions(&extensionCount, extensionNames);
+
+		/* List available extensions 
+		   TODO: print or not?
+		*/
 		
-		// TODO: handle extensions
+		/*uint32_t availableExtensionCount = 0;
+		vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
+		std::vector<VkExtensionProperties> extensions(availableExtensionCount);
+		vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, extensions.data());
+
+		LOG("Avaiable Vulkan extensions:");
+		for (auto extension : extensions)
+		{
+			LOG('\t' + extension.extensionName);
+		}*/
+
+
+		createInfo.enabledLayerCount = 0;
+		uint32_t neededExtensionCount = 0;
+		std::vector<const char*> extensionNames;
+		window->getVulkanInstanceExtensions(&neededExtensionCount, extensionNames);
+		createInfo.enabledExtensionCount = neededExtensionCount;
+		createInfo.ppEnabledExtensionNames = extensionNames.data();
 
 		LOG("Creating Vulkan instance");
 		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
