@@ -13,7 +13,7 @@ namespace te
 		Window() = delete;
 		Window(RendererType rType);
 		Window(int w, int h, RendererType rType);
-		~Window();
+		virtual ~Window();
 		const int getWidth() const;
 		const int getHeight() const;
 

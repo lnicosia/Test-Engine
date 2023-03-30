@@ -25,7 +25,7 @@ namespace te
 		*/
 		Asset& operator=(const Asset& ref) = delete;
 		Asset& operator=(Asset&& ref);
-		~Asset();
+		virtual ~Asset();
 
 		//	Accessors
 

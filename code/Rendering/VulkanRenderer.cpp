@@ -53,10 +53,10 @@ namespace te
 		std::vector<VkExtensionProperties> extensions(availableExtensionCount);
 		vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, extensions.data());
 
-		LOG("Avaiable Vulkan extensions:");
+		LOG("Avaiable Vulkan extensions:\n");
 		for (auto extension : extensions)
 		{
-			LOG('\t' + extension.extensionName);
+			LOG("\t%s\n", extension.extensionName);
 		}*/
 
 
@@ -67,7 +67,7 @@ namespace te
 		createInfo.enabledExtensionCount = neededExtensionCount;
 		createInfo.ppEnabledExtensionNames = extensionNames.data();
 
-		LOG("Creating Vulkan instance");
+		LOG(TE_RESOURCE_LOG, "Creating Vulkan instance\n");
 		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create Vulkan instance!");
 		}

@@ -9,7 +9,7 @@ namespace te
 	{
 	public:
 		Events();
-		~Events();
+		virtual ~Events();
 		/**	Run the whole input pipeline: update inputs state and launch
 		**	functions accordingly
 		*/

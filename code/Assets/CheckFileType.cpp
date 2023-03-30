@@ -20,12 +20,12 @@ namespace te
 	{
 		if (!std::filesystem::exists(path))
 		{
-			std::cerr << std::endl << "nre: " << path << " does not exist" << std::endl;
+			std::cerr << std::endl << "te: " << path << " does not exist" << std::endl;
 			return false;
 		}
 		if (!std::filesystem::is_regular_file(path))
 		{
-			std::cerr << std::endl << "nre: " << path << " is not a regular file" << std::endl;
+			std::cerr << std::endl << "te: " << path << " is not a regular file" << std::endl;
 			return false;
 		}
 		return true;

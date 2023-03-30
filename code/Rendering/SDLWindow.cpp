@@ -19,7 +19,7 @@ namespace te
 
 	SDLWindow::~SDLWindow()
 	{
-		LOG("Destroying SDL Window");
+		LOG(TE_RESOURCE_LOG, "Destroying SDL Window\n");
 		SDL_DestroyWindow(windowPtr);
 	}
 
@@ -46,7 +46,8 @@ namespace te
 		}
 		else
 			throw std::runtime_error("SDL can only create Vulkan, OpenGL or software windows");
-		LOG(log + "window");
+		log += "window";
+		LOG(TE_RESOURCE_LOG, "%s\n", log.c_str());
 
 		windowPtr = SDL_CreateWindow("SDL Window", w, h, flags);
 		if (!windowPtr)
@@ -64,7 +65,7 @@ namespace te
 	{
 		if (SDL_Vulkan_GetInstanceExtensions(count, nullptr) == SDL_FALSE)
 			throw std::runtime_error("Could not querry Vulkan instance extensions count");
-		LOG("SDL requires " + std::to_string(*count)+ " vulkan extensions");
+		LOG(TE_RESOURCE_LOG, "SDL requires %d vulkan extensions\n", *count);
 		names.resize(*count);
 		if (SDL_Vulkan_GetInstanceExtensions(count, names.data()) == SDL_FALSE)
 			throw std::runtime_error("Could not querry Vulkan instance extensions names");

@@ -15,17 +15,18 @@ namespace te
 		frameData(),
 		running(true)
 	{
+		Logger::Init();
 	}
 
 	Renderer::~Renderer()
 	{
 		/* Make sure to clear assets before releasing window libraries */
-		LOG("Clearing renderer UI font");
+		LOG(TE_RESOURCE_LOG, "Clearing renderer UI font\n");
 		uiFont.reset();
-		LOG("Freeing all assets");
+		LOG(TE_RESOURCE_LOG, "Freeing all assets\n");
 		AssetManager::getInstance().clear();
 
-		LOG("Releasing Window");
+		LOG(TE_RESOURCE_LOG, "Releasing Window\n");
 		window.reset();
 
 	}

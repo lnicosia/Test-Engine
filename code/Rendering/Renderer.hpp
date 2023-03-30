@@ -16,7 +16,7 @@ namespace te
 	public:
 		explicit Renderer(RendererType rType = RendererType::TE_VULKAN, WindowManager wManager = WindowManager::TE_SDL);
 		Renderer() = delete;
-		~Renderer();
+		virtual ~Renderer();
 
 		virtual void render() = 0;
 		virtual void renderText(const char* text, std::shared_ptr<Font> font,

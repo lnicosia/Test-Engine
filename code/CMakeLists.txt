@@ -65,7 +65,7 @@ add_executable (${PROJECT_NAME}
 	"Assets/Asset.cpp"
 	"Assets/AssetManager.cpp"
 	"Assets/CheckFileType.hpp"
-	"Assets/CheckFileType.cpp" "Assets/Fonts/TTFFont.hpp" "Assets/Fonts/TTFFont.cpp" "Assets/Textures/SoftwareTexture.hpp" "Assets/Textures/SoftwareTexture.cpp" "Rendering/D3DRenderer.hpp" "Rendering/D3DRenderer.cpp" "Rendering/SDL.hpp" "Rendering/SDL.cpp" "Rendering/RendererType.hpp" "Rendering/WindowManager.hpp")
+	"Assets/CheckFileType.cpp" "Assets/Fonts/TTFFont.hpp" "Assets/Fonts/TTFFont.cpp" "Assets/Textures/SoftwareTexture.hpp" "Assets/Textures/SoftwareTexture.cpp" "Rendering/D3DRenderer.hpp" "Rendering/D3DRenderer.cpp" "Rendering/SDL.hpp" "Rendering/SDL.cpp" "Rendering/RendererType.hpp" "Rendering/WindowManager.hpp" "Log.cpp")
 
 find_package(Vulkan REQUIRED)
 
