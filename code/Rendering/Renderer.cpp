@@ -1,5 +1,5 @@
 #include "Renderer.hpp"
-#include "Log.hpp"
+#include "Debug/Log.hpp"
 #include "Assets/AssetManager.hpp"
 #include "SDL.hpp"
 

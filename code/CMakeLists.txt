@@ -42,7 +42,7 @@ add_executable (${PROJECT_NAME}
 	"Rendering/SDLWindow.hpp"
 	"Rendering/GLRenderer.hpp"
 	"Rendering/VulkanRenderer.hpp"
-	"Log.hpp"
+	"Debug/Log.hpp"
 	"Inputs/Events.hpp"
 	"Inputs/Events.cpp"
 	"Rendering/SoftwareRendering/Raycaster.cpp"
@@ -79,9 +79,9 @@ add_executable (${PROJECT_NAME}
 	"Rendering/SDL.cpp"
 	"Rendering/RendererType.hpp"
 	"Rendering/WindowManager.hpp"
-	"Log.cpp"
-	"ANSI.hpp"
-	"Assert.hpp")
+	"Debug/Log.cpp"
+	"Debug/ANSI.hpp"
+	"Debug/Assert.hpp" "Debug/Exception.hpp" "Debug/Exception.cpp")
 
 find_package(Vulkan REQUIRED)
 

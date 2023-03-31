@@ -1,5 +1,5 @@
 #include "TTFFont.hpp"
-#include "Log.hpp"
+#include "Debug/Log.hpp"
 
 namespace te
 {

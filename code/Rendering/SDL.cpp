@@ -1,5 +1,5 @@
 #include "SDL.hpp"
-#include "Log.hpp"
+#include "Debug/Log.hpp"
 
 #include "SDL.h"
 #include "SDL_ttf.h"

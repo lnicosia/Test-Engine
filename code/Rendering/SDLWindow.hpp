@@ -4,7 +4,7 @@
 #include "SDL.h"
 
 #include "Window.hpp"
-#include "Log.hpp"
+#include "Debug/Log.hpp"
 #include <iostream>
 
 namespace te

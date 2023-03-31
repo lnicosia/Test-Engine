@@ -1,5 +1,5 @@
 #include "SoftwareTexture.hpp"
-#include "Log.hpp"
+#include "Debug/Assert.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 # include "stb_image.h"
@@ -25,6 +25,7 @@ namespace te
 	SoftwareTexture::SoftwareTexture(SoftwareTexture&& ref): Texture(std::move(ref))
 	{
 		// TODO
+		uninplemented();
 	}
 
 	SoftwareTexture& SoftwareTexture::operator=(SoftwareTexture&& ref)

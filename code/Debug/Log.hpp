@@ -48,7 +48,6 @@ static std::vector<const char*> verboseColors =
 	VERBOSE_LEVEL < TE_LOG ? \
 		(void)printf("%s%s: %s: " format TE_CONSOLE_RESET, verboseColors[VERBOSE_LEVEL], catNames[CATEGORY], verboseNames[VERBOSE_LEVEL] __VA_OPT__(,) __VA_ARGS__) \
 		: (void)0 \
-//if (VERBOSE_LEVEL == TE_FATAL) { throw std::exception(); } else { (void)0; } \
 
 namespace te
 {

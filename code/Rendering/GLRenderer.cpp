@@ -1,18 +1,19 @@
 #include "GLRenderer.hpp"
+#include "Debug/Assert.hpp"
 
 namespace te
 {
 	GLRenderer::GLRenderer(): Renderer(RendererType::TE_GL, WindowManager::TE_SDL)
 	{
 		// TODO
-		throw std::runtime_error("OpenGL is not implemented yet");
+		uninplemented();
 
 	}
 
 	GLRenderer::GLRenderer(WindowManager wManage): Renderer(RendererType::TE_GL, wManager)
 	{
 		// TODO
-		throw std::runtime_error("OpenGL is not implemented yet");
+		uninplemented();
 		if (wManager != WindowManager::TE_SDL)
 			throw std::runtime_error("Only SDL is implemented for now");
 	}
@@ -20,15 +21,18 @@ namespace te
 	GLRenderer::~GLRenderer()
 	{
 		// TODO
+		uninplemented();
 	}
 
 	void GLRenderer::render()
 	{
 		// TODO
+		uninplemented();
 	}
 
 	void GLRenderer::renderText(const char* text, std::shared_ptr<Font> font, Point2<int> pos, int size)
 	{
 		// TODO
+		uninplemented();
 	}
 }

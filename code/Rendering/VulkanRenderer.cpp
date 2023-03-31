@@ -1,5 +1,6 @@
 #include "VulkanRenderer.hpp"
 #include "SDLWindow.hpp"
+#include "Debug/Assert.hpp"
 
 namespace te
 {
@@ -55,8 +56,6 @@ namespace te
 			LOG(TE_RENDERING_LOG, TE_VERBOSE, "\t%s\n", extension.extensionName);
 		}
 
-		LOG(TE_ALL_LOG, TE_FATAL, "Test fatal error\n");
-
 		createInfo.enabledLayerCount = 0;
 		uint32_t neededExtensionCount = 0;
 		std::vector<const char*> extensionNames;
@@ -83,5 +82,6 @@ namespace te
 	void VulkanRenderer::renderText(const char* text, std::shared_ptr<Font> font, Point2<int> pos, int size)
 	{
 		// TODO
+		uninplemented();
 	}
 }
