@@ -1,5 +1,6 @@
 #include "TTFFont.hpp"
 #include "Debug/Log.hpp"
+#include "Debug/Exception.hpp"
 
 namespace te
 {
@@ -9,7 +10,7 @@ namespace te
 		LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Loading TTF font %s\n", path.c_str());
 		ptr = TTF_OpenFont(path.c_str(), 12);
 		if (!ptr)
-			throw std::runtime_error( "Couldn't load " + path + "\n");
+			ThrowException( "Couldn't load " + path + "\n");
 	}
 
 	TTFFont::TTFFont(TTFFont&& ref): Font(std::move(ref))

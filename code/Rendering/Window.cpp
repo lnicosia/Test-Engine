@@ -1,4 +1,5 @@
 #include "Window.hpp"
+#include "Debug/Exception.hpp"
 
 #include <stdexcept>
 
@@ -9,7 +10,7 @@ namespace te
 		rType(rType)
 	{
 		if (rType == RendererType::TE_UNKNOWN_RENDERER)
-			throw std::runtime_error("Cannot create Window: renderer is null");
+			ThrowException("Cannot create Window: renderer is null");
 	}
 
 	Window::Window(int w, int h, RendererType rType):
@@ -17,7 +18,7 @@ namespace te
 		rType(rType)
 	{
 		if (rType == RendererType::TE_UNKNOWN_RENDERER)
-			throw std::runtime_error("Cannot create Window: renderer is null");
+			ThrowException("Cannot create Window: renderer is null");
 	}
 
 	Window::~Window()

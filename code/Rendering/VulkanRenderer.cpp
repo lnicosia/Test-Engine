@@ -17,8 +17,9 @@ namespace te
 	VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::TE_VULKAN, wManager)
 	{
 		// TODO
+		uninplemented();
 		if (wManager != WindowManager::TE_SDL)
-			throw std::runtime_error("Only SDL is implemented for now");
+			ThrowException("Only SDL is implemented for now");
 	}
 
 	VulkanRenderer::~VulkanRenderer()
@@ -65,7 +66,7 @@ namespace te
 
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating Vulkan instance\n");
 		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create Vulkan instance!");
+			ThrowException("Failed to create Vulkan instance!");
 		}
 	}
 

@@ -1,6 +1,7 @@
 #include "SDLWindow.hpp"
 #include "SDL.hpp"
 #include "Inputs/SDLEvents.hpp"
+#include "Debug/Exception.hpp"
 
 #include "SDL_vulkan.h"
 
@@ -45,13 +46,13 @@ namespace te
 			log += "software ";
 		}
 		else
-			throw std::runtime_error("SDL can only create Vulkan, OpenGL or software windows");
+			ThrowException("SDL can only create Vulkan, OpenGL or software windows");
 		log += "window";
 		LOG(TE_RENDERING_LOG, TE_LOG, "%s\n", log.c_str());
 
 		windowPtr = SDL_CreateWindow("SDL Window", w, h, flags);
 		if (!windowPtr)
-			throw std::runtime_error("Could not create window");
+			ThrowException("Could not create window");
 
 		events = std::shared_ptr<SDLEvents>(new SDLEvents());
 	}
@@ -64,11 +65,11 @@ namespace te
 	int SDLWindow::getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names)
 	{
 		if (SDL_Vulkan_GetInstanceExtensions(count, nullptr) == SDL_FALSE)
-			throw std::runtime_error("Could not querry Vulkan instance extensions count");
+			ThrowException("Could not querry Vulkan instance extensions count");
 		LOG(TE_RENDERING_LOG, TE_LOG, "SDL requires %d vulkan extensions\n", *count);
 		names.resize(*count);
 		if (SDL_Vulkan_GetInstanceExtensions(count, names.data()) == SDL_FALSE)
-			throw std::runtime_error("Could not querry Vulkan instance extensions names");
+			ThrowException("Could not querry Vulkan instance extensions names");
 		return 0;
 	}
 

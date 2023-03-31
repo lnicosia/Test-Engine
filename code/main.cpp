@@ -15,8 +15,9 @@
 #include "Rendering/GLRenderer.hpp"
 #include "Rendering/D3DRenderer.hpp"
 #include "Rendering/SoftwareRendering/Raycaster.hpp"
+#include "Rendering/WindowManager.hpp"
 
-# include "stb_image.h"
+#include "stb_image.h"
 
 
 int main()

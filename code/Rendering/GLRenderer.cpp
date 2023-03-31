@@ -15,7 +15,7 @@ namespace te
 		// TODO
 		uninplemented();
 		if (wManager != WindowManager::TE_SDL)
-			throw std::runtime_error("Only SDL is implemented for now");
+			ThrowException("Only SDL is implemented for now");
 	}
 
 	GLRenderer::~GLRenderer()

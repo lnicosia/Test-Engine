@@ -2,6 +2,7 @@
 #include "Inputs/SDLEvents.hpp"
 #include "Assets/Fonts/TTFFont.hpp"
 #include "Assets/AssetManager.hpp"
+#include "Debug/Exception.hpp"
 
 namespace te
 {
@@ -17,18 +18,18 @@ namespace te
 		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL renderer\n");
 		SDLRendererPtr = SDL_CreateRenderer(winPtr->getWindow(), nullptr, SDL_RENDERER_SOFTWARE);
 		if (!SDLRendererPtr)
-			throw std::runtime_error("Could not create SDL renderer");
+			ThrowException("Could not create SDL renderer");
 
 		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL texture\n");
 		SDLTexturePtr = SDL_CreateTexture(SDLRendererPtr, SDL_PIXELFORMAT_RGBA8888,
 			SDL_TEXTUREACCESS_STREAMING, w, h);
 		if (!SDLTexturePtr)
-			throw std::runtime_error("Could not create SDL texture");
+			ThrowException("Could not create SDL texture");
 
 		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing pixel array\n");
 		pixels = new uint32_t[window->getWidth() * window->getHeight()];
 		if (!pixels)
-			throw std::runtime_error("Could not allocate pixel array");
+			ThrowException("Could not allocate pixel array");
 
 		AssetManager& assetManager = AssetManager::getInstance();
 		uiFont = assetManager.loadAsset<TTFFont>("../../../../resources/fonts/Alice-Regular.ttf");
@@ -74,7 +75,7 @@ namespace te
 	{
 		std::shared_ptr<TTFFont> ttfFont = dynamic_pointer_cast<TTFFont>(font);
 		if (!ttfFont)
-			throw std::runtime_error("Software renderer is trying to render a " + font->getAssetType()
+			ThrowException("Software renderer is trying to render a " + font->getAssetType()
 				+ " instead of a TTF font");
 
 		SDL_Color color{ 255, 255, 255 };
