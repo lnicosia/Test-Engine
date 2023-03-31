@@ -14,18 +14,18 @@ namespace te
 		w = window->getWidth();
 		h = window->getHeight();
 
-		LOG(TE_RESOURCE_LOG, "Initializing SDL renderer\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL renderer\n");
 		SDLRendererPtr = SDL_CreateRenderer(winPtr->getWindow(), nullptr, SDL_RENDERER_SOFTWARE);
 		if (!SDLRendererPtr)
 			throw std::runtime_error("Could not create SDL renderer");
 
-		LOG(TE_RESOURCE_LOG, "Initializing SDL texture\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL texture\n");
 		SDLTexturePtr = SDL_CreateTexture(SDLRendererPtr, SDL_PIXELFORMAT_RGBA8888,
 			SDL_TEXTUREACCESS_STREAMING, w, h);
 		if (!SDLTexturePtr)
 			throw std::runtime_error("Could not create SDL texture");
 
-		LOG(TE_RESOURCE_LOG, "Initializing pixel array\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing pixel array\n");
 		pixels = new uint32_t[window->getWidth() * window->getHeight()];
 		if (!pixels)
 			throw std::runtime_error("Could not allocate pixel array");
@@ -38,12 +38,12 @@ namespace te
 	SoftwareRenderer::~SoftwareRenderer()
 	{
 
-		LOG(TE_RESOURCE_LOG, "Freeing pixel array\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Freeing pixel array\n");
 		delete[] pixels;
 
-		LOG(TE_RESOURCE_LOG, "Destroying SDL_Texture\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Destroying SDL_Texture\n");
 		SDL_DestroyTexture(SDLTexturePtr);
-		LOG(TE_RESOURCE_LOG, "Destroying SDL_Renderer\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Destroying SDL_Renderer\n");
 		SDL_DestroyRenderer(SDLRendererPtr);
 	}
 

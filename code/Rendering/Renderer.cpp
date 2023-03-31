@@ -21,12 +21,12 @@ namespace te
 	Renderer::~Renderer()
 	{
 		/* Make sure to clear assets before releasing window libraries */
-		LOG(TE_RESOURCE_LOG, "Clearing renderer UI font\n");
+		LOG(TE_RESOURCE_LOG, TE_LOG, "Clearing renderer UI font\n");
 		uiFont.reset();
-		LOG(TE_RESOURCE_LOG, "Freeing all assets\n");
+		LOG(TE_RESOURCE_LOG, TE_LOG, "Freeing all assets\n");
 		AssetManager::getInstance().clear();
 
-		LOG(TE_RESOURCE_LOG, "Releasing Window\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Releasing Window\n");
 		window.reset();
 
 	}

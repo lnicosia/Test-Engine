@@ -13,22 +13,22 @@ namespace te
 	{
 		if (initialized)
 			return;
-		LOG(TE_RESOURCE_LOG, "Initializing SDL\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL\n");
 		if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) != 0) {
 			throw std::runtime_error( "Couldn't initialize SDL : \n" + std::string(SDL_GetError()) );
 		}
 
-		LOG(TE_RESOURCE_LOG, "Initializing SDL_ttf\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL_ttf\n");
 		if (TTF_Init() == -1)
 			throw std::runtime_error( "Couldn't initialize SDL_ttf : \n" + std::string(TTF_GetError()));
 
 		if (std::atexit(Quit) != 0)
 		{
-			LOG(TE_RESOURCE_LOG, "Quitting SDL TTF\n");
+			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL TTF\n");
 			TTF_Quit();
-			LOG(TE_RESOURCE_LOG, "Quitting SDL subsystems\n");
+			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL subsystems\n");
 			SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-			LOG(TE_RESOURCE_LOG, "Quitting SDL\n");
+			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL\n");
 			SDL_Quit();
 			throw std::runtime_error( "Failed to setup SDL cleanup function\n" );
 		}
@@ -51,12 +51,12 @@ namespace te
 	void SDL::Quit( void )
 	{
 		if (initialized) {
-			LOG(TE_RESOURCE_LOG, "Quitting SDL TTF\n");
+			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL TTF\n");
 			TTF_Quit();
 			/* LEAK ?? */
-			LOG(TE_RESOURCE_LOG, "Quitting SDL subsystems\n");
+			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL subsystems\n");
 			SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-			LOG(TE_RESOURCE_LOG, "Quitting SDL\n");
+			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL\n");
 			SDL_Quit();
 			initialized = false;
 		}

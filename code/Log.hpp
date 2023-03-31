@@ -1,6 +1,8 @@
 #ifndef _LOG_HPP_
 # define _LOG_HPP_
 
+#include "ANSI.hpp"
+
 #include <iostream>
 #include <vector>
 
@@ -9,19 +11,44 @@ static std::vector<const char*> catNames =
 	"Log",
 	"General",
 	"Resource",
+	"Rendering API",
 	"Invalid"
 };
 
-// TODO: Not thread safe!!
-// TODO: can be improved -> single fprintf and printf
-// TODO: Either print LogLevel or change color according to it
+static std::vector<const char*> verboseNames =
+{
+	"Fatal",
+	"Error",
+	"Warning",
+	"Display API",
+	"Log",
+	"Verbose",
+	"VeryVerbose"
+};
 
-#define LOG(CATEGORY, ...)	fprintf(Logger::files[CATEGORY], "%s: ", catNames[CATEGORY]); \
-							fprintf(Logger::files[CATEGORY], __VA_ARGS__ ); \
-							fprintf(Logger::files[TE_ALL_LOG], "%s: ", catNames[CATEGORY]); \
-							fprintf(Logger::files[TE_ALL_LOG], __VA_ARGS__ ); \
-							printf("%s: ", catNames[CATEGORY]); printf(__VA_ARGS__);\
+static std::vector<const char*> verboseColors =
+{
+	TE_CONSOLE_BRED TE_CONSOLE_WHITE,
+	TE_CONSOLE_RED,
+	TE_CONSOLE_YELLOW,
+	TE_CONSOLE_DARK_GRAY,
+	TE_CONSOLE_DARK_GRAY,
+	TE_CONSOLE_DARK_GRAY,
+	TE_CONSOLE_DARK_GRAY
+};
 
+// TODO: Don't print verbose level below Display
+// TODO: handle fatal errors
+
+#define LOG(CATEGORY, VERBOSE_LEVEL, format, ...)	\
+	fprintf(Logger::files[CATEGORY], "%s: %s: " format , catNames[CATEGORY], verboseNames[VERBOSE_LEVEL] __VA_OPT__(,) __VA_ARGS__); \
+	\
+	fprintf(Logger::files[TE_ALL_LOG], "%s: %s: " format, catNames[CATEGORY], verboseNames[VERBOSE_LEVEL] __VA_OPT__(,) __VA_ARGS__); \
+	\
+	VERBOSE_LEVEL < TE_LOG ? \
+		(void)printf("%s%s: %s: " format TE_CONSOLE_RESET, verboseColors[VERBOSE_LEVEL], catNames[CATEGORY], verboseNames[VERBOSE_LEVEL] __VA_OPT__(,) __VA_ARGS__) \
+		: (void)0 \
+//if (VERBOSE_LEVEL == TE_FATAL) { throw std::exception(); } else { (void)0; } \
 
 namespace te
 {
@@ -30,6 +57,7 @@ namespace te
 		TE_ALL_LOG,
 		TE_GENERAL_LOG,
 		TE_RESOURCE_LOG,
+		TE_RENDERING_LOG,
 		TE_END_LOG
 	};
 
@@ -45,7 +73,7 @@ namespace te
 	| VeryVerbose     | No                  | No                       |                                                  |
 	*/
 
-	enum class LogLevel
+	enum LogLevel
 	{
 		TE_FATAL,
 		TE_ERROR,

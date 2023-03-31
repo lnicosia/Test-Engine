@@ -3,7 +3,10 @@
 #
 cmake_minimum_required (VERSION 3.10)
 
-project ("Test-Engine")
+project ("Test-Engine"
+	VERSION 0.1.0
+	HOMEPAGE_URL "https://github.com/lnicosia/Test-Engine"
+)
 
 include(FetchContent)
 
@@ -65,7 +68,20 @@ add_executable (${PROJECT_NAME}
 	"Assets/Asset.cpp"
 	"Assets/AssetManager.cpp"
 	"Assets/CheckFileType.hpp"
-	"Assets/CheckFileType.cpp" "Assets/Fonts/TTFFont.hpp" "Assets/Fonts/TTFFont.cpp" "Assets/Textures/SoftwareTexture.hpp" "Assets/Textures/SoftwareTexture.cpp" "Rendering/D3DRenderer.hpp" "Rendering/D3DRenderer.cpp" "Rendering/SDL.hpp" "Rendering/SDL.cpp" "Rendering/RendererType.hpp" "Rendering/WindowManager.hpp" "Log.cpp")
+	"Assets/CheckFileType.cpp"
+	"Assets/Fonts/TTFFont.hpp"
+	"Assets/Fonts/TTFFont.cpp"
+	"Assets/Textures/SoftwareTexture.hpp"
+	"Assets/Textures/SoftwareTexture.cpp"
+	"Rendering/D3DRenderer.hpp"
+	"Rendering/D3DRenderer.cpp"
+	"Rendering/SDL.hpp"
+	"Rendering/SDL.cpp"
+	"Rendering/RendererType.hpp"
+	"Rendering/WindowManager.hpp"
+	"Log.cpp"
+	"ANSI.hpp"
+	"Assert.hpp")
 
 find_package(Vulkan REQUIRED)
 
@@ -84,7 +100,10 @@ target_include_directories(${PROJECT_NAME}
 	PRIVATE "./"
 )
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+#set_property(${PROJECT_NAME} tgt PROPERTY CXX_STANDARD 11)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (WIN32)
 
@@ -111,7 +130,7 @@ endif ()
 
 
 if (MSVC)
-	add_compile_options(/std:c++2a)
+	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor)
 endif(MSVC)
 
 # TODO: Add tests and install targets if needed.

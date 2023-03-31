@@ -13,7 +13,8 @@ namespace te
 		{
 			"Logs/Log.txt",
 			"Logs/GeneralLog.txt",
-			"Logs/ResourcesLog.txt"
+			"Logs/ResourcesLog.txt",
+			"Logs/Rendering.txt"
 		};
 
 		std::filesystem::path folder("Logs");

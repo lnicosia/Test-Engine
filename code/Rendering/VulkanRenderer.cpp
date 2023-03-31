@@ -43,22 +43,19 @@ namespace te
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
-
-		/* List available extensions 
-		   TODO: print or not?
-		*/
 		
-		/*uint32_t availableExtensionCount = 0;
+		uint32_t availableExtensionCount = 0;
 		vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
 		std::vector<VkExtensionProperties> extensions(availableExtensionCount);
 		vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, extensions.data());
 
-		LOG("Avaiable Vulkan extensions:\n");
+		LOG(TE_RENDERING_LOG, TE_VERBOSE, "Avaiable Vulkan extensions:\n");
 		for (auto extension : extensions)
 		{
-			LOG("\t%s\n", extension.extensionName);
-		}*/
+			LOG(TE_RENDERING_LOG, TE_VERBOSE, "\t%s\n", extension.extensionName);
+		}
 
+		LOG(TE_ALL_LOG, TE_FATAL, "Test fatal error\n");
 
 		createInfo.enabledLayerCount = 0;
 		uint32_t neededExtensionCount = 0;
@@ -67,7 +64,7 @@ namespace te
 		createInfo.enabledExtensionCount = neededExtensionCount;
 		createInfo.ppEnabledExtensionNames = extensionNames.data();
 
-		LOG(TE_RESOURCE_LOG, "Creating Vulkan instance\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating Vulkan instance\n");
 		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create Vulkan instance!");
 		}
