@@ -2,9 +2,12 @@
 #include "SDLWindow.hpp"
 #include "Debug/Assert.hpp"
 
+#include <cstring>
+
 namespace te
 {
-	VulkanRenderer::VulkanRenderer(): Renderer(RendererType::TE_VULKAN, WindowManager::TE_SDL)
+	VulkanRenderer::VulkanRenderer(): Renderer(RendererType::TE_VULKAN, WindowManager::TE_SDL),
+		instance()
 	{
 		std::shared_ptr<SDLWindow> winPtr = std::shared_ptr<SDLWindow>(
 			new SDLWindow(1600, 900, RendererType::TE_VULKAN));
@@ -14,7 +17,8 @@ namespace te
 		initVulkan();
 	}
 
-	VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::TE_VULKAN, wManager)
+	VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::TE_VULKAN, wManager),
+		instance()
 	{
 		// TODO
 		uninplemented();
@@ -34,6 +38,9 @@ namespace te
 
 	void VulkanRenderer::createInstance()
 	{
+		if (enableValidationLayers && !checkValidationLayerSupport())
+			ThrowException("Validation layers are not available");
+
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = "Test Engine - Vulkan";
@@ -70,6 +77,33 @@ namespace te
 		}
 	}
 
+	bool VulkanRenderer::checkValidationLayerSupport()
+	{
+		uint32_t layerCount;
+
+		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+		std::vector<VkLayerProperties> availableLayers(layerCount);
+		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+		for (const char* layerName : this->validationLayers)
+		{
+			bool found = false;
+			
+			for (const auto& layerProperty : availableLayers)
+			{
+				if (!strcmp(layerName, layerProperty.layerName))
+				{
+					found = true;
+					LOG(TE_RENDERING_LOG, TE_LOG, "Validation layers found\n");
+					break;
+				}
+			}
+			if (!found)
+				return false;
+		}
+		return true;
+	}
+
 	void VulkanRenderer::render()
 	{
 		while (running == true)
@@ -85,4 +119,5 @@ namespace te
 		// TODO
 		uninplemented();
 	}
+
 }

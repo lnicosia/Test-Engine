@@ -3,6 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.10)
 
+
 project ("Test-Engine"
 	VERSION 0.1.0
 	HOMEPAGE_URL "https://github.com/lnicosia/Test-Engine"
@@ -81,7 +82,9 @@ add_executable (${PROJECT_NAME}
 	"Rendering/WindowManager.hpp"
 	"Debug/Log.cpp"
 	"Debug/ANSI.hpp"
-	"Debug/Assert.hpp" "Debug/Exception.hpp" "Debug/Exception.cpp")
+	"Debug/Assert.hpp"
+	"Debug/Exception.hpp"
+	"Debug/Exception.cpp")
 
 find_package(Vulkan REQUIRED)
 
@@ -99,6 +102,13 @@ target_include_directories(${PROJECT_NAME}
 	PRIVATE "ThirdParty"
 	PRIVATE "./"
 )
+
+if (NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+	add_definitions("-DNDEBUG")
+else()
+endif()
+
+message(STATUS "Config = ${CMAKE_BUILD_TYPE}")
 
 #set_property(${PROJECT_NAME} tgt PROPERTY CXX_STANDARD 11)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
