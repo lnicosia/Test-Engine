@@ -18,10 +18,9 @@ namespace te
 		void renderText(const char* text, std::shared_ptr<Font> font,
 			Point2<int> pos, int size) override;
 	private:
+		/* Vulkan data */
 		VkInstance instance;
-
-		void initVulkan();
-		void createInstance();
+		VkDebugUtilsMessengerEXT debugMessenger;
 
 		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -33,8 +32,29 @@ namespace te
 		const bool enableValidationLayers = true;
 #endif
 
+		void initVulkan();
+		void createInstance();
 		bool checkValidationLayerSupport();
 
+		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+			VkDebugUtilsMessageTypeFlagsEXT messageType,
+			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+			void* pUserData);
+
+		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+		void setupDebugMessenger();
+
+		/* Extension loading functions */
+		VkResult CreateDebugUtilsMessengerEXT(
+			VkInstance instance,
+			const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+			const VkAllocationCallbacks* pAllocator,
+			VkDebugUtilsMessengerEXT* pDebugMessenger);
+		void DestroyDebugUtilsMessengerEXT(
+			VkInstance instance,
+			VkDebugUtilsMessengerEXT debugMessenger,
+			const VkAllocationCallbacks* pAllocator);
 	};
 }
 

@@ -20,7 +20,7 @@ static std::vector<const char*> verboseNames =
 	"Fatal",
 	"Error",
 	"Warning",
-	"Display API",
+	"Display",
 	"Log",
 	"Verbose",
 	"VeryVerbose"

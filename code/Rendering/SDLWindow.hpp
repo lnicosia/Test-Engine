@@ -1,10 +1,11 @@
 #ifndef _SDLWINDOW_HPP_
 # define _SDLWINDOW_HPP_
 
-#include "SDL.h"
-
 #include "Window.hpp"
 #include "Debug/Log.hpp"
+
+#include "SDL.h"
+
 #include <iostream>
 
 namespace te
@@ -20,7 +21,8 @@ namespace te
 		SDL_Window* getWindow() const;
 
 		int	loadVulkan() override;
-		int getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names) override;
+		int getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names,
+			bool enableValidationLayers) override;
 		int loadOpenGL() override;
 
 	private:

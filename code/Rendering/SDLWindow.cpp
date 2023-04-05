@@ -5,6 +5,8 @@
 
 #include "SDL_vulkan.h"
 
+#include "vulkan/vulkan.h"
+
 namespace te
 {
 
@@ -62,7 +64,8 @@ namespace te
 		return 0;
 	}
 
-	int SDLWindow::getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names)
+	int SDLWindow::getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names,
+		bool enableValidationLayers)
 	{
 		if (SDL_Vulkan_GetInstanceExtensions(count, nullptr) == SDL_FALSE)
 			ThrowException("Could not querry Vulkan instance extensions count");
@@ -70,6 +73,11 @@ namespace te
 		names.resize(*count);
 		if (SDL_Vulkan_GetInstanceExtensions(count, names.data()) == SDL_FALSE)
 			ThrowException("Could not querry Vulkan instance extensions names");
+		if (enableValidationLayers)
+		{
+			names.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			(*count)++;
+		}
 		return 0;
 	}
 
