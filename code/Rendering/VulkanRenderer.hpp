@@ -21,6 +21,7 @@ namespace te
 		/* Vulkan data */
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
+		std::vector<VkPhysicalDevice> physicalDevices = { VK_NULL_HANDLE };
 
 		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -35,6 +36,23 @@ namespace te
 		void initVulkan();
 		void createInstance();
 		bool checkValidationLayerSupport();
+		void selectDevices();
+
+		bool isDeviceSuitable(VkPhysicalDevice device);
+
+		struct QueueFamilyIndices
+		{
+			std::optional<uint32_t> graphicsFamily;
+			QueueFamilyIndices() : graphicsFamily() {}
+
+			/**/
+			bool isComplete()
+			{
+				return graphicsFamily.has_value();
+			}
+		};
+
+		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

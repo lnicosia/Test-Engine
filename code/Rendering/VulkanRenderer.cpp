@@ -35,9 +35,12 @@ namespace te
 
 	void VulkanRenderer::initVulkan()
 	{
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating Vulkan instance\n");
 		createInstance();
 		if (enableValidationLayers)
 			setupDebugMessenger();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Selecting physical device\n");
+		selectDevices();
 	}
 
 	void VulkanRenderer::createInstance()
@@ -89,7 +92,6 @@ namespace te
 			createInfo.pNext = nullptr;
 		}
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Creating Vulkan instance\n");
 		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
 			ThrowException("Failed to create Vulkan instance!");
 		}
@@ -98,9 +100,10 @@ namespace te
 	bool VulkanRenderer::checkValidationLayerSupport()
 	{
 		uint32_t layerCount;
+		std::vector<VkLayerProperties> availableLayers;
 
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-		std::vector<VkLayerProperties> availableLayers(layerCount);
+		availableLayers.resize(layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
 		for (const char* layerName : this->validationLayers)
@@ -189,6 +192,84 @@ namespace te
 		{
 			LOG(TE_RENDERING_LOG, TE_ERROR, "Could not load 'vkDestroyDebugUtilsMessengerEXT'\n");
 		}
+	}
+
+	void VulkanRenderer::selectDevices()
+	{
+		uint32_t deviceCount = 0;
+		std::vector<VkPhysicalDevice> devices;
+
+		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+		if (!deviceCount)
+			ThrowException("No GPU found\n");
+
+		devices.resize(deviceCount);
+		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+		for (const VkPhysicalDevice& device : devices)
+		{
+			if (isDeviceSuitable(device))
+			{
+				/* Only selecting the first suitable GPU for now */
+				/* TODO: either give a score to each device and pick the best one
+				or allow use multiple devices */
+				this->physicalDevices[0] = device;
+				break;
+			}
+		}
+
+		if (this->physicalDevices[0] == VK_NULL_HANDLE)
+			ThrowException("No suitable GPU found\n");
+	}
+
+	bool VulkanRenderer::isDeviceSuitable(VkPhysicalDevice device)
+	{
+		VkPhysicalDeviceProperties deviceProperties;
+		VkPhysicalDeviceFeatures deviceFeatures;
+
+		vkGetPhysicalDeviceProperties(device, &deviceProperties);
+		vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+		/* TODO: Check for real wanted features and properties */
+		
+
+		QueueFamilyIndices indices = findQueueFamilies(device);
+
+		if (indices.isComplete())
+		{
+			LOG(TE_RENDERING_LOG, TE_LOG, "Selecting device '%s'\n",
+				deviceProperties.deviceName);
+			return true;
+		}
+		return false;
+	}
+
+	VulkanRenderer::QueueFamilyIndices VulkanRenderer::findQueueFamilies(VkPhysicalDevice device)
+	{
+		QueueFamilyIndices indices;
+		uint32_t queueFamilyCount = 0;
+		std::vector<VkQueueFamilyProperties> queueFamilies;
+
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+		queueFamilies.resize(queueFamilyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+		int i = 0;
+		for (const auto& queueFamily : queueFamilies)
+		{
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+				indices.graphicsFamily = i;
+
+			/* Add other wanted families here */
+
+			if (indices.isComplete())
+				break;
+
+			i++;
+		}
+
+		return indices;
 	}
 
 	void VulkanRenderer::render()
