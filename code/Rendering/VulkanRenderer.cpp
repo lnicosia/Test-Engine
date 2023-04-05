@@ -28,6 +28,8 @@ namespace te
 
 	VulkanRenderer::~VulkanRenderer()
 	{
+		/* TODO: handle multiple logical devices */
+		vkDestroyDevice(devices[0], nullptr);
 		if (enableValidationLayers)
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 		vkDestroyInstance(instance, nullptr);
@@ -40,7 +42,9 @@ namespace te
 		if (enableValidationLayers)
 			setupDebugMessenger();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Selecting physical device\n");
-		selectDevices();
+		selectPhysicalDevices();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating logical device\n");
+		createLogicalDevices();
 	}
 
 	void VulkanRenderer::createInstance()
@@ -92,9 +96,8 @@ namespace te
 			createInfo.pNext = nullptr;
 		}
 
-		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
 			ThrowException("Failed to create Vulkan instance!");
-		}
 	}
 
 	bool VulkanRenderer::checkValidationLayerSupport()
@@ -194,7 +197,7 @@ namespace te
 		}
 	}
 
-	void VulkanRenderer::selectDevices()
+	void VulkanRenderer::selectPhysicalDevices()
 	{
 		uint32_t deviceCount = 0;
 		std::vector<VkPhysicalDevice> devices;
@@ -270,6 +273,41 @@ namespace te
 		}
 
 		return indices;
+	}
+
+	void VulkanRenderer::createLogicalDevices()
+	{
+		/* TODO: handle multiple physical devices */
+		QueueFamilyIndices indices = findQueueFamilies(physicalDevices[0]);
+
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+		queueCreateInfo.queueCount = 1;
+		float queuePriority = 1.0f;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+
+		VkPhysicalDeviceFeatures deviceFeatures{};
+
+		VkDeviceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.pQueueCreateInfos = &queueCreateInfo;
+		createInfo.queueCreateInfoCount = 1;
+		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.enabledExtensionCount = 0;
+
+		if (enableValidationLayers)
+		{
+			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			createInfo.ppEnabledLayerNames = validationLayers.data();
+		}
+		else
+			createInfo.enabledLayerCount = 0;
+
+		if (vkCreateDevice(physicalDevices[0], &createInfo, nullptr, &devices[0]) != VK_SUCCESS)
+			ThrowException("Failed to create logical device!");
+
+		vkGetDeviceQueue(devices[0], indices.graphicsFamily.value(), 0, &graphicsQueue);
 	}
 
 	void VulkanRenderer::render()

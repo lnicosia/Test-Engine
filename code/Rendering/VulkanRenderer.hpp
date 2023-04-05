@@ -22,6 +22,8 @@ namespace te
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
 		std::vector<VkPhysicalDevice> physicalDevices = { VK_NULL_HANDLE };
+		std::vector<VkDevice> devices = { VK_NULL_HANDLE };
+		VkQueue graphicsQueue;
 
 		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -36,7 +38,8 @@ namespace te
 		void initVulkan();
 		void createInstance();
 		bool checkValidationLayerSupport();
-		void selectDevices();
+		void selectPhysicalDevices();
+		void createLogicalDevices();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
 
