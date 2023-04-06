@@ -6,9 +6,9 @@ namespace te
 		SoftwareRenderer* renderer, Point2<int> minClamp, Point2<int> maxClamp)
 	{
 		Point2<int> p;
-		double rad2;
+		double squareRad;
 
-		rad2 = radius * radius;
+		squareRad = radius * radius;
 		for (int y = pos.y - radius; y < pos.y + radius; y++)
 		{
 			for (int x = pos.x - radius; x < pos.x + radius; x++)
@@ -17,7 +17,7 @@ namespace te
 				p.y = y;
 				double xDiff = pos.x - x;
 				double yDiff = pos.y - y;
-				if (xDiff * xDiff + yDiff * yDiff < rad2 &&
+				if (xDiff * xDiff + yDiff * yDiff < squareRad &&
 					x >= minClamp.x && x < maxClamp.x
 					&& y >= minClamp.y && y < maxClamp.y)
 					renderer->pixels[x + y * renderer->w] = color;
@@ -28,9 +28,9 @@ namespace te
 	void drawCircle(Point2<int> pos, double radius, uint32_t color, SoftwareRenderer* renderer)
 	{
 		Point2<int> p;
-		double rad2;
+		double squareRad;
 
-		rad2 = radius * radius;
+		squareRad = radius * radius;
 		for (int y = pos.y - radius; y < pos.y + radius; y++)
 		{
 			for (int x = pos.x - radius; x < pos.x + radius; x++)
@@ -39,7 +39,7 @@ namespace te
 				p.y = y;
 				double xDiff = pos.x - x;
 				double yDiff = pos.y - y;
-				if (xDiff * xDiff + yDiff * yDiff < rad2 &&
+				if (xDiff * xDiff + yDiff * yDiff < squareRad &&
 					x >= 0 && x < renderer->w && y >= 0 && y < renderer->h)
 					renderer->pixels[x + y * renderer->w] = color;
 			}

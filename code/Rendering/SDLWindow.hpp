@@ -20,9 +20,13 @@ namespace te
 		~SDLWindow();
 		SDL_Window* getWindow() const;
 
+		/* Vulkan specifics */
 		int	loadVulkan() override;
 		int getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names,
 			bool enableValidationLayers) override;
+		int createVulkanSurface(VkInstance instance, VkSurfaceKHR* surface) override;
+
+		/* OpenGL specifics */
 		int loadOpenGL() override;
 
 	private:

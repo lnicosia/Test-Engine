@@ -1,8 +1,7 @@
 #include "CheckFileType.hpp"
+#include "Platform.hpp"
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-# define TE_WINDOWS
-#else
+#ifndef TE_WINDOWS
 # include <unistd.h>
 # include <sys/stat.h>
 #endif

@@ -5,6 +5,13 @@
 #include "RendererType.hpp"
 #include "Inputs/Events.hpp"
 
+#include "Platform.hpp"
+#ifdef TE_WINDOWS
+# define VK_USE_PLATFORM_WIN32_KHR
+#endif
+
+#include "Vulkan/vulkan.h"
+
 namespace te
 {
 	class Window
@@ -20,9 +27,13 @@ namespace te
 		int	handleEvents();
 		std::shared_ptr<Events> events;
 
+		/* Vulkan specifics */
 		virtual int	loadVulkan() = 0;
 		virtual int getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names,
 			bool enableValidationLayers) = 0;
+		virtual int createVulkanSurface(VkInstance instance, VkSurfaceKHR* surface) = 0;
+
+		/* OpenGL specifics */
 		virtual int loadOpenGL() = 0;
 
 	private:

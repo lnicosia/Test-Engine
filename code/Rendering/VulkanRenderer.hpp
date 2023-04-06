@@ -21,9 +21,11 @@ namespace te
 		/* Vulkan data */
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
+		VkSurfaceKHR surface = VK_NULL_HANDLE;
 		std::vector<VkPhysicalDevice> physicalDevices = { VK_NULL_HANDLE };
 		std::vector<VkDevice> devices = { VK_NULL_HANDLE };
 		VkQueue graphicsQueue;
+		VkQueue presentQueue;
 
 		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -46,12 +48,12 @@ namespace te
 		struct QueueFamilyIndices
 		{
 			std::optional<uint32_t> graphicsFamily;
+			std::optional<uint32_t> presentFamily;
 			QueueFamilyIndices() : graphicsFamily() {}
 
-			/**/
 			bool isComplete()
 			{
-				return graphicsFamily.has_value();
+				return graphicsFamily.has_value() && presentFamily.has_value();
 			}
 		};
 

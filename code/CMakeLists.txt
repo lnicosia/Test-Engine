@@ -84,7 +84,7 @@ add_executable (${PROJECT_NAME}
 	"Debug/ANSI.hpp"
 	"Debug/Assert.hpp"
 	"Debug/Exception.hpp"
-	"Debug/Exception.cpp"  )
+	"Debug/Exception.cpp"   "Platform.hpp")
 
 find_package(Vulkan REQUIRED)
 
