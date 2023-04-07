@@ -84,7 +84,8 @@ add_executable (${PROJECT_NAME}
 	"Debug/ANSI.hpp"
 	"Debug/Assert.hpp"
 	"Debug/Exception.hpp"
-	"Debug/Exception.cpp"   "Platform.hpp")
+	"Debug/Exception.cpp"
+	"Platform.hpp")
 
 find_package(Vulkan REQUIRED)
 
@@ -127,13 +128,13 @@ if (WIN32)
 			${CMAKE_CURRENT_BINARY_DIR})
 
 	target_link_libraries(${PROJECT_NAME}
-		"${CMAKE_CURRENT_SOURCE_DIR}/../binaries/ThirdParty/vulkan/vulkan-1.lib"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/vulkan/vulkan-1.lib"
 	)
 
 elseif (UNIX)
 
 	target_link_libraries(${PROJECT_NAME}
-		"${CMAKE_CURRENT_SOURCE_DIR}/../binaries/ThirdParty/vulkan/libvulkan.so.1"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/vulkan/libvulkan.so.1"
 	)
 
 endif ()
