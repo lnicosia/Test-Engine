@@ -46,9 +46,9 @@ namespace te
 		gameState(PLAYING)
 	{
 #ifdef __unix__
-		std::string basePath = "../../../resources/";
+		std::string basePath = "../../../Resources/";
 #else
-		std::string basePath = "../../../../resources/";
+		std::string basePath = "../../../../Resources/";
 #endif
 
 		std::string texturesBasePath = basePath + "textures/wolfenstein/";
