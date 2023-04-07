@@ -22,13 +22,13 @@
 
 int main()
 {
-	te::SoftwareRenderer renderer;
+	/*te::SoftwareRenderer renderer;
 	te::Raycaster	raycaster(&renderer);
-	raycaster.render();
+	raycaster.render();*/
 	try
 	{
-		//te::VulkanRenderer renderer;
-		//renderer.render();
+		te::VulkanRenderer renderer;
+		renderer.render();
 	}
 	catch (std::runtime_error& e)
 	{
