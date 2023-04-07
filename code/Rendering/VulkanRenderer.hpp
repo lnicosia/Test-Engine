@@ -48,6 +48,7 @@ namespace te
 		std::vector<QueueFamilyIndices> queueFamilies;
 		VkSwapchainKHR swapChain;
 		std::vector<VkImage> swapChainImages;
+		std::vector<VkImageView> swapChainImageViews;
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 
@@ -73,6 +74,7 @@ namespace te
 		void selectPhysicalDevices();
 		void createLogicalDevices();
 		void createSwapChain();
+		void createImageViews();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
