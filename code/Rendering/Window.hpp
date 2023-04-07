@@ -36,6 +36,9 @@ namespace te
 		/* OpenGL specifics */
 		virtual int loadOpenGL() = 0;
 
+		/* Rendering API independant */
+		virtual int getFrameSize(int* w, int* h) = 0;
+
 	private:
 		bool	resizable;
 		double	ratio;

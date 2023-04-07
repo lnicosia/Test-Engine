@@ -29,6 +29,9 @@ namespace te
 		/* OpenGL specifics */
 		int loadOpenGL() override;
 
+		/* Rendering API independant */
+		int getFrameSize(int* w, int* h) override;
+
 	private:
 
 		SDL_Window* windowPtr;

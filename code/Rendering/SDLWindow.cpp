@@ -74,10 +74,14 @@ namespace te
 	{
 		if (SDL_Vulkan_GetInstanceExtensions(count, nullptr) == SDL_FALSE)
 			ThrowException("Could not querry Vulkan instance extensions count");
-		LOG(TE_RENDERING_LOG, TE_LOG, "SDL requires %d vulkan extensions\n", *count);
+		LOG(TE_RENDERING_LOG, TE_LOG, "SDL requires %d vulkan extensions:\n", *count);
 		names.resize(*count);
 		if (SDL_Vulkan_GetInstanceExtensions(count, names.data()) == SDL_FALSE)
 			ThrowException("Could not querry Vulkan instance extensions names");
+		for (const char* name : names)
+		{
+			LOG(TE_RENDERING_LOG, TE_LOG, "\t'%s'\n", name);
+		}
 		if (enableValidationLayers)
 		{
 			names.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -113,6 +117,12 @@ namespace te
 			ThrowException("Could not create SDL Vulkan surface:" + std::string(SDL_GetError()));
 		}
 
+		return 0;
+	}
+
+	int SDLWindow::getFrameSize(int* w, int* h)
+	{
+		SDL_GetWindowSizeInPixels(this->windowPtr, w, h);
 		return 0;
 	}
 
