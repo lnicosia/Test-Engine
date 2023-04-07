@@ -32,7 +32,7 @@ namespace te
 			ThrowException("Could not allocate pixel array");
 
 		AssetManager& assetManager = AssetManager::getInstance();
-		uiFont = assetManager.loadAsset<TTFFont>("../../../../Resources/fonts/Alice-Regular.ttf");
+		uiFont = assetManager.loadAsset<TTFFont>("../../../Resources/Fonts/Alice-Regular.ttf");
 		
 	}
 

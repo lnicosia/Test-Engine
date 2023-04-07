@@ -46,12 +46,12 @@ namespace te
 		gameState(PLAYING)
 	{
 #ifdef __unix__
-		std::string basePath = "../../../Resources/";
+		std::string basePath = "../../Resources/";
 #else
-		std::string basePath = "../../../../Resources/";
+		std::string basePath = "../../../Resources/";
 #endif
 
-		std::string texturesBasePath = basePath + "textures/wolfenstein/";
+		std::string texturesBasePath = basePath + "Textures/Wolfenstein/";
 
 		AssetManager& assetManager = AssetManager::getInstance();
 
