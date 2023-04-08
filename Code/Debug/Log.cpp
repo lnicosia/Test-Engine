@@ -38,6 +38,8 @@ namespace te
 			ThrowException( "Failed to setup SDL cleanup function\n" );
 		}
 
+		findRootDirPath();
+
 		initialized = true;
 	}
 
@@ -51,6 +53,45 @@ namespace te
 		}
 	}
 
+	void Logger::findRootDirPath()
+	{
+		std::filesystem::path curr(std::filesystem::current_path());
+		
+		bool found = false;
+		bool binariesFound = false;
+		bool shadersFound = false;
+		bool resourcesFound = false;
+		while (!found)
+		{
+			binariesFound = false;
+			shadersFound = false;
+			resourcesFound = false;
+			for (const auto& it : std::filesystem::directory_iterator(curr))
+			{
+				if (it.path().filename() == "Binaries")
+					binariesFound = true;
+				else if (it.path().filename() == "Shaders")
+					shadersFound = true;
+				else if (it.path().filename() == "Resources")
+					resourcesFound = true;
+			}
+			found = binariesFound && shadersFound && resourcesFound;
+			if (!curr.has_relative_path() || found)
+				break;
+			curr = curr.parent_path();
+		}
+		if (!found)
+		{
+			LOG(TE_RESOURCE_LOG, TE_WARNING, "Could not found project root directory\n");
+		}
+		else
+		{
+			LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Project root directory = %s\n", curr.string().c_str());
+			ROOT_DIR_PATH = curr.string() + (char)std::filesystem::path::preferred_separator;
+		}
+	}
+
 	bool Logger::initialized = false;
 	std::vector<FILE*> Logger::files;
+	std::string Logger::ROOT_DIR_PATH;
 }

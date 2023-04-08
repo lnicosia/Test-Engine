@@ -1,5 +1,6 @@
 #include "CheckFileType.hpp"
 #include "Platform.hpp"
+#include "Debug/Log.hpp"
 
 #ifndef TE_WINDOWS
 # include <unistd.h>
@@ -19,12 +20,12 @@ namespace te
 	{
 		if (!std::filesystem::exists(path))
 		{
-			std::cerr << std::endl << "te: " << path << " does not exist" << std::endl;
+			LOG(TE_RESOURCE_LOG, TE_ERROR, "\"%s\" does not exist\n", path.string().c_str());
 			return false;
 		}
 		if (!std::filesystem::is_regular_file(path))
 		{
-			std::cerr << std::endl << "te: " << path << " is not a regular file" << std::endl;
+			LOG(TE_RESOURCE_LOG, TE_ERROR, "\"%s\" is not a regular file\n", path.string().c_str());
 			return false;
 		}
 		return true;

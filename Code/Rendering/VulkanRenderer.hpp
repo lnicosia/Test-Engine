@@ -75,6 +75,7 @@ namespace te
 		void createLogicalDevices();
 		void createSwapChain();
 		void createImageViews();
+		void createGraphicsPipeline();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
@@ -98,6 +99,10 @@ namespace te
 
 		/* Swap chain extent */
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+
+		/* Shaders */
+		/* The type is char because of std::istream::read() which needs a char* pointer */
+		VkShaderModule createShaderModule(const std::vector<char>& code);
 
 		/* Extension loading functions */
 		VkResult CreateDebugUtilsMessengerEXT(

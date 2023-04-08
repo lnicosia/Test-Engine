@@ -4,6 +4,8 @@
 #include "SDLWindow.hpp"
 #include "Debug/Assert.hpp"
 #include "Platform.hpp"
+#include "Shaders/Shader.hpp"
+#include "Assets/CheckFileType.hpp"
 
 #ifdef TE_WINDOWS
 # define VK_USE_PLATFORM_WIN32_KHR
@@ -33,7 +35,7 @@ namespace te
 		// TODO
 		uninplemented();
 		if (wManager != WindowManager::TE_SDL)
-			ThrowException("Only SDL is implemented for now");
+			ThrowException("Only SDL is implemented for now\n");
 	}
 
 	VulkanRenderer::~VulkanRenderer()
@@ -65,6 +67,8 @@ namespace te
 		createSwapChain();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating image views\n");
 		createImageViews();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating graphics pipeline\n");
+		createGraphicsPipeline();
 	}
 
 	void VulkanRenderer::createInstance()
@@ -117,7 +121,7 @@ namespace te
 		}
 
 		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
-			ThrowException("Failed to create Vulkan instance!");
+			ThrowException("Failed to create Vulkan instance!\n");
 	}
 
 	bool VulkanRenderer::checkValidationLayerSupport()
@@ -364,7 +368,7 @@ namespace te
 			createInfo.enabledLayerCount = 0;
 
 		if (vkCreateDevice(physicalDevices[0], &createInfo, nullptr, &devices[0]) != VK_SUCCESS)
-			ThrowException("Failed to create logical device!");
+			ThrowException("Failed to create logical device!\n");
 
 		vkGetDeviceQueue(devices[0], queueFamilies[0].graphicsFamily.value(), 0, &graphicsQueue);
 		vkGetDeviceQueue(devices[0], queueFamilies[0].presentFamily.value(), 0, &presentQueue);
@@ -486,7 +490,7 @@ namespace te
 		}
 
 		if (vkCreateSwapchainKHR(devices[0], &createInfo, nullptr, &swapChain) != VK_SUCCESS)
-			ThrowException("Failed to create swap chain!");
+			ThrowException("Failed to create swap chain!\n");
 
 		vkGetSwapchainImagesKHR(devices[0], swapChain, &imageCount, nullptr);
 		swapChainImages.resize(imageCount);
@@ -515,8 +519,55 @@ namespace te
 			createInfo.subresourceRange.layerCount = 1;
 
 			if (vkCreateImageView(devices[0], &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
-				ThrowException("Failed to create image view " + i);
+				ThrowException("Failed to create image view " + std::to_string(i) + "\n");
 		}
+	}
+
+	void VulkanRenderer::createGraphicsPipeline()
+	{
+		Shader vertex(Logger::ROOT_DIR_PATH + "Shaders/GLSL/triangle.vert.spv");
+		Shader fragment(Logger::ROOT_DIR_PATH + "Shaders/GLSL/triangle.frag.spv");
+
+		VkShaderModule vertShaderModule = createShaderModule(vertex.buff);
+		VkShaderModule fragShaderModule = createShaderModule(fragment.buff);
+
+		VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+		vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+		vertShaderStageInfo.module = vertShaderModule;
+		vertShaderStageInfo.pName = "main";
+
+		VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+		fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		fragShaderStageInfo.module = fragShaderModule;
+		fragShaderStageInfo.pName = "main";
+
+		VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+
+		if (fragShaderModule != VK_NULL_HANDLE)
+			vkDestroyShaderModule(devices[0], fragShaderModule, nullptr);
+		if (vertShaderModule != VK_NULL_HANDLE)
+			vkDestroyShaderModule(devices[0], vertShaderModule, nullptr);
+	}
+
+	VkShaderModule VulkanRenderer::createShaderModule(const std::vector<char>& code)
+	{
+		if (code.size() == 0 || !code.data())
+			return VkShaderModule{};
+
+		VkShaderModuleCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		createInfo.codeSize = code.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+		VkShaderModule shaderModule{};
+		if (vkCreateShaderModule(devices[0], &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+		{
+			LOG(TE_RENDERING_LOG, TE_ERROR, "Failed to create shader module\n");
+		}
+
+		return shaderModule;
 	}
 
 	void VulkanRenderer::render()

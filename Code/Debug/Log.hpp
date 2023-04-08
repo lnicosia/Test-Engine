@@ -51,6 +51,7 @@ static std::vector<const char*> verboseColors =
 
 namespace te
 {
+
 	enum LogCategory
 	{
 		TE_ALL_LOG,
@@ -90,10 +91,13 @@ namespace te
 		static void Quit();
 
 		static std::vector<FILE*> files;
+		static std::string ROOT_DIR_PATH;
 
 	private:
 		Logger();
 		~Logger();
+
+		static void findRootDirPath();
 
 		static bool initialized;
 
