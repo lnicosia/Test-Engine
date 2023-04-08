@@ -51,6 +51,9 @@ namespace te
 		std::vector<VkImageView> swapChainImageViews;
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
+		VkRenderPass renderPass;
+		VkPipelineLayout pipelineLayout;
+		VkPipeline graphicsPipeline;
 
 		const std::vector<const char*> validationLayers =
 		{
@@ -75,6 +78,7 @@ namespace te
 		void createLogicalDevices();
 		void createSwapChain();
 		void createImageViews();
+		void createRenderPass();
 		void createGraphicsPipeline();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
