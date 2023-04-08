@@ -54,6 +54,7 @@ namespace te
 		VkRenderPass renderPass;
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
+		std::vector<VkFramebuffer> framebuffers;
 
 		const std::vector<const char*> validationLayers =
 		{
@@ -80,6 +81,7 @@ namespace te
 		void createImageViews();
 		void createRenderPass();
 		void createGraphicsPipeline();
+		void createFramebuffers();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);

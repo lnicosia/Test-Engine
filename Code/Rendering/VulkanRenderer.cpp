@@ -41,6 +41,8 @@ namespace te
 	VulkanRenderer::~VulkanRenderer()
 	{
 		/* TODO: handle multiple logical devices */
+		for (auto framebuffer : framebuffers)
+			vkDestroyFramebuffer(devices[0], framebuffer, nullptr);
 		vkDestroyPipeline(devices[0], graphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(devices[0], pipelineLayout, nullptr);
 		vkDestroyRenderPass(devices[0], renderPass, nullptr);
@@ -74,6 +76,8 @@ namespace te
 		createRenderPass();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating graphics pipeline\n");
 		createGraphicsPipeline();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating frame buffers\n");
+		createFramebuffers();
 	}
 
 	void VulkanRenderer::createInstance()
@@ -719,6 +723,31 @@ namespace te
 
 		if (vkCreateRenderPass(devices[0], &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
 			ThrowException("Failed to create render pass!\n");
+	}
+
+	void VulkanRenderer::createFramebuffers()
+	{
+		framebuffers.resize(swapChainImageViews.size());
+
+		for (size_t i = 0; i < swapChainImageViews.size(); i++)
+		{
+			VkImageView attachments[] =
+			{
+				swapChainImageViews[i]
+			};
+
+			VkFramebufferCreateInfo framebufferInfo{};
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = renderPass;
+			framebufferInfo.attachmentCount = 1;
+			framebufferInfo.pAttachments = attachments;
+			framebufferInfo.width = swapChainExtent.width;
+			framebufferInfo.height = swapChainExtent.height;
+			framebufferInfo.layers = 1;
+
+			if (vkCreateFramebuffer(devices[0], &framebufferInfo, nullptr, &framebuffers[i]) != VK_SUCCESS)
+				ThrowException("Failed to create framebuffer!");
+		}
 	}
 
 	void VulkanRenderer::render()
