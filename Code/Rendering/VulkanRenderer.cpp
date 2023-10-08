@@ -41,6 +41,10 @@ namespace te
 	VulkanRenderer::~VulkanRenderer()
 	{
 		/* TODO: handle multiple logical devices */
+		vkDestroySemaphore(devices[0], imageAvailableSemaphore, nullptr);
+		vkDestroySemaphore(devices[0], renderFinishedSemaphore, nullptr);
+		vkDestroyFence(devices[0], inFlightFence, nullptr);
+		vkDestroyCommandPool(devices[0], commandPool, nullptr);
 		for (auto framebuffer : framebuffers)
 			vkDestroyFramebuffer(devices[0], framebuffer, nullptr);
 		vkDestroyPipeline(devices[0], graphicsPipeline, nullptr);
@@ -78,6 +82,12 @@ namespace te
 		createGraphicsPipeline();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating frame buffers\n");
 		createFramebuffers();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating command pools\n");
+		createCommandPool();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating command buffer\n");
+		createCommandBuffer();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating synchronization objects\n");
+		createSyncObjects();
 	}
 
 	void VulkanRenderer::createInstance()
@@ -140,14 +150,17 @@ namespace te
 
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 		availableLayers.resize(layerCount);
+		LOG(TE_RENDERING_LOG, TE_DISPLAY, "%u available layers\n", layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
 		for (const char* layerName : this->validationLayers)
 		{
 			bool found = false;
 			
+			LOG(TE_RENDERING_LOG, TE_DISPLAY, "Searching for layer %s\n", layerName);
 			for (const auto& layerProperty : availableLayers)
 			{
+				LOG(TE_RENDERING_LOG, TE_DISPLAY, "Searching for property %s\n", layerProperty.layerName);
 				if (!strcmp(layerName, layerProperty.layerName))
 				{
 					found = true;
@@ -714,12 +727,22 @@ namespace te
 		subpass.colorAttachmentCount = 1;
 		subpass.pColorAttachments = &colorAttachmentRef;
 
+		VkSubpassDependency dependency{};
+		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependency.dstSubpass = 0;
+		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependency.srcAccessMask = 0;
+		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
 		VkRenderPassCreateInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassInfo.attachmentCount = 1;
 		renderPassInfo.pAttachments = &colorAttachment;
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = &subpass;
+		renderPassInfo.dependencyCount = 1;
+		renderPassInfo.pDependencies = &dependency;
 
 		if (vkCreateRenderPass(devices[0], &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
 			ThrowException("Failed to create render pass!\n");
@@ -746,8 +769,134 @@ namespace te
 			framebufferInfo.layers = 1;
 
 			if (vkCreateFramebuffer(devices[0], &framebufferInfo, nullptr, &framebuffers[i]) != VK_SUCCESS)
-				ThrowException("Failed to create framebuffer!");
+				ThrowException("Failed to create framebuffer!\n");
 		}
+	}
+
+	void VulkanRenderer::createCommandPool()
+	{
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = queueFamilies[0].graphicsFamily.value();
+		if (vkCreateCommandPool(devices[0], &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
+			ThrowException("Failed to create command pool!\n");
+	}
+
+	void VulkanRenderer::createCommandBuffer()
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = 1;
+
+		if (vkAllocateCommandBuffers(devices[0], &allocInfo, &commandBuffer) != VK_SUCCESS)
+			ThrowException("Failed to create command buffer!\n");
+	}
+
+	void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+	{
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = 0; // Optional
+		beginInfo.pInheritanceInfo = nullptr; // Optional
+
+		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+			ThrowException("Failed to begin recording command buffer!\n");
+
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = renderPass;
+		renderPassInfo.framebuffer = framebuffers[imageIndex];
+
+		renderPassInfo.renderArea.offset = {0, 0};
+		renderPassInfo.renderArea.extent = swapChainExtent;
+
+		VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+		renderPassInfo.clearValueCount = 1;
+		renderPassInfo.pClearValues = &clearColor;
+
+		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(swapChainExtent.width);
+		viewport.height = static_cast<float>(swapChainExtent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor{};
+		scissor.offset = {0, 0};
+		scissor.extent = swapChainExtent;
+		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+		vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+		vkCmdEndRenderPass(commandBuffer);
+
+		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+			ThrowException("Failed to end command buffer!\n");
+	}
+
+	void VulkanRenderer::createSyncObjects()
+	{
+		VkSemaphoreCreateInfo semaphoreInfo{};
+		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		VkFenceCreateInfo fenceInfo{};
+		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		if (vkCreateSemaphore(devices[0], &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+			vkCreateSemaphore(devices[0], &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
+			vkCreateFence(devices[0], &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
+			ThrowException("Failed to create semaphores!\n");
+	}
+
+	void VulkanRenderer::drawFrame()
+	{
+		vkWaitForFences(devices[0], 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(devices[0], 1, &inFlightFence);
+
+		uint32_t imageIndex;
+		vkAcquireNextImageKHR(devices[0], swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	
+		vkResetCommandBuffer(commandBuffer, 0);
+		recordCommandBuffer(commandBuffer, imageIndex);
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { imageAvailableSemaphore };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandBuffer;
+
+		VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
+			ThrowException("Failed to submit draw command\n");
+
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+
+		VkSwapchainKHR swapChains[] = {swapChain};
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &imageIndex;
+
+		vkQueuePresentKHR(presentQueue, &presentInfo);
 	}
 
 	void VulkanRenderer::render()
@@ -756,7 +905,10 @@ namespace te
 		{
 			if (window->handleEvents() == 1)
 				running = false;
+
+			drawFrame();
 		}
+		vkDeviceWaitIdle(devices[0]);
 		// TODO
 	}
 

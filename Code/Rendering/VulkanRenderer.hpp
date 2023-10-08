@@ -55,6 +55,8 @@ namespace te
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
 		std::vector<VkFramebuffer> framebuffers;
+		VkCommandPool commandPool;
+		VkCommandBuffer commandBuffer;
 
 		const std::vector<const char*> validationLayers =
 		{
@@ -72,6 +74,10 @@ namespace te
 		const bool enableValidationLayers = true;
 #endif
 
+		VkSemaphore imageAvailableSemaphore;
+		VkSemaphore renderFinishedSemaphore;
+		VkFence inFlightFence;
+
 		void initVulkan();
 		void createInstance();
 		bool checkValidationLayerSupport();
@@ -82,6 +88,11 @@ namespace te
 		void createRenderPass();
 		void createGraphicsPipeline();
 		void createFramebuffers();
+		void createCommandPool();
+		void createCommandBuffer();
+		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		void createSyncObjects();
+		void drawFrame();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);

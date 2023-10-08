@@ -128,13 +128,13 @@ if (WIN32)
 			${CMAKE_CURRENT_BINARY_DIR})
 
 	target_link_libraries(${PROJECT_NAME}
-		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/vulkan/vulkan-1.lib"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/Lib/vulkan-1.lib"
 	)
 
 elseif (UNIX)
 
 	target_link_libraries(${PROJECT_NAME}
-		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/vulkan/libvulkan.so.1"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/libvulkan.so.1"
 	)
 
 endif ()
