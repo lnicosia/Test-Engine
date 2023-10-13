@@ -87,6 +87,9 @@ add_executable (${PROJECT_NAME}
 	"Debug/Exception.cpp"
 	"Platform.hpp" "Rendering/Shaders/Shader.hpp" "Rendering/Shaders/Shader.cpp")
 
+
+set(Vulkan_LIBRARY ../../Binaries/ThirdParty/vulkan)	
+set(Vulkan_INCLUDE_DIR ../../Code/ThirdParty/vulkan)	
 find_package(Vulkan REQUIRED)
 
 target_link_directories(${PROJECT_NAME}
@@ -104,31 +107,30 @@ target_include_directories(${PROJECT_NAME}
 	PRIVATE "./"
 )
 
-if (NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
-	add_definitions("-DNDEBUG")
-else()
-endif()
-
-message(STATUS "Config = ${CMAKE_BUILD_TYPE}")
+target_compile_definitions(${PROJECT_NAME}
+	PUBLIC $<$<CONFIG:Release>:-DNDEBUG>
+)
 
 #set_property(${PROJECT_NAME} tgt PROPERTY CXX_STANDARD 11)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E echo 
+			"Config = $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>")
 if (WIN32)
 
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/SDL3.dll"
-			${CMAKE_CURRENT_BINARY_DIR})
+			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3.dll"
+			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/SDL3_ttf.dll"
-			${CMAKE_CURRENT_BINARY_DIR})
+			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3_ttf.dll"
+			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
 
 	target_link_libraries(${PROJECT_NAME}
-		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/Lib/vulkan-1.lib"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/vulkan-1.lib"
 	)
 
 elseif (UNIX)
