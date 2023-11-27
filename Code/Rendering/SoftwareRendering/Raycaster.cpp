@@ -45,16 +45,11 @@ namespace te
 		mapMaxX(24), mapMaxY(24), mapScale(20.0),
 		gameState(PLAYING)
 	{
-#ifdef __unix__
-		std::string basePath = "../../Resources/";
-#else
-		std::string basePath = "../../../Resources/";
-#endif
-
-		std::string texturesBasePath = basePath + "Textures/Wolfenstein/";
+		std::string texturesBasePath = Logger::ROOT_DIR_PATH + "Resources/Textures/Wolfenstein/";
 
 		AssetManager& assetManager = AssetManager::getInstance();
 
+		;
 		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "bluestone.png"));
 		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "colorstone.png"));
 		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "eagle.png"));
@@ -198,7 +193,11 @@ namespace te
 		uint8_t R, G, B;
 		double distance;
 		std::shared_ptr<SoftwareTexture> ceilingTex = textures[7];
+		if (!ceilingTex)
+			return;
 		const unsigned char* img = ceilingTex->getImg();
+		if (!img)
+			return ;
 		for (int y = 0; y < renderer->h / 2; y++)
 		{
 			distance = (0.5 * renderer->h) / (renderer->h * 0.5 - y);
@@ -245,6 +244,8 @@ namespace te
 		}
 		distance = std::numeric_limits<double>::infinity();
 		std::shared_ptr<SoftwareTexture> floorTex = textures[3];
+		if (!floorTex)
+			return;
 		img = floorTex->getImg();
 		//printf("Right dir = [%f %f]\n", camera.getRightVec().x, camera.getRightVec().y);
 		for (int y = renderer->h / 2; y < renderer->h; y++)
@@ -446,7 +447,7 @@ namespace te
 	void	Raycaster::drawColumnOfImg(Point2<int> start, int length, double column, bool side,
 		const std::shared_ptr<SoftwareTexture> texture)
 	{
-		if (texture->isLoaded() == false)
+		if (!texture || texture->isLoaded() == false)
 			return;
 		int i = 0;
 		const unsigned char* img = texture->getImg();

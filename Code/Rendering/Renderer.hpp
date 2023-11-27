@@ -2,7 +2,7 @@
 # define _RENDERER_HPP_
 
 #include "Window.hpp"
-#include "FrameData.hpp"
+#include "FrameStats.hpp"
 #include "DebugLevel.hpp"
 #include "Assets/Fonts/Font.hpp"
 #include "RendererType.hpp"
@@ -26,7 +26,7 @@ namespace te
 		const RendererType getType() const;
 		const WindowManager getWindowManager() const;
 
-		FrameData frameData;
+		FrameStats frameStats;
 		DebugLevel	debugLevel;
 
 		bool running;

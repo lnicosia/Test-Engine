@@ -1,10 +1,10 @@
-#include "FrameData.hpp"
+#include "FrameStats.hpp"
 
 #include <chrono>
 
 namespace te
 {
-	void	FrameData::updateFrameStats()
+	void	FrameStats::updateFrameStats()
 	{
 		static uint64_t lastUpdate = frameTime;
 

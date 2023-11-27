@@ -5,6 +5,8 @@
 
 #include "vulkan/vulkan.h"
 
+#include <optional>
+
 namespace te
 {
 	class VulkanRenderer: public Renderer

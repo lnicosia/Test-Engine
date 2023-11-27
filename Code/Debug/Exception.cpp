@@ -1,5 +1,6 @@
 #include "Exception.hpp"
 #include "Log.hpp"
+#include "ANSI.hpp"
 
 namespace te
 {

@@ -6,7 +6,7 @@
 
 namespace te
 {
-	struct FrameData
+	struct FrameStats
 	{
 		uint64_t	frameTime;
 		uint64_t	fps;

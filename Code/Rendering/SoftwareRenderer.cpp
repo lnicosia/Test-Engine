@@ -32,7 +32,7 @@ namespace te
 			ThrowException("Could not allocate pixel array");
 
 		AssetManager& assetManager = AssetManager::getInstance();
-		uiFont = assetManager.loadAsset<TTFFont>("../../../Resources/Fonts/Alice-Regular.ttf");
+		uiFont = assetManager.loadAsset<TTFFont>(Logger::ROOT_DIR_PATH + "Resources/Fonts/Alice-Regular.ttf");
 		
 	}
 
@@ -53,7 +53,7 @@ namespace te
 		SDL_UpdateTexture(SDLTexturePtr, nullptr, pixels, sizeof(Uint32) * window->getWidth());
 		SDL_RenderTexture(SDLRendererPtr, SDLTexturePtr, NULL, NULL);
 		SDL_RenderPresent(SDLRendererPtr);
-		frameData.updateFrameStats();
+		frameStats.updateFrameStats();
 		showFrameStats();
 	}
 
@@ -63,7 +63,7 @@ namespace te
 		{
 			char	buff[10];
 
-			snprintf(buff, 10, "%lu", frameData.fps);
+			snprintf(buff, 10, "%lu", frameStats.fps);
 			renderText(buff, uiFont, Point2<int>(), 16);
 		}
 	}
@@ -73,6 +73,11 @@ namespace te
 	void	SoftwareRenderer::renderText(const char* text, std::shared_ptr<Font> font,
 		Point2<int> pos, int size)
 	{
+		if (!font)
+		{
+			LOG(TE_RENDERING_LOG, TE_ERROR, "RenderText font in nullptr\n");
+			return ;
+		}
 		std::shared_ptr<TTFFont> ttfFont = dynamic_pointer_cast<TTFFont>(font);
 		if (!ttfFont)
 			ThrowException("Software renderer is trying to render a " + font->getAssetType()

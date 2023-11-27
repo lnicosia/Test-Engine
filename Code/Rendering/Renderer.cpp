@@ -12,7 +12,7 @@ namespace te
 		window(nullptr), rType(rType), wManager(wManager),
 		debugLevel(DebugLevel::TE_SHOW_FPS),
 		uiFont(nullptr),
-		frameData(),
+		frameStats(),
 		running(true)
 	{
 		Logger::Init();

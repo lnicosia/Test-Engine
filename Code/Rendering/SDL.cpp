@@ -15,13 +15,12 @@ namespace te
 		if (initialized)
 			return;
 		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL\n");
-		if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) != 0) {
-			ThrowException( "Couldn't initialize SDL : \n" + std::string(SDL_GetError()) );
-		}
+		if (SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS ) != 0)
+			ThrowException( "Couldn't initialize SDL : \n" + std::string(SDL_GetError()) + "\n" );
 
 		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL_ttf\n");
 		if (TTF_Init() == -1)
-			ThrowException( "Couldn't initialize SDL_ttf : \n" + std::string(TTF_GetError()));
+			ThrowException( "Couldn't initialize SDL_ttf : \n" + std::string(TTF_GetError()) + "\n" );
 
 		if (std::atexit(Quit) != 0)
 		{
@@ -51,7 +50,8 @@ namespace te
 
 	void SDL::Quit( void )
 	{
-		if (initialized) {
+		if (initialized)
+		{
 			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL TTF\n");
 			TTF_Quit();
 			/* LEAK ?? */

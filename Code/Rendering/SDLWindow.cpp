@@ -57,9 +57,9 @@ namespace te
 		log += "window";
 		LOG(TE_RENDERING_LOG, TE_LOG, "%s\n", log.c_str());
 
-		windowPtr = SDL_CreateWindow("SDL Window", w, h, flags);
+		windowPtr = SDL_CreateWindow("Test Engine - SDL Window", w, h, flags);
 		if (!windowPtr)
-			ThrowException("Could not create window");
+			ThrowException("Could not create window: " + std::string(SDL_GetError()) + "\n");
 
 		events = std::shared_ptr<SDLEvents>(new SDLEvents());
 	}

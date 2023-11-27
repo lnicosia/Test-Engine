@@ -28,7 +28,7 @@ static std::vector<const char*> verboseNames =
 
 static std::vector<const char*> verboseColors =
 {
-	TE_CONSOLE_BRED TE_CONSOLE_WHITE,
+	TE_CONSOLE_RED,
 	TE_CONSOLE_RED,
 	TE_CONSOLE_YELLOW,
 	TE_CONSOLE_DARK_GRAY,

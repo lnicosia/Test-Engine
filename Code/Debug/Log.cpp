@@ -57,6 +57,7 @@ namespace te
 	{
 		std::filesystem::path curr(std::filesystem::current_path());
 		
+		LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Executable directory = %s\n", curr.string().c_str());
 		bool found = false;
 		bool binariesFound = false;
 		bool shadersFound = false;

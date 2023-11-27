@@ -6,6 +6,7 @@
 
 #include <map>
 #include <iostream>
+#include <memory>
 
 namespace te
 {
@@ -24,12 +25,13 @@ namespace te
 		/**	For a given type, path and args, search the content of the manager
 		**	for an existing and corresponding asset. If found, return it.
 		**	If not, load it with its own load function
+		**	TODO: Add a requires(Asset) or smt
 		*/
 		template <typename T, typename ... Args>
 		std::shared_ptr<T> loadAsset(const std::string& path, Args... args)
 		{
 			if (!IsReg(path))
-				return nullptr;
+				return std::shared_ptr<T>();
 			for (const auto& pair : this->assets)
 			{
 				std::shared_ptr<Asset> asset = pair.second;
@@ -51,7 +53,7 @@ namespace te
 			std::shared_ptr<T> ptr = std::make_shared<T>(path, std::forward<Args>(args)...);
 			if (ptr->isLoaded() == false)
 			{
-				return nullptr;
+				return std::shared_ptr<T>();
 			}
 			assets.emplace(std::make_pair(ptr->getId(), ptr));
 			return ptr;
@@ -65,7 +67,7 @@ namespace te
 		std::shared_ptr<T> loadEmbeddedAsset(const std::string& path, std::string& embeddedName, Args... args)
 		{
 			if (!IsReg(path))
-				return nullptr;
+				return std::shared_ptr<T>();
 			for (const auto& pair : this->assets)
 			{
 				std::shared_ptr<Asset> asset = pair.second;
@@ -87,7 +89,7 @@ namespace te
 			std::shared_ptr<T> ptr = std::make_shared<T>(path, std::forward<Args>(args)...);
 			if (ptr->isLoaded() == false)
 			{
-				return nullptr;
+				return std::shared_ptr<T>();
 			}
 			ptr->setEmbeddedName(embeddedName);
 			assets.emplace(std::make_pair(ptr->getId(), ptr));
@@ -115,7 +117,7 @@ namespace te
 						return tmp;
 				}
 			}
-			return nullptr;
+			return std::shared_ptr<T>();
 		}
 
 		/**	Retrieve an asset by its ID if found or nullptr.
@@ -127,11 +129,11 @@ namespace te
 			std::map<uint32_t, std::shared_ptr<Asset>>::iterator it =
 				this->assets.find(id);
 			if (it == this->assets.end())
-				return nullptr;
+				return std::shared_ptr<T>();
 			std::shared_ptr<T> tmp = dynamic_pointer_cast<T>(it->second);
 			if (tmp)
 				return tmp;
-			return nullptr;
+			return std::shared_ptr<Asset>();
 		}
 
 		/**	Retrieve an asset by its name if found or nullptr.
@@ -151,7 +153,7 @@ namespace te
 						return tmp;
 				}
 			}
-			return nullptr;
+			return std::shared_ptr<T>();
 		}
 
 		template <typename T>
