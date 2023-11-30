@@ -14,9 +14,25 @@ namespace te
 	{
 		if (initialized)
 			return;
+
 		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL\n");
-		if (SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS ) != 0)
-			ThrowException( "Couldn't initialize SDL : \n" + std::string(SDL_GetError()) + "\n" );
+
+		if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
+			ThrowException( "Couldn't initialize SDL Video subsystem : " + std::string(SDL_GetError()) + "\n" );
+
+		// No need to init EVENTS manually, it is implied in VIDEO
+
+		//if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
+		//	LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Audio subsystem : %s\n", SDL_GetError());
+
+		//if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0)
+		//	LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Joystick subsystem : %s\n", SDL_GetError());
+
+		//if (SDL_InitSubSystem(SDL_INIT_HAPTIC) != 0)
+		//	LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Haptic subsystem : %s\n", SDL_GetError());
+
+		//if (SDL_InitSubSystem(SDL_INIT_GAMEPAD) != 0)
+		//	LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Gamepad subsystem : %s\n", SDL_GetError());
 
 		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL_ttf\n");
 		if (TTF_Init() == -1)
