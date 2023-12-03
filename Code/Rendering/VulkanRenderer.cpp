@@ -35,7 +35,9 @@ namespace te
 		// TODO
 		uninplemented();
 		if (wManager != WindowManager::TE_SDL)
+		{
 			ThrowException("Only SDL is implemented for now\n");
+		}
 	}
 
 	VulkanRenderer::~VulkanRenderer()
@@ -46,17 +48,23 @@ namespace te
 		vkDestroyFence(devices[0], inFlightFence, nullptr);
 		vkDestroyCommandPool(devices[0], commandPool, nullptr);
 		for (auto framebuffer : framebuffers)
+		{
 			vkDestroyFramebuffer(devices[0], framebuffer, nullptr);
+		}
 		vkDestroyPipeline(devices[0], graphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(devices[0], pipelineLayout, nullptr);
 		vkDestroyRenderPass(devices[0], renderPass, nullptr);
 		for (auto imageView : swapChainImageViews)
+		{
 			vkDestroyImageView(devices[0], imageView, nullptr);
+		}
 		vkDestroySwapchainKHR(devices[0], swapChain, nullptr);
 		vkDestroyDevice(devices[0], nullptr);
 		vkDestroySurfaceKHR(instance, surface, nullptr);
 		if (enableValidationLayers)
+		{
 			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+		}
 		vkDestroyInstance(instance, nullptr);
 	}
 
@@ -65,7 +73,9 @@ namespace te
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating Vulkan instance\n");
 		createInstance();
 		if (enableValidationLayers)
+		{
 			setupDebugMessenger();
+		}
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating platform specific surface\n");
 		window->createVulkanSurface(instance, &surface);
 		LOG(TE_RENDERING_LOG, TE_LOG, "Selecting physical device\n");
@@ -93,7 +103,9 @@ namespace te
 	void VulkanRenderer::createInstance()
 	{
 		if (enableValidationLayers && !checkValidationLayerSupport())
+		{
 			ThrowException("Validation layers are not available");
+		}
 
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -140,7 +152,9 @@ namespace te
 		}
 
 		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create Vulkan instance!\n");
+		}
 	}
 
 	bool VulkanRenderer::checkValidationLayerSupport()
@@ -168,7 +182,9 @@ namespace te
 				}
 			}
 			if (!found)
+			{
 				return false;
+			}
 		}
 		return true;
 	}
@@ -189,7 +205,9 @@ namespace te
 
 		populateDebugMessengerCreateInfo(createInfo);
 		if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+		{
 			ThrowException("Failed to setup vulkan debug message\n");
+		}
 	}
 
 	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanRenderer::debugCallback(
@@ -221,7 +239,9 @@ namespace te
 	{
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
 		if (func != nullptr)
+		{
 			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+		}
 		else
 		{
 			LOG(TE_RENDERING_LOG, TE_ERROR, "Could not load 'vkCreateDebugUtilsMessengerEXT'\n");
@@ -236,7 +256,9 @@ namespace te
 	{
 		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
 		if (func != nullptr)
+		{
 			func(instance, debugMessenger, pAllocator);
+		}
 		else
 		{
 			LOG(TE_RENDERING_LOG, TE_ERROR, "Could not load 'vkDestroyDebugUtilsMessengerEXT'\n");
@@ -250,7 +272,9 @@ namespace te
 
 		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 		if (!deviceCount)
+		{
 			ThrowException("No GPU found\n");
+		}
 
 		devices.resize(deviceCount);
 		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
@@ -268,7 +292,9 @@ namespace te
 		}
 
 		if (this->physicalDevices[0] == VK_NULL_HANDLE)
+		{
 			ThrowException("No suitable GPU found\n");
+		}
 	}
 
 	bool VulkanRenderer::isDeviceSuitable(VkPhysicalDevice device)
@@ -313,7 +339,9 @@ namespace te
 		std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
 		for (const auto& extension : availableExtensions)
+		{
 			requiredExtensions.erase(extension.extensionName);
+		}
 
 		return requiredExtensions.empty();
 	}
@@ -333,17 +361,23 @@ namespace te
 		for (const auto& queueFamily : queueFamilies)
 		{
 			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			{
 				indices.graphicsFamily = i;
+			}
 
 			VkBool32 presentSupport = false;
 			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
 			if (presentSupport)
+			{
 				indices.presentFamily = i;
+			}
 
 			/* Add other wanted families here */
 
 			if (indices.isComplete())
+			{
 				break;
+			}
 
 			i++;
 		}
@@ -387,10 +421,14 @@ namespace te
 			createInfo.ppEnabledLayerNames = validationLayers.data();
 		}
 		else
+		{
 			createInfo.enabledLayerCount = 0;
+		}
 
 		if (vkCreateDevice(physicalDevices[0], &createInfo, nullptr, &devices[0]) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create logical device!\n");
+		}
 
 		vkGetDeviceQueue(devices[0], queueFamilies[0].graphicsFamily.value(), 0, &graphicsQueue);
 		vkGetDeviceQueue(devices[0], queueFamilies[0].presentFamily.value(), 0, &presentQueue);
@@ -427,7 +465,9 @@ namespace te
 		{
 			if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB
 				&& availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+			{
 				return availableFormat;
+			}
 		}
 		return availableFormats[0];
 	}
@@ -437,7 +477,9 @@ namespace te
 		for (const auto& availablePresentMode : availablePresentModes)
 		{
 			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+			{
 				return availablePresentMode;
+			}
 		}
 
 		return VK_PRESENT_MODE_FIFO_KHR;
@@ -446,7 +488,9 @@ namespace te
 	VkExtent2D VulkanRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+		{
 			return capabilities.currentExtent;
+		}
 		else
 		{
 			int w, h;
@@ -475,7 +519,9 @@ namespace te
 
 		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 		if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
+		{
 			imageCount = swapChainSupport.capabilities.maxImageCount;
+		}
 
 		VkSwapchainCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -512,7 +558,9 @@ namespace te
 		}
 
 		if (vkCreateSwapchainKHR(devices[0], &createInfo, nullptr, &swapChain) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create swap chain!\n");
+		}
 
 		vkGetSwapchainImagesKHR(devices[0], swapChain, &imageCount, nullptr);
 		swapChainImages.resize(imageCount);
@@ -541,7 +589,9 @@ namespace te
 			createInfo.subresourceRange.layerCount = 1;
 
 			if (vkCreateImageView(devices[0], &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
+			{
 				ThrowException("Failed to create image view " + std::to_string(i) + "\n");
+			}
 		}
 	}
 
@@ -658,7 +708,9 @@ namespace te
 		pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
 		if (vkCreatePipelineLayout(devices[0], &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create pipeline layout!\n");
+		}
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -679,18 +731,26 @@ namespace te
 		pipelineInfo.basePipelineIndex = -1; // Optional
 
 		if (vkCreateGraphicsPipelines(devices[0], VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create graphics pipeline!\n");
+		}
 
 		if (fragShaderModule != VK_NULL_HANDLE)
+		{
 			vkDestroyShaderModule(devices[0], fragShaderModule, nullptr);
+		}
 		if (vertShaderModule != VK_NULL_HANDLE)
+		{
 			vkDestroyShaderModule(devices[0], vertShaderModule, nullptr);
+		}
 	}
 
 	VkShaderModule VulkanRenderer::createShaderModule(const std::vector<char>& code)
 	{
 		if (code.size() == 0 || !code.data())
+		{
 			return VkShaderModule{};
+		}
 
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -745,7 +805,9 @@ namespace te
 		renderPassInfo.pDependencies = &dependency;
 
 		if (vkCreateRenderPass(devices[0], &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create render pass!\n");
+		}
 	}
 
 	void VulkanRenderer::createFramebuffers()
@@ -769,7 +831,9 @@ namespace te
 			framebufferInfo.layers = 1;
 
 			if (vkCreateFramebuffer(devices[0], &framebufferInfo, nullptr, &framebuffers[i]) != VK_SUCCESS)
+			{
 				ThrowException("Failed to create framebuffer!\n");
+			}
 		}
 	}
 
@@ -780,7 +844,9 @@ namespace te
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		poolInfo.queueFamilyIndex = queueFamilies[0].graphicsFamily.value();
 		if (vkCreateCommandPool(devices[0], &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create command pool!\n");
+		}
 	}
 
 	void VulkanRenderer::createCommandBuffer()
@@ -792,7 +858,9 @@ namespace te
 		allocInfo.commandBufferCount = 1;
 
 		if (vkAllocateCommandBuffers(devices[0], &allocInfo, &commandBuffer) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create command buffer!\n");
+		}
 	}
 
 	void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
@@ -803,7 +871,9 @@ namespace te
 		beginInfo.pInheritanceInfo = nullptr; // Optional
 
 		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+		{
 			ThrowException("Failed to begin recording command buffer!\n");
+		}
 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -840,7 +910,9 @@ namespace te
 		vkCmdEndRenderPass(commandBuffer);
 
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+		{
 			ThrowException("Failed to end command buffer!\n");
+		}
 	}
 
 	void VulkanRenderer::createSyncObjects()
@@ -854,7 +926,9 @@ namespace te
 		if (vkCreateSemaphore(devices[0], &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
 			vkCreateSemaphore(devices[0], &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
 			vkCreateFence(devices[0], &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
+		{
 			ThrowException("Failed to create semaphores!\n");
+		}
 	}
 
 	void VulkanRenderer::drawFrame()
@@ -884,7 +958,9 @@ namespace te
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
+		{
 			ThrowException("Failed to submit draw command\n");
+		}
 
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -904,7 +980,9 @@ namespace te
 		while (running == true)
 		{
 			if (window->handleEvents() == 1)
+			{
 				running = false;
+			}
 
 			drawFrame();
 		}

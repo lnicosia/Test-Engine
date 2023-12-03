@@ -43,7 +43,9 @@ namespace te
 					//	If the cast successed, we found our asset. Return it instead of
 					//	loading it again
 					if (tmp)
+					{
 						return tmp;
+					}
 					//	If not, it can be an asset with the same path but of different type.
 					//	For example, embedded textures or animations share the same path
 					//	with their object
@@ -67,7 +69,9 @@ namespace te
 		std::shared_ptr<T> loadEmbeddedAsset(const std::string& path, std::string& embeddedName, Args... args)
 		{
 			if (!IsReg(path))
+			{
 				return std::shared_ptr<T>();
+			}
 			for (const auto& pair : this->assets)
 			{
 				std::shared_ptr<Asset> asset = pair.second;
@@ -79,7 +83,9 @@ namespace te
 					//	If the cast successed, we found our asset. Return it instead of
 					//	loading it again
 					if (tmp && tmp->getEmbeddedName() == embeddedName)
+					{
 						return tmp;
+					}
 					//	If not, it can be an asset with the same path but of different type.
 					//	For example, embedded textures or animations share the same path
 					//	with their object
@@ -114,7 +120,9 @@ namespace te
 				{
 					std::shared_ptr<T> tmp = dynamic_pointer_cast<T>(this->assets[asset->getId()]);
 					if (tmp)
+					{
 						return tmp;
+					}
 				}
 			}
 			return std::shared_ptr<T>();
@@ -129,10 +137,14 @@ namespace te
 			std::map<uint32_t, std::shared_ptr<Asset>>::iterator it =
 				this->assets.find(id);
 			if (it == this->assets.end())
+			{
 				return std::shared_ptr<T>();
+			}
 			std::shared_ptr<T> tmp = dynamic_pointer_cast<T>(it->second);
 			if (tmp)
+			{
 				return tmp;
+			}
 			return std::shared_ptr<Asset>();
 		}
 
@@ -150,7 +162,9 @@ namespace te
 				{
 					std::shared_ptr<T> tmp = dynamic_pointer_cast<T>(this->assets[asset->getId()]);
 					if (tmp)
+					{
 						return tmp;
+					}
 				}
 			}
 			return std::shared_ptr<T>();
@@ -171,7 +185,9 @@ namespace te
 			{
 				std::shared_ptr<T> asset = dynamic_pointer_cast<T>(this->assets[pair.second->getId()]);
 				if (asset)
+				{
 					res.push_back(asset);
+				}
 			}
 			return res;
 		}

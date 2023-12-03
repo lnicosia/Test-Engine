@@ -13,7 +13,9 @@ namespace te
 		for (size_t i = 0; i < size; i++)
 		{
 			if (i != 0)
+			{
 				name += "-";
+			}
 			name += this->paths[i].filename().string();
 		}
 	}
@@ -117,11 +119,15 @@ namespace te
 	{
 		std::cout << "- ";
 		if (asset.getEmbeddedName() != "")
+		{
 			std::cout << "Embedded ";
+		}
 		std::cout << asset.getAssetType() << " \"" << asset.getName();
 		std::cout << "\"";
 		if (asset.getEmbeddedName() != "")
+		{
 			std::cout << " (" << asset.getEmbeddedName() << ")";
+		}
 		std::cout << ": ID = " << asset.getId() << ", path = ";
 		std::cout << asset.getPath();
 		/*if (asset.isLoaded())

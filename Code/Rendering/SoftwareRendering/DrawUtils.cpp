@@ -20,7 +20,9 @@ namespace te
 				if (xDiff * xDiff + yDiff * yDiff < squareRad &&
 					x >= minClamp.x && x < maxClamp.x
 					&& y >= minClamp.y && y < maxClamp.y)
+				{
 					renderer->pixels[x + y * renderer->w] = color;
+				}
 			}
 		}
 	}
@@ -41,7 +43,9 @@ namespace te
 				double yDiff = pos.y - y;
 				if (xDiff * xDiff + yDiff * yDiff < squareRad &&
 					x >= 0 && x < renderer->w && y >= 0 && y < renderer->h)
+				{
 					renderer->pixels[x + y * renderer->w] = color;
+				}
 			}
 		}
 	}
@@ -61,22 +65,30 @@ namespace te
 			coord.x = pos.x;
 			coord.y = pos.y + y;
 			if (coord.x >= 0 && coord.x < renderer->w && coord.y >= 0 && coord.y < renderer->h)
+			{
 				renderer->pixels[coord.x + coord.y * renderer->w] = color;
+			}
 			coord.x = pos.x + size.w;
 			coord.y = pos.y + y;
 			if (coord.x >= 0 && coord.x < renderer->w && coord.y >= 0 && coord.y < renderer->h)
+			{
 				renderer->pixels[coord.x + coord.y * renderer->w] = color;
+			}
 		}
 		for (int x = 0; x < size.w && pos.x + x < renderer->w; x++)
 		{
 			coord.x = pos.x + x;
 			coord.y = pos.y;
 			if (coord.x >= 0 && coord.x < renderer->w && coord.y >= 0 && coord.y < renderer->h)
+			{
 				renderer->pixels[coord.x + coord.y * renderer->w] = color;
+			}
 			coord.x = pos.x + x;
 			coord.y = pos.y + size.y;
 			if (coord.x >= 0 && coord.x < renderer->w && coord.y >= 0 && coord.y < renderer->h)
+			{
 				renderer->pixels[coord.x + coord.y * renderer->w] = color;
+			}
 		}
 	}
 
@@ -88,7 +100,9 @@ namespace te
 			for (int x = pos.x; x < pos.x + size.w; x++)
 			{
 				if (x >= 0 && x < renderer->w && y >= 0 && y < renderer->h)
+				{
 					renderer->pixels[x + y * renderer->w] = insideColor;
+				}
 			}
 		}
 	}
@@ -104,12 +118,16 @@ namespace te
 			coord.y = pos.y + y;
 			if (coord.x >= minClamp.x && coord.x < maxClamp.x
 				&& coord.y >= minClamp.y && coord.y < maxClamp.y)
+			{
 				renderer->pixels[coord.x + coord.y * renderer->w] = color;
+			}
 			coord.x = pos.x + size.w;
 			coord.y = pos.y + y;
 			if (coord.x >= minClamp.x && coord.x < maxClamp.x
 				&& coord.y >= minClamp.y && coord.y < maxClamp.y)
+			{
 				renderer->pixels[coord.x + coord.y * renderer->w] = color;
+			}
 		}
 		for (int x = 0; x < size.w && pos.x + x < renderer->w; x++)
 		{
@@ -117,12 +135,16 @@ namespace te
 			coord.y = pos.y;
 			if (coord.x >= minClamp.x && coord.x < maxClamp.x
 				&& coord.y >= minClamp.y && coord.y < maxClamp.y)
+			{
 				renderer->pixels[coord.x + coord.y * renderer->w] = color;
+			}
 			coord.x = pos.x + x;
 			coord.y = pos.y + size.y;
 			if (coord.x >= minClamp.x && coord.x < maxClamp.x
 				&& coord.y >= minClamp.y && coord.y < maxClamp.y)
+			{
 				renderer->pixels[coord.x + coord.y * renderer->w] = color;
+			}
 		}
 	}
 
@@ -135,7 +157,9 @@ namespace te
 			{
 				if (x >= minClamp.x && x < maxClamp.x
 					&& y >= minClamp.y && y < maxClamp.y)
+				{
 					renderer->pixels[x + y * renderer->w] = insideColor;
+				}
 			}
 		}
 	}
@@ -149,11 +173,17 @@ namespace te
 		while ((int)x != p2.x || (int)y != p2.y)
 		{
 			if (x >= 0 && x < renderer->w && y >= 0 && y < renderer->h)
+			{
 				renderer->pixels[(int)x + (int)y * renderer->w] = color;
+			}
 			if ((int)x != p2.x)
+			{
 				x += v.x;
+			}
 			if ((int)y != p2.y)
+			{
 				y += v.y;
+			}
 		}
 	}
 
@@ -168,11 +198,17 @@ namespace te
 		{
 			if (x >= minClamp.x && x < maxClamp.x
 				&& y >= minClamp.y && y < maxClamp.y)
+			{
 				renderer->pixels[(int)x + (int)y * renderer->w] = color;
+			}
 			if ((int)x != p2.x)
+			{
 				x += v.x;
+			}
 			if ((int)y != p2.y)
+			{
 				y += v.y;
+			}
 		}
 	}
 }

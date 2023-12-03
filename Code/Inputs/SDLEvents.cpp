@@ -21,27 +21,35 @@ namespace te
 			case InputState::TE_PRESS:
 			{
 				if (binding.onPress)
+				{
 					binding.onPress->execute();
+				}
 				binding.setState(InputState::TE_PRESSED);
 				break;
 			}
 			case InputState::TE_RELEASE:
 			{
 				if (binding.onRelease)
+				{
 					binding.onRelease->execute();
+				}
 				binding.setState(InputState::TE_RELEASED);
 				break;
 			}
 			case InputState::TE_PRESSED:
 			{
 				if (binding.whenPressed)
+				{
 					binding.whenPressed->execute();
+				}
 				break;
 			}
 			case InputState::TE_RELEASED:
 			{
 				if (binding.whenReleased)
+				{
 					binding.whenReleased->execute();
+				}
 				break;
 			}
 			default:
@@ -55,27 +63,35 @@ namespace te
 			case InputState::TE_PRESS:
 			{
 				if (mouseBinding.onPress)
+				{
 					mouseBinding.onPress->execute();
+				}
 				mouseBinding.setState(InputState::TE_PRESSED);
 				break;
 			}
 			case InputState::TE_RELEASE:
 			{
 				if (mouseBinding.onRelease)
+				{
 					mouseBinding.onRelease->execute();
+				}
 				mouseBinding.setState(InputState::TE_RELEASED);
 				break;
 			}
 			case InputState::TE_PRESSED:
 			{
 				if (mouseBinding.whenPressed)
+				{
 					mouseBinding.whenPressed->execute();
+				}
 				break;
 			}
 			case InputState::TE_RELEASED:
 			{
 				if (mouseBinding.whenReleased)
+				{
 					mouseBinding.whenReleased->execute();
+				}
 				break;
 			}
 			default:
@@ -99,8 +115,7 @@ namespace te
 			{
 			case SDL_EVENT_QUIT:
 			{
-				return(1);
-				break;
+				return 1;
 			}
 			case SDL_EVENT_KEY_DOWN:
 			{
@@ -110,7 +125,9 @@ namespace te
 						|| e.key.keysym.sym == binding.getKey2())
 					{
 						if (binding.getState() == InputState::TE_RELEASED)
+						{
 							binding.setState(InputState::TE_PRESS);
+						}
 					}
 				}
 				break;
@@ -143,7 +160,9 @@ namespace te
 				}
 				if (e.button.button == SDL_BUTTON_LEFT
 					&& mouseState == InputState::TE_RELEASED)
+				{
 					mouseState = InputState::TE_PRESS;
+				}
 				break;
 			}
 			case SDL_EVENT_MOUSE_BUTTON_UP:
@@ -176,7 +195,9 @@ namespace te
 	int	SDLEvents::handle()
 	{
 		if (updateInputsState() == 1)
+		{
 			return 1;
+		}
 		processInputs();
 		return 0;
 	}

@@ -10,7 +10,9 @@ namespace te
 		rType(rType)
 	{
 		if (rType == RendererType::TE_UNKNOWN_RENDERER)
+		{
 			ThrowException("Cannot create Window: renderer is null");
+		}
 	}
 
 	Window::Window(int w, int h, RendererType rType):
@@ -18,7 +20,9 @@ namespace te
 		rType(rType)
 	{
 		if (rType == RendererType::TE_UNKNOWN_RENDERER)
+		{
 			ThrowException("Cannot create Window: renderer is null");
+		}
 	}
 
 	Window::~Window()

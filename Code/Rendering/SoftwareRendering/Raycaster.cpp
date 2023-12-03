@@ -49,7 +49,6 @@ namespace te
 
 		AssetManager& assetManager = AssetManager::getInstance();
 
-		;
 		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "bluestone.png"));
 		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "colorstone.png"));
 		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "eagle.png"));
@@ -142,7 +141,9 @@ namespace te
 					drawRectangleClamped(pos, size, 0xFFFFFFFF, renderer, minimapPos, minimapPos + minimapSize);
 				}
 				else
+				{
 					drawRectangleClamped(pos, size, 0xFFFFFFFF, renderer, minimapPos, minimapPos + minimapSize);
+				}
 				pos.x += size.x;
 			}
 			pos.y += size.y;
@@ -170,7 +171,9 @@ namespace te
 		while (running == true)
 		{
 			if (renderer->getWindow()->handleEvents() == 1)
+			{
 				running = false;
+			}
 
 			drawFloorAndCeiling();
 
@@ -194,10 +197,14 @@ namespace te
 		double distance;
 		std::shared_ptr<SoftwareTexture> ceilingTex = textures[7];
 		if (!ceilingTex)
+		{
 			return;
+		}
 		const unsigned char* img = ceilingTex->getImg();
 		if (!img)
+		{
 			return ;
+		}
 		for (int y = 0; y < renderer->h / 2; y++)
 		{
 			distance = (0.5 * renderer->h) / (renderer->h * 0.5 - y);
@@ -226,9 +233,13 @@ namespace te
 				int coordX = (int)currX % ceilingTex->getWidth();
 				int coordY = (int)currY % ceilingTex->getHeight();
 				if (coordX >= ceilingTex->getWidth())
+				{
 					coordX = ceilingTex->getWidth() - 1;
+				}
 				if (coordY >= ceilingTex->getHeight())
+				{
 					coordY = ceilingTex->getHeight() - 1;
+				}
 
 				//printf("pos = [%d %d]\n", coordX, coordY);
 				int imgCoord = ceilingTex->getChannels() * (int)(coordX + coordY * ceilingTex->getWidth());
@@ -245,7 +256,9 @@ namespace te
 		distance = std::numeric_limits<double>::infinity();
 		std::shared_ptr<SoftwareTexture> floorTex = textures[3];
 		if (!floorTex)
+		{
 			return;
+		}
 		img = floorTex->getImg();
 		//printf("Right dir = [%f %f]\n", camera.getRightVec().x, camera.getRightVec().y);
 		for (int y = renderer->h / 2; y < renderer->h; y++)
@@ -270,9 +283,13 @@ namespace te
 				currX = currX - (int)currX;
 				currY = currY - (int)currY;
 				if (currX < 0)
+				{
 					currX = 1 - currX;
+				}
 				if (currY < 0)
+				{
 					currY = 1 - currY;
+				}
 				//printf("pos = [%f %f]\n", currX, currY);
 				currX *= floorTex->getWidth();
 				currY *= floorTex->getHeight();
@@ -325,14 +342,22 @@ namespace te
 			//printf("ceil(%f) = %f\n", 5.0f, ceil(5.0f));
 			double nextX;
 			if (v.x > 0)
+			{
 				nextX = floor(mapX) + 1;
+			}
 			else
+			{
 				nextX = ceil(mapX) - 1;
+			}
 			double nextY;
 			if (v.y > 0)
+			{
 				nextY = floor(mapY) + 1;
+			}
 			else
+			{
 				nextY = ceil(mapY) - 1;
+			}
 			diffX = (nextX - mapX) / v.x;
 			diffY = (nextY - mapY) / v.y;
 			if (diffX < diffY)
@@ -358,9 +383,13 @@ namespace te
 			coord.y = mapY;
 			//printf("Coord = [%d %d]\n", coord.x, coord.y);
 			if (diffX < diffY && v.x < 0)
+			{
 				coord.x = (int)(ceil(mapX) - 1);
+			}
 			if (diffY < diffX && v.y < 0)
+			{
 				coord.y = (int)(ceil(mapY) - 1);
+			}
 			//printf("Coord = [%d %d] (%d)\n", coord.x, coord.y, map[coord.y][coord.x]);
 			if (this->map[coord.y][coord.x] == 0)
 			{
@@ -382,7 +411,9 @@ namespace te
 			//break;
 		}
 		if (hit == false)
+		{
 			return ;
+		}
 		//printf("Intersects at map[%f %f] ([%d %d]\n", mapX, mapY, coord.x, coord.y);
 		// TODO Could be replaced by cos/sin formula (cheaper)
 		dist = pointDistance(pos, Point2<double>(mapX, mapY));
@@ -397,9 +428,13 @@ namespace te
 		//printf("Correc dist = %f\n", distCorrec);
 		double size;
 		if (distCorrec < 400 / this->renderer->h)
+		{
 			size = this->renderer->h / 2;
+		}
 		else
+		{
 			size = this->renderer->h / distCorrec;
+		}
 		double column;
 		double dummy;
 		bool side;
@@ -448,7 +483,9 @@ namespace te
 		const std::shared_ptr<SoftwareTexture> texture)
 	{
 		if (!texture || texture->isLoaded() == false)
+		{
 			return;
+		}
 		int i = 0;
 		const unsigned char* img = texture->getImg();
 		int columnIndex = column * texture->getWidth();

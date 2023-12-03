@@ -53,13 +53,17 @@ namespace te
 			log += "software ";
 		}
 		else
+		{
 			ThrowException("SDL can only create Vulkan, OpenGL or software windows");
+		}
 		log += "window";
 		LOG(TE_RENDERING_LOG, TE_LOG, "%s\n", log.c_str());
 
 		windowPtr = SDL_CreateWindow("Test Engine - SDL Window", w, h, flags);
 		if (!windowPtr)
+		{
 			ThrowException("Could not create window: " + std::string(SDL_GetError()) + "\n");
+		}
 
 		events = std::shared_ptr<SDLEvents>(new SDLEvents());
 	}
@@ -73,11 +77,15 @@ namespace te
 		bool enableValidationLayers)
 	{
 		if (SDL_Vulkan_GetInstanceExtensions(count, nullptr) == SDL_FALSE)
+		{
 			ThrowException("Could not querry Vulkan instance extensions count");
+		}
 		LOG(TE_RENDERING_LOG, TE_LOG, "SDL requires %d vulkan extensions:\n", *count);
 		names.resize(*count);
 		if (SDL_Vulkan_GetInstanceExtensions(count, names.data()) == SDL_FALSE)
+		{
 			ThrowException("Could not querry Vulkan instance extensions names");
+		}
 		for (const char* name : names)
 		{
 			LOG(TE_RENDERING_LOG, TE_LOG, "\t'%s'\n", name);

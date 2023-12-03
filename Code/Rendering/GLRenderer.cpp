@@ -15,7 +15,9 @@ namespace te
 		// TODO
 		uninplemented();
 		if (wManager != WindowManager::TE_SDL)
+		{
 			ThrowException("Only SDL is implemented for now");
+		}
 	}
 
 	GLRenderer::~GLRenderer()

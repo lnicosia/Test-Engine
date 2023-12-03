@@ -8,7 +8,9 @@ namespace te
 	void Logger::Init()
 	{
 		if (initialized)
+		{
 			return;
+		}
 
 		static std::filesystem::path paths[] =
 		{
@@ -24,13 +26,17 @@ namespace te
 			std::filesystem::create_directory(folder);
 		}
 		else if (!std::filesystem::is_directory(folder))
+		{
 			ThrowException( "'Logs/' already exists and is not a directory\n" );
+		}
 
 		for (int i = TE_ALL_LOG; i != TE_END_LOG; i++)
 		{
 			FILE* f = fopen(paths[i].string().c_str(), "w+");
 			if (f == nullptr)
+			{
 				ThrowException("Could not open log file " + paths[i].string());
+			}
 			files.push_back(f);
 		}
 		if (std::atexit(Quit) != 0)
@@ -46,7 +52,9 @@ namespace te
 	void Logger::Quit()
 	{
 		if (!initialized)
+		{
 			return;
+		}
 		for (int i = TE_ALL_LOG; i != TE_END_LOG; i++)
 		{
 			fclose(files[i]);
@@ -70,15 +78,23 @@ namespace te
 			for (const auto& it : std::filesystem::directory_iterator(curr))
 			{
 				if (it.path().filename() == "Binaries")
+				{
 					binariesFound = true;
+				}
 				else if (it.path().filename() == "Shaders")
+				{
 					shadersFound = true;
+				}
 				else if (it.path().filename() == "Resources")
+				{
 					resourcesFound = true;
+				}
 			}
 			found = binariesFound && shadersFound && resourcesFound;
 			if (!curr.has_relative_path() || found)
+			{
 				break;
+			}
 			curr = curr.parent_path();
 		}
 		if (!found)

@@ -37,7 +37,9 @@ namespace te
 	{
 		LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Destroying software texture %s\n", paths[0].string().c_str());
 		if (this->img)
+		{
 			stbi_image_free(this->img);
+		}
 	}
 
 	const unsigned char* SoftwareTexture::getImg() const

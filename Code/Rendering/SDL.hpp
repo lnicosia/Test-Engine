@@ -3,8 +3,8 @@
 
 namespace te
 {
-	class SDL {
-
+	class SDL
+	{
 	public:
 		static void Init( void );
 		static void Quit( void );

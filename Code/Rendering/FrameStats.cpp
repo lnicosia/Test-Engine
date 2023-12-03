@@ -15,14 +15,11 @@ namespace te
 		double currFps = 1000.0 / frameDuration;
 		//printf("%f fps\n", fps);
 
-
 		if (frameTime - lastUpdate >= 1000)
 		{
 			lastUpdate = newTime;
 			fps = currFps;
 		}
 		frameTime = newTime;
-
 	}
-
 }
