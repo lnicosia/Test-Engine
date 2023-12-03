@@ -23,6 +23,7 @@ Game engine for training purposes.
 
 * SDL2
 * SDL2_ttf
+* stb_image
 
 ### Features:
 
