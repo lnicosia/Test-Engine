@@ -10,7 +10,7 @@
 # define VK_USE_PLATFORM_WIN32_KHR
 #endif
 
-#include "Vulkan/vulkan.h"
+#include "vulkan/vulkan.h"
 
 namespace te
 {

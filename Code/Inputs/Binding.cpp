@@ -3,9 +3,9 @@
 namespace te
 {
 	Binding::Binding(std::string name, uint32_t key1, uint32_t key2, bool editable) :
-		name(name), key1(key1), key2(key2), editable(editable),
-		state(InputState::TE_RELEASED),
-		onRelease(), onPress(), whenPressed(), whenReleased()
+		onRelease(), onPress(), whenReleased(), whenPressed(), 
+		key1(key1), key2(key2), state(InputState::TE_RELEASED),
+		name(name)
 	{
 
 	}

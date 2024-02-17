@@ -11,13 +11,13 @@ class ActionWrapper
 {
 public:
     ActionWrapper(){}
-    ~ActionWrapper(){}
+    virtual ~ActionWrapper(){}
 
     virtual void execute( void ) const {}
 
     ActionWrapper& operator =(const ActionWrapper& ref)
     {
-        *this = ref;
+        //*this = ref;
         return *this;
     }
 };

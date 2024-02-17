@@ -2,8 +2,9 @@
 
 namespace te
 {
-	Events::Events(): bindings(), mouseBindings(),
-		mousePos(), mouseGlobalPos(), mouseState(InputState::TE_RELEASED)
+	Events::Events(): mouseBindings(),
+		mousePos(), mouseGlobalPos(), mouseRelativePos(), 
+		mouseState(InputState::TE_RELEASED), bindings()
 	{
 	}
 

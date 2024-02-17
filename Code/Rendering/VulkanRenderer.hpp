@@ -70,10 +70,10 @@ namespace te
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 
-#ifdef NDEBUG
-		const bool enableValidationLayers = false;
-#else
+#if defined(NDEBUG) && defined(ENABLE_VALIDATION_LAYERS)
 		const bool enableValidationLayers = true;
+#else
+		const bool enableValidationLayers = false;
 #endif
 
 		VkSemaphore imageAvailableSemaphore;

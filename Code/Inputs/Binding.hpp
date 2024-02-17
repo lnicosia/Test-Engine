@@ -53,8 +53,6 @@ namespace te
 
 		std::string const	name;
 
-		bool const	editable = true;
-
 	};
 
 	struct MouseBinding : public Binding

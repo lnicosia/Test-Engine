@@ -69,7 +69,7 @@ namespace te
 		{
 			char buff[10];
 
-			snprintf(buff, 10, "%lu", frameStats.fps);
+			snprintf(buff, 10, "%llu", frameStats.fps);
 			renderText(buff, uiFont, Point2<int>(), 16);
 		}
 	}

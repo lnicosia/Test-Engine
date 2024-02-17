@@ -38,12 +38,12 @@ namespace te
 		camera.moveLeft();
 	}
 
-	Raycaster::Raycaster(SoftwareRenderer* renderer): renderer(renderer), running(true),
+	Raycaster::Raycaster(SoftwareRenderer* renderer): running(true),
 		minimapPos(),
 		minimapSize(Point2<int>(200, 200)),
 		minimapCenter(Point2<int>(minimapPos + minimapSize / 2.0)),
 		mapMaxX(24), mapMaxY(24), mapScale(20.0),
-		gameState(PLAYING)
+		gameState(PLAYING), renderer(renderer)
 	{
 		std::string texturesBasePath = Logger::ROOT_DIR_PATH + "Resources/Textures/Wolfenstein/";
 
@@ -161,7 +161,7 @@ namespace te
 		end = te::Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
 		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);*/
 		end = winPos + camera.getRightVec() * 150;
-		Point2<int> pos = winPos - camera.getRightVec() * 150;
+		//Point2<int> pos = winPos - camera.getRightVec() * 150;
 		drawLineClamped(winPos, end, 0x00FF00FF, renderer, minimapPos, minimapPos + minimapSize);
 		drawCircleClamped(winPos, mapScale / 8.0, 0xFFFFFFFF, renderer, minimapPos, minimapPos + minimapSize);
 	}
@@ -331,7 +331,7 @@ namespace te
 		v.normalize();
 		//printf("Ray starting from [%f %f] with angle = %f\n", pos.x, pos.y, angle / M_PI * 180);
 		//printf("Vector = [%f %f]\n", v.x, v.y);
-		int count = 0;
+		//int count = 0;
 		int textIndex;
 		while (hit == false && ((int)mapX < this->mapMaxX && (int)mapY < this->mapMaxY
 			&& (int)mapX >= 1 && (int)mapY >= 1))
@@ -406,7 +406,7 @@ namespace te
 			}
 			//drawCircleClamped(end, 4, 0x00FF00FF);
 			screen = end;
-			count++;
+			//count++;
 			//if (count == 2)
 			//break;
 		}
@@ -463,7 +463,7 @@ namespace te
 	{
 		double ratio = camera.getHFov() / this->renderer->w;
 		double currAngle = camera.getYaw() - camera.getHFov() / 2.0;
-		uint32_t color;
+		//uint32_t color;
 		Point2<int> winPos(this->renderer->w / 2, this->renderer->h / 2);
 
 		for (int x = 0; x < this->renderer->w; x++)

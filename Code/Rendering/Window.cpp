@@ -6,8 +6,8 @@
 namespace te
 {
 	Window::Window(RendererType rType):
-		w(1600), h(900), ratio(w / (double)h), resizable(false),
-		rType(rType)
+		resizable(false), ratio(w / (double)h),
+		rType(rType), w(1600), h(900)
 	{
 		if (rType == RendererType::TE_UNKNOWN_RENDERER)
 		{
@@ -16,8 +16,8 @@ namespace te
 	}
 
 	Window::Window(int w, int h, RendererType rType):
-		w(w), h(h), ratio(w / (double)h), resizable(false),
-		rType(rType)
+		resizable(false), ratio(w / (double)h),
+		rType(rType), w(w), h(h)
 	{
 		if (rType == RendererType::TE_UNKNOWN_RENDERER)
 		{
