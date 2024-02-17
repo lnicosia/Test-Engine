@@ -14,4 +14,4 @@
 
 Run `cmake -S . -B Build/Linux` or `cmake -S . -B Build/Windows` to configure the project
 
-Run ``cmake --build Build/Linux` or `cmake --build Build/Windows` to build the project
+Run `cmake --build Build/Linux` or `cmake --build Build/Windows` to build the project
