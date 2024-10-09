@@ -29,6 +29,7 @@ FetchContent_MakeAvailable(SDL_ttf)
 # Add source to this project's executable.
 
 add_executable (${PROJECT_NAME}
+	Test-Engine.rc
 	"main.cpp"
 	"Inputs/Binding.cpp"
 	"Inputs/SDLEvents.cpp"
@@ -85,7 +86,9 @@ add_executable (${PROJECT_NAME}
 	"Debug/Assert.hpp"
 	"Debug/Exception.hpp"
 	"Debug/Exception.cpp"
-	"Platform.hpp" "Rendering/Shaders/Shader.hpp" "Rendering/Shaders/Shader.cpp")
+	"Platform.hpp"
+	"Rendering/Shaders/Shader.hpp"
+	"Rendering/Shaders/Shader.cpp")
 
 
 set(Vulkan_LIBRARY ../../Binaries/ThirdParty/vulkan)	
