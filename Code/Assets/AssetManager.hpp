@@ -113,7 +113,8 @@ namespace te
 			for (const auto& pair : this->assets)
 			{
 				std::shared_ptr<Asset> asset = pair.second;
-				if (std::filesystem::exists(std::filesystem::path(path))
+				std::filesystem::path stdPath(path);
+				if (std::filesystem::exists(stdPath)
 					&& std::filesystem::exists(asset->getPath())
 					&& std::filesystem::equivalent(std::filesystem::path(asset->getPath()),
 						std::filesystem::path(path)))
