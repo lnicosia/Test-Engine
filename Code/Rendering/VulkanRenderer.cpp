@@ -19,7 +19,7 @@
 namespace te
 {
 	VulkanRenderer::VulkanRenderer(): Renderer(RendererType::TE_VULKAN, WindowManager::TE_SDL),
-		instance(), debugMessenger()
+		vulkanInstance(), debugMessenger()
 	{
 		std::shared_ptr<SDLWindow> winPtr = std::shared_ptr<SDLWindow>(
 			new SDLWindow(1600, 900, RendererType::TE_VULKAN));
@@ -30,7 +30,7 @@ namespace te
 	}
 
 	VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::TE_VULKAN, wManager),
-		instance(), debugMessenger()
+		vulkanInstance(), debugMessenger()
 	{
 		// TODO
 		uninplemented();
@@ -60,12 +60,12 @@ namespace te
 		}
 		vkDestroySwapchainKHR(devices[0], swapChain, nullptr);
 		vkDestroyDevice(devices[0], nullptr);
-		vkDestroySurfaceKHR(instance, surface, nullptr);
+		vkDestroySurfaceKHR(vulkanInstance, surface, nullptr);
 		if (enableValidationLayers)
 		{
-			DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+			DestroyDebugUtilsMessengerEXT(vulkanInstance, debugMessenger, nullptr);
 		}
-		vkDestroyInstance(instance, nullptr);
+		vkDestroyInstance(vulkanInstance, nullptr);
 	}
 
 	void VulkanRenderer::initVulkan()
@@ -77,7 +77,7 @@ namespace te
 			setupDebugMessenger();
 		}
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating platform specific surface\n");
-		window->createVulkanSurface(instance, &surface);
+		window->createVulkanSurface(vulkanInstance, &surface);
 		LOG(TE_RENDERING_LOG, TE_LOG, "Selecting physical device\n");
 		selectPhysicalDevices();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating logical device\n");
@@ -110,9 +110,9 @@ namespace te
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = "Test Engine - Vulkan";
-		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 1);
 		appInfo.pEngineName = "Test Engine";
-		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 1);
 		appInfo.apiVersion = VK_API_VERSION_1_0;
 
 		VkInstanceCreateInfo createInfo{};
@@ -151,7 +151,7 @@ namespace te
 			createInfo.pNext = nullptr;
 		}
 
-		if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
+		if (vkCreateInstance(&createInfo, nullptr, &vulkanInstance) != VK_SUCCESS)
 		{
 			ThrowException("Failed to create Vulkan instance!\n");
 		}
@@ -204,7 +204,7 @@ namespace te
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 
 		populateDebugMessengerCreateInfo(createInfo);
-		if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+		if (CreateDebugUtilsMessengerEXT(vulkanInstance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
 		{
 			ThrowException("Failed to setup vulkan debug message\n");
 		}
@@ -232,15 +232,15 @@ namespace te
 	}
 
 	VkResult VulkanRenderer::CreateDebugUtilsMessengerEXT(
-		VkInstance instance,
+		VkInstance vulkanInstance,
 		const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 		const VkAllocationCallbacks* pAllocator,
 		VkDebugUtilsMessengerEXT* pDebugMessenger)
 	{
-		auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+		auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(vulkanInstance, "vkCreateDebugUtilsMessengerEXT");
 		if (func != nullptr)
 		{
-			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+			return func(vulkanInstance, pCreateInfo, pAllocator, pDebugMessenger);
 		}
 		else
 		{
@@ -250,14 +250,14 @@ namespace te
 	}
 
 	void VulkanRenderer::DestroyDebugUtilsMessengerEXT(
-		VkInstance instance,
+		VkInstance vulkanInstance,
 		VkDebugUtilsMessengerEXT debugMessenger,
 		const VkAllocationCallbacks* pAllocator)
 	{
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(vulkanInstance, "vkDestroyDebugUtilsMessengerEXT");
 		if (func != nullptr)
 		{
-			func(instance, debugMessenger, pAllocator);
+			func(vulkanInstance, debugMessenger, pAllocator);
 		}
 		else
 		{
@@ -270,14 +270,14 @@ namespace te
 		uint32_t deviceCount = 0;
 		std::vector<VkPhysicalDevice> devices;
 
-		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+		vkEnumeratePhysicalDevices(vulkanInstance, &deviceCount, nullptr);
 		if (!deviceCount)
 		{
 			ThrowException("No GPU found\n");
 		}
 
 		devices.resize(deviceCount);
-		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+		vkEnumeratePhysicalDevices(vulkanInstance, &deviceCount, devices.data());
 
 		for (const VkPhysicalDevice& device : devices)
 		{

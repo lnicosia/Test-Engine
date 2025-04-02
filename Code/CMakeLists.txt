@@ -29,7 +29,7 @@ FetchContent_MakeAvailable(SDL_ttf)
 # Add source to this project's executable.
 
 add_executable (${PROJECT_NAME}
-	Test-Engine.rc
+	#TODO: remake: Test-Engine.rc
 	"main.cpp"
 	"Inputs/Binding.cpp"
 	"Inputs/SDLEvents.cpp"

@@ -40,7 +40,7 @@ namespace te
 		};
 
 		/* Vulkan data */
-		VkInstance instance;
+		VkInstance vulkanInstance;
 		VkDebugUtilsMessengerEXT debugMessenger;
 		VkSurfaceKHR surface = VK_NULL_HANDLE;
 		std::vector<VkPhysicalDevice> physicalDevices = { VK_NULL_HANDLE };
@@ -70,7 +70,7 @@ namespace te
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 
-#if defined(NDEBUG) && defined(ENABLE_VALIDATION_LAYERS)
+#if !defined(NDEBUG) && defined(ENABLE_VALIDATION_LAYERS)
 		const bool enableValidationLayers = true;
 #else
 		const bool enableValidationLayers = false;
@@ -125,12 +125,12 @@ namespace te
 
 		/* Extension loading functions */
 		VkResult CreateDebugUtilsMessengerEXT(
-			VkInstance instance,
+			VkInstance vulkanInstance,
 			const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 			const VkAllocationCallbacks* pAllocator,
 			VkDebugUtilsMessengerEXT* pDebugMessenger);
 		void DestroyDebugUtilsMessengerEXT(
-			VkInstance instance,
+			VkInstance vulkanInstance,
 			VkDebugUtilsMessengerEXT debugMessenger,
 			const VkAllocationCallbacks* pAllocator);
 	};

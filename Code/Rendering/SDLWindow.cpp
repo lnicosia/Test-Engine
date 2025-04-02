@@ -59,7 +59,16 @@ namespace te
 		log += "window";
 		LOG(TE_RENDERING_LOG, TE_LOG, "%s\n", log.c_str());
 
-		windowPtr = SDL_CreateWindow("Test Engine - SDL Window", w, h, flags);
+		std::string windowName = "Test Engine - SDL Window - Configuration type: ";
+#ifdef NDEBUG
+		windowName += " Release";
+#else
+		windowName += " Debug";
+		#endif
+#ifdef ENABLE_VALIDATION_LAYERS
+		windowName += " with Vulkan Validation layers";
+#endif
+		windowPtr = SDL_CreateWindow(windowName.c_str(), w, h, flags);
 		if (!windowPtr)
 		{
 			ThrowException("Could not create window: " + std::string(SDL_GetError()) + "\n");
