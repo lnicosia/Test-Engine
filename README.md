@@ -7,7 +7,7 @@ Game engine for training purposes.
 * Improve my C++ skills
 * Rely as less as possible on external libraries
 * Make the project modular so new features (ex: physics, audio, new graphics API) can be added and tested easily
-* Learn and use CI and automated build tools and maintain the project cross-platform (for the moment, Windows and Linux).
+* Learn and use CI (Continuous integration) and automated build tools and maintain the project cross-platform (for the moment, Windows and Linux, I don't own a Mac 😥).
 
 ## Project state
 
