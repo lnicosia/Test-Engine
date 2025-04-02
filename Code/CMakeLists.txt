@@ -107,8 +107,10 @@ target_include_directories(${PROJECT_NAME}
 	PRIVATE "./"
 )
 
-target_compile_definitions(${PROJECT_NAME}
-	PUBLIC $<$<CONFIG:Release>:-DNDEBUG>
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+	$<$<CONFIG:Debug>:>
+	$<$<CONFIG:RenderingDebug>:-DENABLE_VALIDATION_LAYERS>
+	$<$<CONFIG:Release>:-DNDEBUG>
 )
 
 #set_property(${PROJECT_NAME} tgt PROPERTY CXX_STANDARD 11)
@@ -117,16 +119,19 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E echo 
-			"Config = $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>")
+			"Config = $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RenderingDebug>:RenderingDebug>"
+)
 if (WIN32)
 
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3.dll"
+			#"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3.dll"
+			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/SDL3.dll"
 			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3_ttf.dll"
+			#"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3_ttf.dll"
+			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/SDL3_ttf.dll"
 			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
 
 	target_link_libraries(${PROJECT_NAME}
