@@ -4,4 +4,4 @@ IF "%1"=="" (
 	EXIT /B
 )
 
-..\..\Binaries\ThirdParty\vulkan\glslc.exe %1 -o %1.spv
+..\..\Binaries\ThirdParty\vulkan\1.3.239.0\glslc.exe %1 -o ..\SPIR-V\%1.spv

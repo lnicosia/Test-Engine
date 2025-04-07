@@ -7,6 +7,8 @@
 
 #include <optional>
 
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
 namespace te
 {
 	class VulkanRenderer: public Renderer
@@ -58,7 +60,15 @@ namespace te
 		VkPipeline graphicsPipeline;
 		std::vector<VkFramebuffer> framebuffers;
 		VkCommandPool commandPool;
-		VkCommandBuffer commandBuffer;
+		std::vector<VkCommandBuffer> commandBuffers;
+
+		std::vector<VkSemaphore> imageAvailableSemaphores;
+		std::vector<VkSemaphore> renderFinishedSemaphores;
+		std::vector<VkFence> inFlightFences;
+
+		uint32_t currentFrame = 0;
+
+		bool frameBufferResized = false;
 
 		const std::vector<const char*> validationLayers =
 		{
@@ -76,24 +86,25 @@ namespace te
 		const bool enableValidationLayers = false;
 #endif
 
-		VkSemaphore imageAvailableSemaphore;
-		VkSemaphore renderFinishedSemaphore;
-		VkFence inFlightFence;
-
 		void initVulkan();
 		void createInstance();
 		bool checkValidationLayerSupport();
 		void selectPhysicalDevices();
 		void createLogicalDevices();
+
 		void createSwapChain();
+		void recreateSwapChain();
+		void cleanupSwapChain();
+
 		void createImageViews();
 		void createRenderPass();
 		void createGraphicsPipeline();
-		void createFramebuffers();
+		void createFrameBuffers();
 		void createCommandPool();
-		void createCommandBuffer();
+		void createCommandBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 		void createSyncObjects();
+
 		void drawFrame();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
