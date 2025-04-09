@@ -11,7 +11,7 @@
 
 #include "Inputs/SDLEvents.hpp"
 #include "Rendering/SoftwareRenderer.hpp"
-#include "Rendering/VulkanRenderer.hpp"
+#include "Rendering/Vulkan/VulkanRenderer.hpp"
 #include "Rendering/GLRenderer.hpp"
 #include "Rendering/D3DRenderer.hpp"
 #include "Rendering/SoftwareRendering/Raycaster.hpp"

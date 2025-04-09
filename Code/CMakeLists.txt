@@ -1,11 +1,8 @@
-﻿# CMakeList.txt : CMake project for Code, include source and define
-# project specific logic here.
-#
-cmake_minimum_required (VERSION 3.10)
-
+﻿cmake_minimum_required (VERSION 3.10)
 
 project ("Test-Engine"
-	VERSION 0.1.0
+	VERSION 0.0.1
+	DESCRIPTION "Test engine"
 	HOMEPAGE_URL "https://github.com/lnicosia/Test-Engine"
 )
 
@@ -36,14 +33,16 @@ add_executable (${PROJECT_NAME}
 	"Inputs/SDLEvents.hpp"
 	"Inputs/Binding.hpp"
 	"Inputs/Action.hpp"
-	"maths/math.hpp" 
+	"maths/math_tmp.hpp" 
 	"Rendering/SoftwareRendering/Raycaster.hpp"
 	"Rendering/Renderer.hpp"
 	"Rendering/SoftwareRenderer.hpp"
 	"Rendering/Window.hpp"
 	"Rendering/SDLWindow.hpp"
 	"Rendering/GLRenderer.hpp"
-	"Rendering/VulkanRenderer.hpp"
+	"Rendering/Vulkan/VulkanRenderer.hpp"
+	"Rendering/Vulkan/VulkanRenderer.cpp"
+	"Rendering/Vulkan/VulkanVertex.hpp"
 	"Debug/Log.hpp"
 	"Inputs/Events.hpp"
 	"Inputs/Events.cpp"
@@ -53,13 +52,12 @@ add_executable (${PROJECT_NAME}
 	"Rendering/SDLWindow.cpp"
 	"Rendering/Renderer.cpp"
 	"Rendering/GLRenderer.cpp"
-	"Rendering/VulkanRenderer.cpp"
 	"Rendering/Camera.hpp"
 	"Rendering/Camera.cpp"
 	"Assets/Textures/Texture.hpp"
 	"Assets/Textures/Texture.cpp"
 	"Rendering/SoftwareRendering/DrawUtils.cpp"
-	"Maths/math.cpp"
+	"Maths/math_tmp.cpp"
 	"Rendering/FrameStats.hpp"
 	"Rendering/FrameStats.cpp"
 	"Rendering/DebugLevel.hpp"
@@ -88,12 +86,15 @@ add_executable (${PROJECT_NAME}
 	"Debug/Exception.cpp"
 	"Platform.hpp"
 	"Rendering/Shaders/Shader.hpp"
-	"Rendering/Shaders/Shader.cpp")
-
+	"Rendering/Shaders/Shader.cpp"
+	"Rendering/Vertex.hpp"
+)
 
 set(Vulkan_LIBRARY ../../Binaries/ThirdParty/vulkan)	
 set(Vulkan_INCLUDE_DIR ../../Code/ThirdParty/vulkan)	
 find_package(Vulkan REQUIRED)
+
+add_subdirectory(Maths)
 
 target_link_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build
@@ -103,11 +104,13 @@ target_link_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	SDL3::SDL3
 	SDL3_ttf::SDL3_ttf
+	sml
 )
 
 target_include_directories(${PROJECT_NAME}
 	PRIVATE "ThirdParty"
 	PRIVATE "./"
+	PRIVATE "Maths"
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC

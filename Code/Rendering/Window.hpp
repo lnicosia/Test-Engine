@@ -1,7 +1,7 @@
 #ifndef _WINDOW_HPP_
 # define _WINDOW_HPP_
 
-#include "Maths/math.hpp"
+#include "Maths/math_tmp.hpp"
 #include "RendererType.hpp"
 #include "Inputs/Events.hpp"
 
