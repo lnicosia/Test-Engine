@@ -6,6 +6,7 @@
 #include "../Platform.hpp"
 #include "../Shaders/Shader.hpp"
 #include "../Assets/CheckFileType.hpp"
+#include "Maths/Tests/MatrixTest.hpp"
 
 #ifdef TE_WINDOWS
 # define VK_USE_PLATFORM_WIN32_KHR
@@ -15,6 +16,7 @@
 #include <cstring>
 #include <set>
 #include <limits>
+#include <chrono>
 
 namespace te
 {
@@ -27,9 +29,12 @@ namespace te
 
 		window->loadVulkan();
 		initVulkan();
+		TestMatrixInit();
+		//TestMatrixMult();
+		//TestMatrixOperations();
 	}
 
-	VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::TE_VULKAN, wManager),
+VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::TE_VULKAN, wManager),
 		vulkanInstance(), debugMessenger()
 	{
 		// TODO
@@ -45,6 +50,15 @@ namespace te
 		cleanupSwapChain();
 		/* TODO: handle multiple logical devices */
 		
+		for (size_t i = 0; i < uniformBuffers.size(); i++)
+		{
+			vkDestroyBuffer(devices[0], uniformBuffers[i], nullptr);
+			vkFreeMemory(devices[0], uniformBuffersMemory[i], nullptr);
+		}
+
+		vkDestroyDescriptorPool(devices[0], descriptorPool, nullptr);
+		vkDestroyDescriptorSetLayout(devices[0], descriptorSetLayout, nullptr);
+
 		vkDestroyBuffer(devices[0], vertexBuffer, nullptr);
 		vkFreeMemory(devices[0], vertexBufferMemory, nullptr);
 		vkDestroyBuffer(devices[0], indexBuffer, nullptr);
@@ -93,16 +107,24 @@ namespace te
 		createImageViews();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating render pass\n");
 		createRenderPass();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating descriptor set layout\n");
+		createDescriptorSetLayout();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating graphics pipeline\n");
 		createGraphicsPipeline();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating frame buffers\n");
 		createFrameBuffers();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating command pools\n");
 		createCommandPools();
-		LOG(TE_RENDERING_LOG, TE_LOG, "Creating vertex buffers\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating vertex buffer\n");
 		createVertexBuffer();
-		LOG(TE_RENDERING_LOG, TE_LOG, "Creating index buffers\n");
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating index buffer\n");
 		createIndexBuffer();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating uniform buffers\n");
+		createUniformBuffers();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating descriptor pool\n");
+		createDescriptorPool();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating descriptor sets\n");
+		createDescriptorSets();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating command buffer\n");
 		createCommandBuffers();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating synchronization objects\n");
@@ -644,6 +666,26 @@ namespace te
 		}
 	}
 
+	void VulkanRenderer::createDescriptorSetLayout()
+	{
+		VkDescriptorSetLayoutBinding uboLayoutBinding{};
+		uboLayoutBinding.binding = 0;
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uboLayoutBinding.descriptorCount = 1;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		uboLayoutBinding.pImmutableSamplers = nullptr;
+
+		VkDescriptorSetLayoutCreateInfo layoutCreateInfo{};
+		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutCreateInfo.bindingCount = 1;
+		layoutCreateInfo.pBindings = &uboLayoutBinding;
+
+		if (vkCreateDescriptorSetLayout(devices[0], &layoutCreateInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+		{
+			ThrowException("Failed to create descriptor set layout!");
+		}
+	}
+
 	void VulkanRenderer::createGraphicsPipeline()
 	{
 		Shader vertex(Logger::ROOT_DIR_PATH + "Shaders/SPIR-V/triangle.vert.spv");
@@ -702,8 +744,10 @@ namespace te
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
-		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		//rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+		rasterizer.cullMode = VK_CULL_MODE_NONE;
+		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		//rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 		rasterizer.depthBiasConstantFactor = 0.0f; // Optional
 		rasterizer.depthBiasClamp = 0.0f; // Optional
@@ -741,8 +785,8 @@ namespace te
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0; // Optional
-		pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
+		pipelineLayoutInfo.setLayoutCount = 1; // Optional
+		pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout; // Optional
 		pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 		pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
@@ -1011,6 +1055,79 @@ namespace te
     	vkFreeMemory(devices[0], stagingBufferMemory, nullptr);
 	}
 
+	void VulkanRenderer::createUniformBuffers()
+	{
+		VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+
+		uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+		uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+		uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+				uniformBuffers[i], uniformBuffersMemory[i]);
+	
+			vkMapMemory(devices[0], uniformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
+		}
+	}
+
+	void VulkanRenderer::createDescriptorPool()
+	{
+		VkDescriptorPoolSize poolSize{};
+		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = 1;
+		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+		if (vkCreateDescriptorPool(devices[0], &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+		{
+			ThrowException("Could not create descriptor pool\n");
+		}
+	}
+
+	void VulkanRenderer::createDescriptorSets()
+	{
+		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = descriptorPool;
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+		allocInfo.pSetLayouts = layouts.data();
+
+		descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+		if (vkAllocateDescriptorSets(devices[0], &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+		{
+			ThrowException("Could not create descriptor sets\n");
+		}
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = uniformBuffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(UniformBufferObject);
+
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSets[i];
+			descriptorWrite.dstBinding = 0;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+			descriptorWrite.pImageInfo = nullptr; // Optional
+			descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+			vkUpdateDescriptorSets(devices[0], 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
 	uint32_t VulkanRenderer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
@@ -1091,6 +1208,8 @@ namespace te
 		scissor.extent = swapChainExtent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
+
 		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
@@ -1129,6 +1248,22 @@ namespace te
 		}
 	}
 
+	void VulkanRenderer::updateUniformBuffer(uint32_t currentFrame)
+	{
+		static auto startTime = std::chrono::high_resolution_clock::now();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	
+		UniformBufferObject ubo{};
+		ubo.model = sml::rotate(time * SML_TO_RADIANS * 90.0f, sml::vec3(0.0f, 1.0f, 0.0f));
+		ubo.view = sml::lookAt(sml::vec3(2.0f, 2.0f, 2.0f), sml::vec3(0.0f, 0.0f, 0.0f), sml::vec3(0.0f, 0.0f, 1.0f));
+		ubo.projection = sml::perspective(SML_TO_RADIANS * 45.0f, 1.77777777778f, 0.1f, 100.0f);
+		ubo.projection[1][1] *= -1;
+
+		memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo));
+	}
+
 	void VulkanRenderer::drawFrame()
 	{
 		vkWaitForFences(devices[0], 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -1151,6 +1286,8 @@ namespace te
 	
 		vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 		recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+
+		updateUniformBuffer(currentFrame);
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

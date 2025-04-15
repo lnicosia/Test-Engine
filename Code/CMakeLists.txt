@@ -101,9 +101,11 @@ target_link_directories(${PROJECT_NAME}
 	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build
 )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} PUBLIC
 	SDL3::SDL3
 	SDL3_ttf::SDL3_ttf
+)
+target_link_libraries(${PROJECT_NAME} PUBLIC
 	sml
 )
 
@@ -133,20 +135,27 @@ if (WIN32)
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			#"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3.dll"
 			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/SDL3.dll"
-			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
+			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+	)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			#"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3_ttf.dll"
 			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/SDL3_ttf.dll"
-			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>)
+			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+	)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"${CMAKE_CURRENT_BINARY_DIR}/Maths/sml.dll"
+			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+	)
 
-	target_link_libraries(${PROJECT_NAME}
+	target_link_libraries(${PROJECT_NAME} PUBLIC
 		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/vulkan-1.lib"
 	)
 
 elseif (UNIX)
 
-	target_link_libraries(${PROJECT_NAME}
+	target_link_libraries(${PROJECT_NAME} PUBLIC
 		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/libvulkan.so.1"
 	)
 

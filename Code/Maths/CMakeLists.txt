@@ -5,6 +5,13 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS True)
 add_library(sml SHARED
 	"Vector.hpp"
 	"Vector.cpp"
+	"Matrix.hpp"
+	"Matrix.cpp"
+	"Quaternion.hpp"
+	"Quaternion.cpp"
+	"MathsUtils.cpp"
+	# TODO: make this optional
+	"Tests/MatrixTest.cpp"
 )
 
 target_include_directories(sml PRIVATE Maths)

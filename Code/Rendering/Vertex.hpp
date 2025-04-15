@@ -7,6 +7,10 @@ namespace te
 {
 	struct Vertex
 	{
+	public:
+		constexpr Vertex() = default;
+		constexpr Vertex(const sml::vec3& pos, const sml::vec3& color): pos(pos), color(color) {}
+
 		sml::vec3 pos;
 		sml::vec3 color;
 	};

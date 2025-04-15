@@ -5,12 +5,13 @@
 
 namespace te
 {
-	struct VulkanVertex
+	struct VulkanVertex// : public Vertex
 	{
+		//constexpr VulkanVertex(const sml::vec3& pos, const sml::vec3& color): Vertex(pos, color) {}
+
 		sml::vec3 pos;
 		sml::vec3 color;
-
-		static VkVertexInputBindingDescription getBindingDescription()
+		static constexpr VkVertexInputBindingDescription getBindingDescription()
 		{
 			VkVertexInputBindingDescription bindingDescription{};
 			bindingDescription.binding = 0;
@@ -19,7 +20,7 @@ namespace te
 			return bindingDescription;
 		}
 
-		static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions()
+		static constexpr std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions()
 		{
 			std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
 

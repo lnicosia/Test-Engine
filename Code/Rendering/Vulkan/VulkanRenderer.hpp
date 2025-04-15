@@ -3,6 +3,7 @@
 
 #include "../Renderer.hpp"
 #include "VulkanVertex.hpp"
+#include "Maths/Matrix.hpp"
 
 #include "vulkan/vulkan.h"
 
@@ -37,11 +38,19 @@ namespace te
 					&& transferFamily.has_value();
 			}
 		};
+
 		struct SwapChainSupportDetails
 		{
 			VkSurfaceCapabilitiesKHR capabilities;
 			std::vector<VkSurfaceFormatKHR> formats;
 			std::vector<VkPresentModeKHR> presentModes;
+		};
+
+		struct UniformBufferObject
+		{
+			sml::mat4 model;
+			sml::mat4 view;
+			sml::mat4 projection;
 		};
 
 		/* Vulkan data */
@@ -60,18 +69,25 @@ namespace te
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 		VkRenderPass renderPass;
+		VkDescriptorSetLayout descriptorSetLayout;
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
 		std::vector<VkFramebuffer> framebuffers;
 		VkCommandPool mainCommandPool;
 		VkCommandPool transferCommandPool;
 		std::vector<VkCommandBuffer> commandBuffers;
+		VkDescriptorPool descriptorPool;
+		std::vector<VkDescriptorSet> descriptorSets;
 
 		/** Temporary hard coded vertex and index buffers */
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
 		VkBuffer indexBuffer;
 		VkDeviceMemory indexBufferMemory;
+		/** Uniform buffers */
+		std::vector<VkBuffer> uniformBuffers;
+		std::vector<VkDeviceMemory> uniformBuffersMemory;
+		std::vector<void*> uniformBuffersMapped;
 
 		std::vector<VkSemaphore> imageAvailableSemaphores;
 		std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -118,12 +134,19 @@ namespace te
 		/** Buffers */
 		void createVertexBuffer();
 		void createIndexBuffer();
+		void createUniformBuffers();
 		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+		void createDescriptorSetLayout();
+		void createDescriptorPool();
+		void createDescriptorSets();
+
 		void createSyncObjects();
 
+		/** Drawing */
+		void updateUniformBuffer(uint32_t currentFrame);
 		void drawFrame();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
@@ -164,6 +187,7 @@ namespace te
 			VkDebugUtilsMessengerEXT debugMessenger,
 			const VkAllocationCallbacks* pAllocator);
 
+		/** TMP hardcoded vertices */
 		const std::vector<VulkanVertex> vertices =
 		{
 			{{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
@@ -175,6 +199,7 @@ namespace te
 		{
 			0, 1, 2, 2, 3, 0
 		};
+
 	};
 }
 
