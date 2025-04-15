@@ -71,7 +71,7 @@ namespace te
 		windowPtr = SDL_CreateWindow(windowName.c_str(), w, h, flags);
 		if (!windowPtr)
 		{
-			ThrowException("Could not create window: " + std::string(SDL_GetError()) + "\n");
+			ThrowException("Could not create SDL window: " + std::string(SDL_GetError()) + "\n");
 		}
 
 		events = std::shared_ptr<SDLEvents>(new SDLEvents());

@@ -83,7 +83,7 @@ void TestMatrixInit()
 	const mat3 testMat3{	{1.0f, 2.0f, 3.0f},
 							{4.0f, 5.0f, 6.0f},
 							{7.0f, 8.0f, 9.0f}};
-	const vec3 vm({1.0f, 2.0f, 3.0f});
+	const vec3 vm(1.0f, 2.0f, 3.0f);
 	const mat3 testMatFromVec{vm, vm, vm};
 	printf("Construct matrix from vectors:\n");
 	printf("const vec3 vm({1.0f, 2.0f, 3.0f});\nconst mat3 testMatFromVec{vm, vm, vm};\nRes:\n");

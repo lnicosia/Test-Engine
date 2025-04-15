@@ -185,7 +185,7 @@ namespace sml
 			return res;
 		}
 
-		template < typename T, size_t size >
+		template < size_t size >
 		constexpr Vector<T, size> operator*(const Vector<T, size>& v) const
 		{
 			Vector<T, size> res{T(0)};

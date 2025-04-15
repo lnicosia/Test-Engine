@@ -6,6 +6,7 @@
 
 #include <array>
 #include <iomanip>
+#include <cmath>
 
 namespace sml
 {
@@ -56,7 +57,7 @@ namespace sml
 				data[i] = value;
 			}
 		} 
-		constexpr VectorUnion<T, 3>( T x, T y, T z): data(x, y, z) {}
+		constexpr VectorUnion<T, 3>( T x, T y, T z): data{x, y, z} {}
 		constexpr VectorUnion<T, 3>(const std::array<T, 3>& from): data(from) {}
 	};
 
@@ -218,7 +219,6 @@ namespace sml
 			return res;
 		}
 
-		template < typename T, size_t size >
 		static constexpr T dot(const Vector<T, size>& v1, const Vector<T, size>& v2)
 		{
 			T res = 0;
