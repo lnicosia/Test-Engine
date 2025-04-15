@@ -29,7 +29,7 @@ namespace te
 
 		window->loadVulkan();
 		initVulkan();
-		TestMatrixInit();
+		//TestMatrixInit();
 		//TestMatrixMult();
 		//TestMatrixOperations();
 	}
