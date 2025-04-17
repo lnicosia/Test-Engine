@@ -2,12 +2,12 @@
 # define _VULKAN_RENDERER_HPP_
 
 #include "../Renderer.hpp"
+#include "../Assets/Textures/VulkanTexture.hpp"
 #include "VulkanVertex.hpp"
 #include "Maths/Matrix.hpp"
+#include "QueueFamilyIndices.hpp"
 
 #include "vulkan/vulkan.h"
-
-#include <optional>
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -25,20 +25,6 @@ namespace te
 			Point2<int> pos, int size) override;
 	private:
 
-		struct QueueFamilyIndices
-		{
-			std::optional<uint32_t> graphicsFamily;
-			std::optional<uint32_t> presentFamily;
-			std::optional<uint32_t> transferFamily;
-
-			bool isComplete() const
-			{
-				return graphicsFamily.has_value()
-					&& presentFamily.has_value()
-					&& transferFamily.has_value();
-			}
-		};
-
 		struct SwapChainSupportDetails
 		{
 			VkSurfaceCapabilitiesKHR capabilities;
@@ -48,53 +34,52 @@ namespace te
 
 		struct UniformBufferObject
 		{
-			sml::mat4 model;
-			sml::mat4 view;
-			sml::mat4 projection;
+			alignas(16) sml::mat4 model;
+			alignas(16) sml::mat4 view;
+			alignas(16) sml::mat4 projection;
 		};
 
 		/* Vulkan data */
-		VkInstance vulkanInstance;
-		VkDebugUtilsMessengerEXT debugMessenger;
+		VkInstance vulkanInstance{};
+		VkDebugUtilsMessengerEXT debugMessenger{};
 		VkSurfaceKHR surface = VK_NULL_HANDLE;
 		std::vector<VkPhysicalDevice> physicalDevices = { VK_NULL_HANDLE };
 		std::vector<VkDevice> devices = { VK_NULL_HANDLE };
-		VkQueue graphicsQueue;
-		VkQueue presentQueue;
-		VkQueue transferQueue;
-		std::vector<QueueFamilyIndices> queueFamilies;
-		VkSwapchainKHR swapChain;
-		std::vector<VkImage> swapChainImages;
-		std::vector<VkImageView> swapChainImageViews;
-		VkFormat swapChainImageFormat;
-		VkExtent2D swapChainExtent;
-		VkRenderPass renderPass;
-		VkDescriptorSetLayout descriptorSetLayout;
-		VkPipelineLayout pipelineLayout;
-		VkPipeline graphicsPipeline;
-		std::vector<VkFramebuffer> framebuffers;
-		VkCommandPool mainCommandPool;
-		VkCommandPool transferCommandPool;
-		std::vector<VkCommandBuffer> commandBuffers;
-		VkDescriptorPool descriptorPool;
-		std::vector<VkDescriptorSet> descriptorSets;
-
+		VkQueue graphicsQueue{};
+		VkQueue presentQueue{};
+		VkQueue transferQueue{};
+		std::vector<QueueFamilyIndices> queueFamilies{};
+		VkSwapchainKHR swapChain{};
+		std::vector<VkImage> swapChainImages{};
+		std::vector<VkImageView> swapChainImageViews{};
+		VkFormat swapChainImageFormat{};
+		VkExtent2D swapChainExtent{};
+		VkRenderPass renderPass{};
+		VkDescriptorSetLayout descriptorSetLayout{};
+		VkPipelineLayout pipelineLayout{};
+		VkPipeline graphicsPipeline{};
+		std::vector<VkFramebuffer> framebuffers{};
+		VkCommandPool mainCommandPool{};
+		VkCommandPool transferCommandPool{};
+		std::vector<VkCommandBuffer> commandBuffers{};
+		VkDescriptorPool descriptorPool{};
+		std::vector<VkDescriptorSet> descriptorSets{};
 		/** Temporary hard coded vertex and index buffers */
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
-		VkBuffer indexBuffer;
-		VkDeviceMemory indexBufferMemory;
+		VkBuffer vertexBuffer{};
+		VkDeviceMemory vertexBufferMemory{};
+		VkBuffer indexBuffer{};
+		VkDeviceMemory indexBufferMemory{};
 		/** Uniform buffers */
-		std::vector<VkBuffer> uniformBuffers;
-		std::vector<VkDeviceMemory> uniformBuffersMemory;
-		std::vector<void*> uniformBuffersMapped;
-
-		std::vector<VkSemaphore> imageAvailableSemaphores;
-		std::vector<VkSemaphore> renderFinishedSemaphores;
-		std::vector<VkFence> inFlightFences;
-
+		std::vector<VkBuffer> uniformBuffers{};
+		std::vector<VkDeviceMemory> uniformBuffersMemory{};
+		std::vector<void*> uniformBuffersMapped{};
+		/** Images */
+		std::vector<VulkanTexture> textures{};
+		/** Synchro */
+		std::vector<VkSemaphore> imageAvailableSemaphores{};
+		std::vector<VkSemaphore> renderFinishedSemaphores{};
+		std::vector<VkFence> inFlightFences{};
 		uint32_t currentFrame = 0;
-
 		bool frameBufferResized = false;
 
 		const std::vector<const char*> validationLayers =
@@ -135,13 +120,14 @@ namespace te
 		void createVertexBuffer();
 		void createIndexBuffer();
 		void createUniformBuffers();
-		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 		void createDescriptorSetLayout();
 		void createDescriptorPool();
 		void createDescriptorSets();
+
+		/** Textures */
+		void createTextureImage();
 
 		void createSyncObjects();
 
@@ -190,10 +176,10 @@ namespace te
 		/** TMP hardcoded vertices */
 		const std::vector<VulkanVertex> vertices =
 		{
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
-    		{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}},
-			{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}
+			{{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+    		{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+			{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+			{{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}
 		};
 		const std::vector<uint16_t> indices =
 		{

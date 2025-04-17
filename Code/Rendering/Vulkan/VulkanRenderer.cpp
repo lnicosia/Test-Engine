@@ -1,11 +1,13 @@
 #define NOMINMAX
 
 #include "VulkanRenderer.hpp"
+#include "VulkanUtils.hpp"
 #include "../SDLWindow.hpp"
 #include "../Debug/Assert.hpp"
 #include "../Platform.hpp"
 #include "../Shaders/Shader.hpp"
 #include "../Assets/CheckFileType.hpp"
+#include "../Assets/AssetManager.hpp"
 #include "Maths/Tests/MatrixTest.hpp"
 
 #ifdef TE_WINDOWS
@@ -48,8 +50,14 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 	VulkanRenderer::~VulkanRenderer()
 	{
 		cleanupSwapChain();
+
 		/* TODO: handle multiple logical devices */
 		
+		for (auto& vulkanTexture : textures)
+		{
+			vulkanTexture.cleanUp();
+		}
+
 		for (size_t i = 0; i < uniformBuffers.size(); i++)
 		{
 			vkDestroyBuffer(devices[0], uniformBuffers[i], nullptr);
@@ -115,6 +123,8 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		createFrameBuffers();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating command pools\n");
 		createCommandPools();
+		LOG(TE_RENDERING_LOG, TE_LOG, "Creating texture image\n");
+		createTextureImage();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating vertex buffer\n");
 		createVertexBuffer();
 		LOG(TE_RENDERING_LOG, TE_LOG, "Creating index buffer\n");
@@ -349,7 +359,8 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 			swapChainSupported = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 		}
 
-		if (indices.isComplete() && requiredExtensionsSupported && swapChainSupported)
+		if (indices.isComplete() && requiredExtensionsSupported && swapChainSupported
+			&& deviceFeatures.samplerAnisotropy)
 		{
 			LOG(TE_RENDERING_LOG, TE_LOG, "Selecting device '%s'\n",
 				deviceProperties.deviceName);
@@ -376,7 +387,7 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		return requiredExtensions.empty();
 	}
 
-	VulkanRenderer::QueueFamilyIndices VulkanRenderer::findQueueFamilies(VkPhysicalDevice device)
+	QueueFamilyIndices VulkanRenderer::findQueueFamilies(VkPhysicalDevice device)
 	{
 		QueueFamilyIndices indices;
 		uint32_t queueFamilyCount = 0;
@@ -442,6 +453,7 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		}
 
 		VkPhysicalDeviceFeatures deviceFeatures{};
+		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 		VkDeviceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -644,25 +656,7 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 
 		for (size_t i = 0; i < swapChainImages.size(); i++)
 		{
-			VkImageViewCreateInfo createInfo{};
-			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			createInfo.image = swapChainImages[i];
-			createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			createInfo.format = swapChainImageFormat;
-			createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-			createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			createInfo.subresourceRange.baseMipLevel = 0;
-			createInfo.subresourceRange.levelCount = 1;
-			createInfo.subresourceRange.baseArrayLayer = 0;
-			createInfo.subresourceRange.layerCount = 1;
-
-			if (vkCreateImageView(devices[0], &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
-			{
-				ThrowException("Failed to create image view " + std::to_string(i) + "\n");
-			}
+			swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat, devices[0]);
 		}
 	}
 
@@ -675,10 +669,18 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 		uboLayoutBinding.pImmutableSamplers = nullptr;
 
+		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+		samplerLayoutBinding.binding = 1;
+		samplerLayoutBinding.descriptorCount = 1;
+		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		samplerLayoutBinding.pImmutableSamplers = nullptr;
+		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+		std::array<VkDescriptorSetLayoutBinding, 2> bindings{ uboLayoutBinding, samplerLayoutBinding };
 		VkDescriptorSetLayoutCreateInfo layoutCreateInfo{};
 		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutCreateInfo.bindingCount = 1;
-		layoutCreateInfo.pBindings = &uboLayoutBinding;
+		layoutCreateInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+		layoutCreateInfo.pBindings = bindings.data();
 
 		if (vkCreateDescriptorSetLayout(devices[0], &layoutCreateInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
 		{
@@ -744,10 +746,8 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
-		//rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.cullMode = VK_CULL_MODE_NONE;
+		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-		//rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 		rasterizer.depthBiasConstantFactor = 0.0f; // Optional
 		rasterizer.depthBiasClamp = 0.0f; // Optional
@@ -937,76 +937,22 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		}
 	}
 
-	void VulkanRenderer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+	void VulkanRenderer::createTextureImage()
 	{
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = size;
-		bufferInfo.usage = usage;
-		bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
-		
-		uint32_t queueFamilyIndices[] =
-		{
-			queueFamilies[0].graphicsFamily.value(),
-			queueFamilies[0].transferFamily.value()
-		};
-		bufferInfo.queueFamilyIndexCount = 2;
-		bufferInfo.pQueueFamilyIndices = queueFamilyIndices;
-
-		if (vkCreateBuffer(devices[0], &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-		{
-			ThrowException("Failed to create vertex buffer!");
-		}
-
-		VkMemoryRequirements memRequirements{};
-		vkGetBufferMemoryRequirements(devices[0], buffer, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
-
-		if (vkAllocateMemory(devices[0], &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-		{
-			ThrowException("Failed to allocate vertex buffer memory");
-		}
-		vkBindBufferMemory(devices[0], buffer, bufferMemory, 0);
+		textures.emplace_back(VulkanTexture{{&queueFamilies, physicalDevices[0], devices[0],
+			transferCommandPool, mainCommandPool, transferQueue, graphicsQueue},
+			Logger::ROOT_DIR_PATH + "Resources/Textures/bigdoor2.bmp"});
 	}
 
 	void VulkanRenderer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = transferCommandPool;
-		allocInfo.commandBufferCount = 1;
-
-		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(devices[0], &allocInfo, &commandBuffer);
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-		vkBeginCommandBuffer(commandBuffer, &beginInfo);
+		VkCommandBuffer commandBuffer = beginSingleTimeCommands(transferCommandPool, devices[0]);
 
 		VkBufferCopy copyRegion{};
-		copyRegion.srcOffset = 0; // Optional
-		copyRegion.dstOffset = 0; // Optional
 		copyRegion.size = size;
 		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-		vkEndCommandBuffer(commandBuffer);
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-
-		vkQueueSubmit(transferQueue, 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(transferQueue);
-
-		vkFreeCommandBuffers(devices[0], transferCommandPool, 1, &commandBuffer);
+		endSingleTimeCommands(commandBuffer, transferCommandPool, devices[0], transferQueue);
 	}
 
 	void VulkanRenderer::createVertexBuffer()
@@ -1015,7 +961,8 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 
 		VkBuffer stagingBuffer;
     	VkDeviceMemory stagingBufferMemory;
-		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		createBuffer(queueFamilies, physicalDevices[0], devices[0],
+			bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			stagingBuffer, stagingBufferMemory);
 
@@ -1024,7 +971,8 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
 		vkUnmapMemory(devices[0], stagingBufferMemory);
 
-		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		createBuffer(queueFamilies, physicalDevices[0], devices[0],
+			bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
 		copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
@@ -1038,7 +986,8 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 
 		VkBuffer stagingBuffer;
     	VkDeviceMemory stagingBufferMemory;
-		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		createBuffer(queueFamilies, physicalDevices[0], devices[0],
+			bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			stagingBuffer, stagingBufferMemory);
 
@@ -1047,7 +996,8 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
 		vkUnmapMemory(devices[0], stagingBufferMemory);
 
-		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+		createBuffer(queueFamilies, physicalDevices[0], devices[0],
+			bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
 		copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
@@ -1065,7 +1015,8 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			createBuffer(queueFamilies, physicalDevices[0], devices[0],
+				bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 				uniformBuffers[i], uniformBuffersMemory[i]);
 	
@@ -1075,14 +1026,16 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 
 	void VulkanRenderer::createDescriptorPool()
 	{
-		VkDescriptorPoolSize poolSize{};
-		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+		std::array<VkDescriptorPoolSize, 2> poolSizes{};
+		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = 1;
-		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+		poolInfo.pPoolSizes = poolSizes.data();
 		poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
 		if (vkCreateDescriptorPool(devices[0], &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
@@ -1113,35 +1066,30 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 			bufferInfo.offset = 0;
 			bufferInfo.range = sizeof(UniformBufferObject);
 
-			VkWriteDescriptorSet descriptorWrite{};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = descriptorSets[i];
-			descriptorWrite.dstBinding = 0;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-			descriptorWrite.pImageInfo = nullptr; // Optional
-			descriptorWrite.pTexelBufferView = nullptr; // Optional
+			VkDescriptorImageInfo imageInfo{};
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.imageView = textures[0].getImageView();
+			imageInfo.sampler = textures[0].getSampler();
 
-			vkUpdateDescriptorSets(devices[0], 1, &descriptorWrite, 0, nullptr);
+			std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[0].dstSet = descriptorSets[i];
+			descriptorWrites[0].dstBinding = 0;
+			descriptorWrites[0].dstArrayElement = 0;
+			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrites[0].descriptorCount = 1;
+			descriptorWrites[0].pBufferInfo = &bufferInfo;
+			
+			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[1].dstSet = descriptorSets[i];
+			descriptorWrites[1].dstBinding = 1;
+			descriptorWrites[1].dstArrayElement = 0;
+			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrites[1].descriptorCount = 1;
+			descriptorWrites[1].pImageInfo = &imageInfo;
+
+			vkUpdateDescriptorSets(devices[0], static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
-	}
-
-	uint32_t VulkanRenderer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
-	{
-		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(physicalDevices[0], &memProperties);
-
-		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-		{
-			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-			{
-				return i;
-			}
-		}
-		ThrowException("Could not find a suitable memory type");
-		return 0;
 	}
 
 	void VulkanRenderer::createCommandBuffers()
@@ -1256,9 +1204,9 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 	
 		UniformBufferObject ubo{};
-		ubo.model = sml::rotate(time * SML_TO_RADIANS * 90.0f, sml::vec3(0.0f, 1.0f, 0.0f));
+		ubo.model = sml::rotate(time * SML_TO_RADIANS * 90.0f, sml::vec3(0.0f, 0.0f, 1.0f));
 		ubo.view = sml::lookAt(sml::vec3(2.0f, 2.0f, 2.0f), sml::vec3(0.0f, 0.0f, 0.0f), sml::vec3(0.0f, 0.0f, 1.0f));
-		ubo.projection = sml::perspective(SML_TO_RADIANS * 45.0f, 1.77777777778f, 0.1f, 100.0f);
+		ubo.projection = sml::perspective(SML_TO_RADIANS * 45.0f, swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 		ubo.projection[1][1] *= -1;
 
 		memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo));

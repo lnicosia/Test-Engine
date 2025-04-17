@@ -29,42 +29,31 @@ namespace te
 
 		//	Accessors
 
-		virtual const std::string&
-			getName() const;
+		virtual const std::string& getName() const;
 
-		virtual const std::string&
-			getEmbeddedName() const;
+		virtual const std::string& getEmbeddedName() const;
 
-		const uint32_t&
-			getId() const;
+		const uint32_t& getId() const;
 
-		const std::filesystem::path&
-			getPath(int index = 0) const;
+		const std::filesystem::path& getPath(int index = 0) const;
 
-		const std::vector<std::filesystem::path>&
-			getPaths() const;
+		const std::vector<std::filesystem::path>& getPaths() const;
 
-		const bool
-			isLoaded() const;
+		const bool isLoaded() const;
 
-		virtual const std::string
-			getAssetType() const = 0;
+		virtual const std::string getAssetType() const = 0;
 
 		//	Setters
 
-		void
-			setName(const std::string& name);
+		void setName(const std::string& name);
 
-		void
-			setEmbeddedName(const std::string& name);
+		void setEmbeddedName(const std::string& name);
 
 		//	No setter for ID
 
-		void
-			setPath(const std::filesystem::path& path, int index = 0);
+		void setPath(const std::filesystem::path& path, int index = 0);
 
-		void
-			setPaths(const std::vector<std::filesystem::path>& paths);
+		void setPaths(const std::vector<std::filesystem::path>& paths);
 
 	protected:
 
@@ -80,13 +69,13 @@ namespace te
 		*/
 		std::string	embeddedName;
 
-		bool					loaded;
+		bool loaded;
 
 	private:
 
-		uint32_t				id;
+		uint32_t id;
 
-		static uint32_t			count;
+		static uint32_t count;
 	};
 
 	std::ostream& operator<<(std::ostream& o, Asset const& asset);

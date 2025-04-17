@@ -13,20 +13,20 @@ namespace sml
 	struct Matrix
 	{
 		/** Constructors */
-		constexpr Matrix(): data{}
+		constexpr Matrix()
 		{
 		}
 
-		constexpr Matrix(T value): data{}
+		constexpr Matrix(T value)
 		{
 			for (size_t i = 0; i < std::min(rowCount, columnCount); i++)
 			{
-				data[i][i] = value;
+				data.arrays[i][i] = value;
 			}
 			
 		}
 
-		constexpr Matrix(std::initializer_list<std::initializer_list<T>> list): data{}
+		constexpr Matrix(std::initializer_list<std::initializer_list<T>> list)
 		{
 			if (list.size() > rowCount)
 			{
@@ -42,7 +42,7 @@ namespace sml
 				int c = 0;
 				for (const T* it = (*lit).begin(); it != (*lit).end(); it++)
 				{
-					data[r][c] = *it;
+					data.arrays[r][c] = *it;
 					c++;
 				}
 				r++;
@@ -54,7 +54,7 @@ namespace sml
 			
 		}
 
-		constexpr Matrix(std::initializer_list<Vector<T, columnCount>> list): data{}
+		constexpr Matrix(std::initializer_list<Vector<T, columnCount>> list)
 		{
 			if (list.size() > rowCount)
 			{
@@ -63,16 +63,16 @@ namespace sml
 			int r = 0;
 			for (const Vector<T, columnCount>* it = list.begin(); it != list.end(); it++)
 			{
-				for (size_t i = 0; i < data[r].size(); i++)
+				for (size_t i = 0; i < data.arrays[r].size(); i++)
 				{
-					data[r][i] = (*it)[i];
+					data.arrays[r][i] = (*it)[i];
 				}
 				r++;
 			}
 		}
 
 		template < typename... Args>
-		constexpr Matrix(Args... args): vectors{}
+		constexpr Matrix(Args... args)
 		{
 			for (size_t i = 0; i < sizeof...(args); i++)
 			{
@@ -88,7 +88,7 @@ namespace sml
 				printf("{");
 				for (size_t j = 0; j < columnCount; j++)
 				{
-					printf(" %f", data[i][j]);
+					printf(" %f", data.arrays[i][j]);
 				}
 				printf(" }\n");
 			}
@@ -97,17 +97,17 @@ namespace sml
 		/** Accessors */
 		constexpr std::array<T, columnCount>& operator[]( size_t index )
 		{
-			if (index >= 0 && index < data.size())
+			if (index >= 0 && index < data.arrays.size())
 			{
-				return data[index];
+				return data.arrays[index];
 			}
 			throw MathsException("Matrix index out of bounds\n");
 		}
 		constexpr const std::array<T, columnCount>& operator[]( size_t index ) const
 		{
-			if (index >= 0 && index < data.size())
+			if (index >= 0 && index < data.arrays.size())
 			{
-				return data[index];
+				return data.arrays[index];
 			}
 			throw MathsException("Matrix index out of bounds\n");
 		}
@@ -156,7 +156,7 @@ namespace sml
 				{
 					for (size_t k = 0; k < columnCount; k++)
 					{
-						res[i][j] += data[i][k] * m[k][j];
+						res[i][j] += data.arrays[i][k] * m[k][j];
 					}
 				}
 			}
@@ -178,7 +178,7 @@ namespace sml
 				{
 					for (size_t k = 0; k < columnCount; k++)
 					{
-						res[i][j] += data[i][k] * m[k][j];
+						res[i][j] += data.arrays[i][k] * m[k][j];
 					}
 				}
 			}
@@ -193,18 +193,19 @@ namespace sml
 			{
 				for (size_t j = 0; j < size; j++)
 				{
-					res[i] += data[i][j] * v[j];
+					res[i] += data.arrays[i][j] * v[j];
 				}
 			}
 			return res;
 		}
 
 		/** Data */
-		union
+		union DataUnion
 		{
-			std::array<std::array<T, columnCount>, rowCount> data;
+			std::array<std::array<T, columnCount>, rowCount> arrays;
 			std::array<Vector<T, columnCount>, rowCount> vectors;
 		};
+		DataUnion data{};
 		
 	};
 

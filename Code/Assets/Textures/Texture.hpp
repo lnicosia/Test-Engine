@@ -20,7 +20,7 @@ namespace te
 		Texture(Texture&& ref);
 		Texture& operator=(Texture&& ref);
 		Texture& operator=(const Texture& ref) = delete;
-		~Texture();
+		virtual ~Texture();
 
 		const int getWidth() const;
 		const int getHeight() const;
