@@ -8,20 +8,27 @@
 namespace te
 {
 
-	uint32_t findMemoryType(VkPhysicalDevice& physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
+	uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	
-	void createBuffer(std::vector<QueueFamilyIndices>& queueFamilies, VkPhysicalDevice& ownerPhysicalDevice, VkDevice& ownerDevice,
+	/** Buffers and image creation and transition */
+	void createBuffer(std::vector<QueueFamilyIndices>& queueFamilies, VkPhysicalDevice physicalDevice, VkDevice device,
 		VkDeviceSize& size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-		VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+		VkBuffer& outBuffer, VkDeviceMemory& outBufferMemory);
+	void createImage(VkPhysicalDevice physicalDevice, VkDevice device, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling,
+		VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& outImage, VkDeviceMemory& outImageMemory);
+	VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+	void transitionImageLayout(VkDevice device, VkCommandPool commandPool, VkQueue queue,
+		VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	bool hasStencilComponent(VkFormat format);
 
-	VkCommandBuffer beginSingleTimeCommands(VkCommandPool& commandPool, VkDevice device);
-	void endSingleTimeCommands(VkCommandBuffer& commandBuffer, VkCommandPool& commandPool, VkDevice device, VkQueue queue);
+	/** Single use buffer commands */
+	VkCommandBuffer beginSingleTimeCommands(VkCommandPool commandPool, VkDevice device);
+	void endSingleTimeCommands(VkDevice device, VkQueue queue, VkCommandBuffer commandBuffer, VkCommandPool commandPool);
 	/** Buffer commands */
 	void setupCommandBuffer(); // TODO
-	void addCommandToBuffer(VkCommandBuffer& commandBuffer); // TODO
-	void flushCommandBuffer(VkCommandBuffer& commandBuffer); // TODO
+	void addCommandToBuffer(VkCommandBuffer commandBuffer); // TODO
+	void flushCommandBuffer(VkCommandBuffer commandBuffer); // TODO
 
-	VkImageView createImageView(VkImage& image, VkFormat format, VkDevice& device);
 
 } // namespace te
 

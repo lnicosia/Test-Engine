@@ -39,31 +39,38 @@ namespace te
 			alignas(16) sml::mat4 projection;
 		};
 
-		/* Vulkan data */
+		/* Base data */
 		VkInstance vulkanInstance{};
-		VkDebugUtilsMessengerEXT debugMessenger{};
 		VkSurfaceKHR surface = VK_NULL_HANDLE;
 		std::vector<VkPhysicalDevice> physicalDevices = { VK_NULL_HANDLE };
 		std::vector<VkDevice> devices = { VK_NULL_HANDLE };
+		/** Queues */
 		VkQueue graphicsQueue{};
 		VkQueue presentQueue{};
 		VkQueue transferQueue{};
 		std::vector<QueueFamilyIndices> queueFamilies{};
+
+		/** Swap chain */
 		VkSwapchainKHR swapChain{};
 		std::vector<VkImage> swapChainImages{};
 		std::vector<VkImageView> swapChainImageViews{};
 		VkFormat swapChainImageFormat{};
 		VkExtent2D swapChainExtent{};
+		/** Render pass */
 		VkRenderPass renderPass{};
+		/** Descriptor sets */
 		VkDescriptorSetLayout descriptorSetLayout{};
-		VkPipelineLayout pipelineLayout{};
-		VkPipeline graphicsPipeline{};
-		std::vector<VkFramebuffer> framebuffers{};
-		VkCommandPool mainCommandPool{};
-		VkCommandPool transferCommandPool{};
-		std::vector<VkCommandBuffer> commandBuffers{};
 		VkDescriptorPool descriptorPool{};
 		std::vector<VkDescriptorSet> descriptorSets{};
+		/** Pipeline */
+		VkPipelineLayout pipelineLayout{};
+		VkPipeline graphicsPipeline{};
+		/** Buffers */
+		std::vector<VkFramebuffer> framebuffers{};
+		std::vector<VkCommandBuffer> commandBuffers{};
+		/** Command pools */
+		VkCommandPool graphicsCommandPool{};
+		VkCommandPool transferCommandPool{};
 		/** Temporary hard coded vertex and index buffers */
 		VkBuffer vertexBuffer{};
 		VkDeviceMemory vertexBufferMemory{};
@@ -75,6 +82,10 @@ namespace te
 		std::vector<void*> uniformBuffersMapped{};
 		/** Images */
 		std::vector<VulkanTexture> textures{};
+		/** Depth buffer */
+		VkImage depthImage{};
+		VkDeviceMemory depthImageMemory{};
+		VkImageView depthImageView{};
 		/** Synchro */
 		std::vector<VkSemaphore> imageAvailableSemaphores{};
 		std::vector<VkSemaphore> renderFinishedSemaphores{};
@@ -82,6 +93,8 @@ namespace te
 		uint32_t currentFrame = 0;
 		bool frameBufferResized = false;
 
+		/** Debug data */
+		VkDebugUtilsMessengerEXT debugMessenger{};
 		const std::vector<const char*> validationLayers =
 		{
 			"VK_LAYER_KHRONOS_validation"
@@ -129,16 +142,23 @@ namespace te
 		/** Textures */
 		void createTextureImage();
 
+		/** Depth buffer */
+		void createDepthResources();
+		VkFormat findDepthFormat();
+
 		void createSyncObjects();
 
 		/** Drawing */
 		void updateUniformBuffer(uint32_t currentFrame);
 		void drawFrame();
 
+		/** Utils/queries */
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates,
+			VkImageTiling tiling, VkFormatFeatureFlags features);
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
