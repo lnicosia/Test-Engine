@@ -9,7 +9,7 @@
 
 namespace te
 {
-	VulkanTexture::VulkanTexture(VulkanOwnerData ownerData, const std::string& path): ownerData{ownerData}, Texture{path}
+	VulkanTexture::VulkanTexture(VulkanOwnerData&& ownerData, const std::string& path): ownerData{std::move(ownerData)}, Texture{path}
 	{
 		int texWidth, texHeight, texChannels;
 		std::string filePath{Logger::ROOT_DIR_PATH + "Resources/Textures/bigdoor2.bmp"};
@@ -53,8 +53,18 @@ namespace te
 	VulkanTexture::VulkanTexture(VulkanTexture&& ref): Texture{std::move(ref)}, 
 		textureImage{std::move(ref.textureImage)}, textureImageMemory{std::move(ref.textureImageMemory)},
 		textureImageView{std::move(ref.textureImageView)}, textureSampler{std::move(ref.textureSampler)},
-		ownerData(std::move(ownerData))
+		ownerData{std::move(ref.ownerData)}
 	{
+	}
+
+	VulkanTexture& VulkanTexture::operator=(VulkanTexture&& ref)
+	{
+		textureImage= std::move(ref.textureImage);
+		textureImageMemory = std::move(ref.textureImageMemory);
+		textureImageView = std::move(ref.textureImageView);
+		textureSampler = std::move(ref.textureSampler);
+		ownerData = std::move(ref.ownerData);
+		return *this;
 	}
 
 	VulkanTexture::~VulkanTexture()

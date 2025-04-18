@@ -10,20 +10,54 @@ namespace te
 {
 	struct VulkanOwnerData
 	{
-		std::vector<QueueFamilyIndices>* queueFamilies;
+		std::vector<QueueFamilyIndices>* queueFamilies{};
 		VkPhysicalDevice physicalDevice{};
 		VkDevice device{};
 		VkCommandPool transferPool{};
 		VkCommandPool graphicsPool{};
 		VkQueue transferQueue{};
 		VkQueue graphicsQueue{};
+
+		VulkanOwnerData()
+		{
+		}
+
+		VulkanOwnerData(std::vector<QueueFamilyIndices>* queueFamilies,
+			VkPhysicalDevice physicalDevice, VkDevice device,
+			VkCommandPool transferPool, VkCommandPool graphicsPool,
+			VkQueue transferQueue, VkQueue graphicsQueue):
+			queueFamilies{queueFamilies},
+			physicalDevice{physicalDevice}, device{device},
+			transferPool{transferPool}, graphicsPool{graphicsPool},
+			transferQueue{transferQueue}, graphicsQueue{graphicsQueue}
+		{
+		}
+
+		VulkanOwnerData(VulkanOwnerData&& ref): queueFamilies{std::move(ref.queueFamilies)},
+			physicalDevice{std::move(ref.physicalDevice)}, device{std::move(ref.device)},
+			transferPool{std::move(ref.transferPool)}, graphicsPool{std::move(ref.graphicsPool)},
+			transferQueue{std::move(ref.transferQueue)}, graphicsQueue{std::move(ref.graphicsQueue)}
+		{
+		}
+
+		VulkanOwnerData& operator=(VulkanOwnerData&& ref)
+		{
+			queueFamilies = std::move(ref.queueFamilies);
+			physicalDevice = std::move(ref.physicalDevice);
+			device = std::move(ref.device);
+			transferPool = std::move(ref.transferPool);
+			graphicsPool = std::move(ref.graphicsPool);
+			transferQueue = std::move(ref.transferQueue);
+			graphicsQueue = std::move(ref.graphicsQueue);
+			return *this;
+		}
 	};
 
 	class VulkanTexture : public Texture
 	{
 	public:
 		VulkanTexture() = delete;
-		VulkanTexture(VulkanOwnerData ownerData, const std::string& path);
+		VulkanTexture(VulkanOwnerData&& ownerData, const std::string& path);
 		VulkanTexture(const VulkanTexture& ref) = delete;
 		VulkanTexture(VulkanTexture&& ref);
 		VulkanTexture& operator=(VulkanTexture&& ref);

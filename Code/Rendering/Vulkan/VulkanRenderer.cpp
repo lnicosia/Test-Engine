@@ -52,7 +52,6 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 		cleanupSwapChain();
 
 		/* TODO: handle multiple logical devices */
-		
 		for (auto& vulkanTexture : textures)
 		{
 			vulkanTexture.cleanUp();
@@ -1282,7 +1281,10 @@ VulkanRenderer::VulkanRenderer(WindowManager wManager): Renderer(RendererType::T
 
 			drawFrame();
 		}
-		vkDeviceWaitIdle(devices[0]);
+		if (vkDeviceWaitIdle(devices[0]) != VK_SUCCESS)
+		{
+			LOG(TE_RENDERING_LOG, TE_ERROR, "Could not wait for device to become idle\n");
+		}
 		// TODO
 	}
 
