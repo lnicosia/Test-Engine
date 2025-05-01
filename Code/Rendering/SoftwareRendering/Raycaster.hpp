@@ -1,7 +1,7 @@
 #ifndef _RAYCASTER_HPP_
 # define _RAYCASTER_HPP_
 
-#include "Rendering/SoftwareRenderer.hpp"
+#include "Rendering/SoftwareRendering/SoftwareRenderer.hpp"
 #include "Rendering/Camera.hpp"
 #include "Assets/Textures/SoftwareTexture.hpp"
 

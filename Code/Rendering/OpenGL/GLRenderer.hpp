@@ -1,7 +1,7 @@
 #ifndef _GL_RENDERER_HPP_
 # define _GL_RENDERER_HPP_
 
-#include "Renderer.hpp"
+#include "../Renderer.hpp"
 
 namespace te
 {
@@ -9,7 +9,7 @@ namespace te
 	{
 	public:
 		GLRenderer();
-		GLRenderer(WindowManager wManager);
+		GLRenderer(WindowAPI wManager);
 		~GLRenderer();
 
 		void render() override;

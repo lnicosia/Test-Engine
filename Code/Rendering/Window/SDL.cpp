@@ -15,7 +15,7 @@ namespace te
 		if (initialized)
 			return;
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Initializing SDL\n");
 
 		if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
 		{
@@ -26,25 +26,25 @@ namespace te
 
 		//if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
 		//{
-		//	LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Audio subsystem : %s\n", SDL_GetError());
+		//	TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Audio subsystem : %s\n", SDL_GetError());
 		//}
 
 		//if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) != 0)
 		//{
-		//	LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Joystick subsystem : %s\n", SDL_GetError());
+		//	TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Joystick subsystem : %s\n", SDL_GetError());
 		//}
 
 		//if (SDL_InitSubSystem(SDL_INIT_HAPTIC) != 0)
 		//{
-		//	LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Haptic subsystem : %s\n", SDL_GetError());
+		//	TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Haptic subsystem : %s\n", SDL_GetError());
 		//}
 
 		//if (SDL_InitSubSystem(SDL_INIT_GAMEPAD) != 0)
 		//{
-		//	LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Gamepad subsystem : %s\n", SDL_GetError());
+		//	TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Couldn't initialize SDL Gamepad subsystem : %s\n", SDL_GetError());
 		//}
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL_ttf\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Initializing SDL_ttf\n");
 		if (TTF_Init() == -1)
 		{
 			ThrowException( "Couldn't initialize SDL_ttf : \n" + std::string(TTF_GetError()) + "\n" );
@@ -52,11 +52,11 @@ namespace te
 
 		if (std::atexit(Quit) != 0)
 		{
-			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL TTF\n");
+			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL TTF\n");
 			TTF_Quit();
-			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL subsystems\n");
+			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL subsystems\n");
 			SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL\n");
+			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL\n");
 			SDL_Quit();
 			ThrowException( "Failed to setup SDL cleanup function\n" );
 		}
@@ -80,12 +80,12 @@ namespace te
 	{
 		if (initialized)
 		{
-			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL TTF\n");
+			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL TTF\n");
 			TTF_Quit();
 			/* LEAK ?? */
-			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL subsystems\n");
+			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL subsystems\n");
 			SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-			LOG(TE_RENDERING_LOG, TE_LOG, "Quitting SDL\n");
+			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL\n");
 			SDL_Quit();
 			initialized = false;
 		}

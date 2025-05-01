@@ -39,6 +39,29 @@ namespace sml
 	};
 
 	template < typename T >
+	struct VectorUnion<T, 2>
+	{
+		union
+		{
+			std::array<T,3> data;
+			struct { T x; T y; };
+			struct { T s; T t; };
+			struct { T u; T v; };
+		};
+
+		constexpr VectorUnion<T, 2>() = default;
+		constexpr VectorUnion<T, 2>(T value)
+		{
+			for (size_t i = 0; i < 2; i++)
+			{
+				data[i] = value;
+			}
+		} 
+		constexpr VectorUnion<T, 2>( T x, T y): data{x, y} {}
+		constexpr VectorUnion<T, 2>(const std::array<T, 2>& from): data(from) {}
+	};
+
+	template < typename T >
 	struct VectorUnion<T, 3>
 	{
 		union

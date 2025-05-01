@@ -27,7 +27,7 @@ namespace te
 
 	SDLWindow::~SDLWindow()
 	{
-		LOG(TE_RENDERING_LOG, TE_LOG, "Destroying SDL Window\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Destroying SDL Window\n");
 		SDL_DestroyWindow(windowPtr);
 	}
 
@@ -57,7 +57,7 @@ namespace te
 			ThrowException("SDL can only create Vulkan, OpenGL or software windows");
 		}
 		log += "window";
-		LOG(TE_RENDERING_LOG, TE_LOG, "%s\n", log.c_str());
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "%s\n", log.c_str());
 
 		std::string windowName = "Test Engine - SDL Window - Configuration type: ";
 #ifdef NDEBUG
@@ -89,7 +89,7 @@ namespace te
 		{
 			ThrowException("Could not querry Vulkan instance extensions count");
 		}
-		LOG(TE_RENDERING_LOG, TE_LOG, "SDL requires %d vulkan extensions:\n", *count);
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "SDL requires %d vulkan extensions:\n", *count);
 		names.resize(*count);
 		if (SDL_Vulkan_GetInstanceExtensions(count, names.data()) == SDL_FALSE)
 		{
@@ -97,7 +97,7 @@ namespace te
 		}
 		for (const char* name : names)
 		{
-			LOG(TE_RENDERING_LOG, TE_LOG, "\t'%s'\n", name);
+			TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "\t'%s'\n", name);
 		}
 		if (enableValidationLayers)
 		{
@@ -118,7 +118,7 @@ namespace te
 		createInfo.hinstance = GetModuleHandle(nullptr);
 		if (vkCreateWin32SurfaceKHR(instance, &createInfo, nullptr, surface) != VK_SUCCESS)
 		{
-			LOG(TE_RENDERING_LOG, TE_ERROR, "Could not create SDL Vulkan surface\n");
+			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Could not create SDL Vulkan surface\n");
 		}
 #elif TE_LINUX
 #endif*/
@@ -126,7 +126,7 @@ namespace te
 		/* SDL 3.0 handles the platform itself */
 		if (*surface != VK_NULL_HANDLE)
 		{
-			LOG(TE_RENDERING_LOG, TE_ERROR, "Vulkan surface already exists\n");
+			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Vulkan surface already exists\n");
 		}
 		if (SDL_Vulkan_CreateSurface(windowPtr, instance, surface) == SDL_FALSE
 			|| surface == nullptr)

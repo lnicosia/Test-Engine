@@ -63,7 +63,7 @@ namespace te
 			files[i] = f;
 		}
 
-		LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Project root directory = %s\n", ROOT_DIR_PATH.c_str());
+		TE_LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Project root directory = %s\n", ROOT_DIR_PATH.c_str());
 		initialized = true;
 	}
 
@@ -123,7 +123,7 @@ namespace te
 		}
 		if (!found)
 		{
-			//LOG(TE_RESOURCE_LOG, TE_WARNING, "Could not found project root directory\n");
+			//TE_LOG(TE_RESOURCE_LOG, TE_WARNING, "Could not found project root directory\n");
 		}
 		else
 		{

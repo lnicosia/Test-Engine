@@ -3,7 +3,11 @@
 
 #include "Vector.hpp"
 #include "MathsException.hpp"
+#include "MathsUtils.hpp"
 
+#undef min
+#undef max
+#include <algorithm>
 #include <ostream>
 #include <iomanip>
 

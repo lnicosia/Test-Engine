@@ -2,7 +2,7 @@
 # define _DRAW_UTILS_HPP_
 
 #include "Maths/math_tmp.hpp"
-#include "Rendering/SoftwareRenderer.hpp"
+#include "Rendering/SoftwareRendering/SoftwareRenderer.hpp"
 
 namespace te
 {

@@ -3,10 +3,13 @@
 
 namespace sml
 {
+	template < typename T >
 	struct Quaternion
 	{
 
 	};
+
+	using quat = Quaternion<float>;
 } // namespace sml
 
 #endif // _QUATERNION_HPP_

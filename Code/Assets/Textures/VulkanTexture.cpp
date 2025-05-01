@@ -1,70 +1,54 @@
 #include "VulkanTexture.hpp"
 
 #include "Rendering/Vulkan/VulkanUtils.hpp"
+#include "Rendering/Vulkan/VulkanDevice.hpp"
 #include "Debug/Exception.hpp"
 #include "Debug/Log.hpp"
-#include "stb_image.h"
 
 #include <cstring>
+#include <memory>
 
 namespace te
 {
-	VulkanTexture::VulkanTexture(VulkanOwnerData&& ownerData, const std::string& path): ownerData{std::move(ownerData)}, Texture{path}
+	VulkanTexture::VulkanTexture(const std::string& path, std::string&& textureType, VulkanDevice* vulkanDevice):
+		Texture{path, std::move(textureType)}, vulkanDevice{vulkanDevice}
 	{
-		int texWidth, texHeight, texChannels;
-		std::string filePath{Logger::ROOT_DIR_PATH + "Resources/Textures/bigdoor2.bmp"};
-		stbi_uc* pixels = stbi_load(filePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		if (!pixels)
-		{
-			ThrowException("Could not import " + filePath + "\n");
-		}
-		VkDeviceSize imageSize = texWidth * texHeight * 4;
-
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-
-		createBuffer(*ownerData.queueFamilies, ownerData.physicalDevice, ownerData.device,
-			imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer, stagingBufferMemory);
-		void* data;
-
-		vkMapMemory(ownerData.device, stagingBufferMemory, 0, imageSize, 0, &data);
-		memcpy(data, pixels, static_cast<size_t>(imageSize));
-		vkUnmapMemory(ownerData.device, stagingBufferMemory);
-		
-		stbi_image_free(pixels);
-		createImage(ownerData.physicalDevice, ownerData.device,
-			texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
-
-		transitionImageLayout(ownerData.device, ownerData.transferPool, ownerData.transferQueue, textureImage,
-			VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-		transitionImageLayout(ownerData.device, ownerData.graphicsPool, ownerData.graphicsQueue, textureImage,
-			VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		
-		vkDestroyBuffer(ownerData.device, stagingBuffer, nullptr);
-		vkFreeMemory(ownerData.device, stagingBufferMemory, nullptr);
-
-		createTextureImageView();
-		createTextureSampler();
+		setup(path);
 	}
 
-	VulkanTexture::VulkanTexture(VulkanTexture&& ref): Texture{std::move(ref)}, 
-		textureImage{std::move(ref.textureImage)}, textureImageMemory{std::move(ref.textureImageMemory)},
-		textureImageView{std::move(ref.textureImageView)}, textureSampler{std::move(ref.textureSampler)},
-		ownerData{std::move(ref.ownerData)}
+	VulkanTexture::VulkanTexture(const std::string& path, unsigned char* pixels, unsigned int size,
+		std::string&& textureType, VulkanDevice* vulkanDevice):
+		Texture{path, pixels, size, std::move(textureType)}, vulkanDevice{vulkanDevice}
 	{
+		setup(path);
+	}
+
+	VulkanTexture::VulkanTexture(const std::string& path, VulkanDevice* vulkanDevice):
+		Texture{path}, vulkanDevice{vulkanDevice}
+	{
+		setup(path);
+	}
+
+	VulkanTexture::VulkanTexture(VulkanTexture&& ref): Texture{std::move(ref)}, vulkanDevice{std::move(ref.vulkanDevice)}
+	{
+	}
+
+	void VulkanTexture::setup(const std::string& path)
+	{
+		vulkanDevice->createTexture(path, textureImage, textureImageMemory);
+		textureImageView = vulkanDevice->createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
+		textureSampler = vulkanDevice->createTextureSampler();
+
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = textureImageView;
+		imageInfo.sampler = textureSampler;
+
+		vulkanDevice->addImageInfo(imageInfo);
 	}
 
 	VulkanTexture& VulkanTexture::operator=(VulkanTexture&& ref)
 	{
-		textureImage= std::move(ref.textureImage);
-		textureImageMemory = std::move(ref.textureImageMemory);
-		textureImageView = std::move(ref.textureImageView);
-		textureSampler = std::move(ref.textureSampler);
-		ownerData = std::move(ref.ownerData);
+		vulkanDevice = std::move(ref.vulkanDevice);
 		return *this;
 	}
 
@@ -74,69 +58,11 @@ namespace te
 
 	void VulkanTexture::cleanUp()
 	{
-		vkDestroySampler(ownerData.device, textureSampler, nullptr);
-		vkDestroyImageView(ownerData.device, textureImageView, nullptr);
-		vkDestroyImage(ownerData.device, textureImage, nullptr);
-		vkFreeMemory(ownerData.device, textureImageMemory, nullptr); 
-	}
-
-	void VulkanTexture::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
-	{
-		VkCommandBuffer commandBuffer = beginSingleTimeCommands(ownerData.transferPool, ownerData.device);
-
-		VkBufferImageCopy region{};
-		region.bufferOffset = 0;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
-		
-		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = 1;
-		
-		region.imageOffset = {0, 0, 0};
-		region.imageExtent = {width, height, 1};
-
-		vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1, &region);
-
-		endSingleTimeCommands(ownerData.device, ownerData.transferQueue, commandBuffer, ownerData.transferPool);
+		vulkanDevice->cleanUpTexture(textureImage, textureImageMemory, textureImageView, textureSampler);
 	}
 
 	void VulkanTexture::createTextureImageView()
 	{
-		textureImageView = createImageView(ownerData.device, textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
-	}
-
-	void VulkanTexture::createTextureSampler()
-	{
-		VkSamplerCreateInfo samplerInfo{};
-		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.anisotropyEnable = VK_TRUE; // TODO: user choice!
-
-		VkPhysicalDeviceProperties properties{};
-		vkGetPhysicalDeviceProperties(ownerData.physicalDevice, &properties);
-		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy; // TODO: user choice!
-
-		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-		samplerInfo.unnormalizedCoordinates = VK_FALSE;
-		samplerInfo.compareEnable = VK_FALSE;
-		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.mipLodBias = 0.0f;
-		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = 0.0f;
-
-		if (vkCreateSampler(ownerData.device, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
-		{
-			ThrowException("Failed to create texture sampler!\n");
-		}
 	}
 
 	VkImageView VulkanTexture::getImageView()
@@ -149,11 +75,6 @@ namespace te
 		return textureSampler;
 	}
 
-	void VulkanTexture::setOwnerDevice(VkDevice inDevice)
-	{
-		ownerData.device = inDevice;
-	}
-	
 	const std::string VulkanTexture::getAssetType() const
 	{
 		return {"Vulkan texture"};

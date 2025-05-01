@@ -6,7 +6,7 @@
 
 namespace te
 {
-	SoftwareRenderer::SoftwareRenderer(): Renderer(RendererType::TE_SOFTWARE, WindowManager::TE_SDL)
+	SoftwareRenderer::SoftwareRenderer(): Renderer(RendererType::TE_SOFTWARE, WindowAPI::TE_SDL)
 	{
 
 		std::shared_ptr<SDLWindow> winPtr = std::shared_ptr<SDLWindow>(
@@ -15,14 +15,14 @@ namespace te
 		w = window->getWidth();
 		h = window->getHeight();
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL renderer\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Initializing SDL renderer\n");
 		SDLRendererPtr = SDL_CreateRenderer(winPtr->getWindow(), nullptr, SDL_RENDERER_SOFTWARE);
 		if (!SDLRendererPtr)
 		{
 			ThrowException("Could not create SDL renderer");
 		}
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing SDL texture\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Initializing SDL texture\n");
 		SDLTexturePtr = SDL_CreateTexture(SDLRendererPtr, SDL_PIXELFORMAT_RGBA8888,
 			SDL_TEXTUREACCESS_STREAMING, w, h);
 		if (!SDLTexturePtr)
@@ -30,7 +30,7 @@ namespace te
 			ThrowException("Could not create SDL texture");
 		}
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Initializing pixel array\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Initializing pixel array\n");
 		pixels = new uint32_t[window->getWidth() * window->getHeight()];
 		if (!pixels)
 		{
@@ -39,49 +39,48 @@ namespace te
 
 		AssetManager& assetManager = AssetManager::getInstance();
 		uiFont = assetManager.loadAsset<TTFFont>(Logger::ROOT_DIR_PATH + "Resources/Fonts/Alice-Regular.ttf");
-		
 	}
 
 	SoftwareRenderer::~SoftwareRenderer()
 	{
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Freeing pixel array\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Freeing pixel array\n");
 		delete[] pixels;
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Destroying SDL_Texture\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Destroying SDL_Texture\n");
 		SDL_DestroyTexture(SDLTexturePtr);
-		LOG(TE_RENDERING_LOG, TE_LOG, "Destroying SDL_Renderer\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Destroying SDL_Renderer\n");
 		SDL_DestroyRenderer(SDLRendererPtr);
 	}
 
-	void	SoftwareRenderer::render()
+	void SoftwareRenderer::render()
 	{
 		SDL_UpdateTexture(SDLTexturePtr, nullptr, pixels, sizeof(Uint32) * window->getWidth());
 		SDL_RenderTexture(SDLRendererPtr, SDLTexturePtr, NULL, NULL);
 		SDL_RenderPresent(SDLRendererPtr);
-		frameStats.updateFrameStats();
+		//frameStats.updateFrameStats();
 		showFrameStats();
 	}
 
-	void	SoftwareRenderer::showFrameStats()
+	void SoftwareRenderer::showFrameStats()
 	{
 		if (debugLevel == DebugLevel::TE_SHOW_FPS)
 		{
 			char buff[10];
 
-			snprintf(buff, 10, "%llu", frameStats.fps);
+			//snprintf(buff, 10, "%llu", frameStats.fps);
 			renderText(buff, uiFont, Point2<int>(), 16);
 		}
 	}
 
 	/* TODO: protections
 	*/
-	void	SoftwareRenderer::renderText(const char* text, std::shared_ptr<Font> font,
+	void SoftwareRenderer::renderText(const char* text, std::shared_ptr<Font> font,
 		Point2<int> pos, int size)
 	{
 		if (!font)
 		{
-			LOG(TE_RENDERING_LOG, TE_ERROR, "RenderText font in nullptr\n");
+			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "RenderText font in nullptr\n");
 			return ;
 		}
 		std::shared_ptr<TTFFont> ttfFont = dynamic_pointer_cast<TTFFont>(font);

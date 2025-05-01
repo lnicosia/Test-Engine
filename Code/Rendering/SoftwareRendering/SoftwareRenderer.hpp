@@ -3,8 +3,8 @@
 
 #include "SDL_ttf.h"
 
-#include "Renderer.hpp"
-#include "SDLWindow.hpp"
+#include "../Renderer.hpp"
+#include "../Window/SDLWindow.hpp"
 
 namespace te
 {

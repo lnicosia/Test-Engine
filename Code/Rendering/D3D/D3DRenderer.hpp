@@ -1,7 +1,7 @@
 #ifndef _D3D_RENDERER_HPP_
 # define _D3D_RENDERER_HPP_
 
-#include "Renderer.hpp"
+#include "../Renderer.hpp"
 
 namespace te
 {

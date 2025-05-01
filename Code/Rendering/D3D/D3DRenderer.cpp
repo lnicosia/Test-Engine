@@ -3,7 +3,7 @@
 
 namespace te
 {
-	D3DRenderer::D3DRenderer(): Renderer(RendererType::TE_D3D, WindowManager::TE_UNKNOWN_WINDOW)
+	D3DRenderer::D3DRenderer(): Renderer(RendererType::TE_D3D, WindowAPI::TE_UNKNOWN_WINDOW)
 	{
 		// TODO
 		uninplemented();

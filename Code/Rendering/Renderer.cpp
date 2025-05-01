@@ -1,19 +1,17 @@
 #include "Renderer.hpp"
 #include "Debug/Log.hpp"
 #include "Assets/AssetManager.hpp"
-#include "SDL.hpp"
+#include "Window/SDL.hpp"
 
 #include "SDL_ttf.h"
 
 namespace te
 {
 
-	Renderer::Renderer(RendererType rType, WindowManager wManager):
-		window(nullptr), rType(rType), wManager(wManager),
+	Renderer::Renderer(RendererType rType, WindowAPI windowAPI):
+		window(nullptr), rType(rType), windowAPI(windowAPI),
 		debugLevel(DebugLevel::TE_SHOW_FPS),
-		uiFont(nullptr),
-		frameStats(),
-		running(true)
+		uiFont(nullptr), running(true)
 	{
 		Logger::Init();
 	}
@@ -21,14 +19,31 @@ namespace te
 	Renderer::~Renderer()
 	{
 		/* Make sure to clear assets before releasing window libraries */
-		LOG(TE_RESOURCE_LOG, TE_LOG, "Clearing renderer UI font\n");
+		TE_LOG(TE_RESOURCE_LOG, TE_VERBOSE, "Clearing renderer UI font\n");
 		uiFont.reset();
-		LOG(TE_RESOURCE_LOG, TE_LOG, "Freeing all assets\n");
+		TE_LOG(TE_RESOURCE_LOG, TE_VERBOSE, "Freeing all assets\n");
 		AssetManager::getInstance().clear();
 
-		LOG(TE_RENDERING_LOG, TE_LOG, "Releasing Window\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Releasing Window\n");
 		window.reset();
+	}
 
+	void Renderer::render()
+	{
+		while (running == true)
+		{
+			device->frameStats.drawCallCount = 0;
+			if (window->handleEvents() == 1)
+			{
+				running = false;
+			}
+			if (scene.isDirty())
+			{
+				device->updateBuffers(scene);
+				scene.setIsDirty(false);
+			}
+			device->drawFrame();
+		}
 	}
 
 	std::shared_ptr<Window> Renderer::getWindow() const
@@ -36,13 +51,23 @@ namespace te
 		return window;
 	}
 
+	std::shared_ptr<GPUDevice> Renderer::getDevice() const
+	{
+		return device;
+	}
+
 	const RendererType Renderer::getType() const
 	{
 		return rType;
 	}
 
-	const WindowManager Renderer::getWindowManager() const
+	const WindowAPI Renderer::getWindowAPI() const
 	{
-		return wManager;
+		return windowAPI;
+	}
+
+	const Scene& Renderer::getScene() const
+	{
+		return scene;
 	}
 }

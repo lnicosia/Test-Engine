@@ -5,18 +5,24 @@
 namespace te
 {
 
-	Texture::Texture(const std::string& path): Asset(path)
+	Texture::Texture(const std::string& path, std::string&& textureType): Asset{path}, type{textureType}
 	{
 
 	}
 
-	Texture::Texture(Texture&& ref): Asset(std::move(ref))
+	Texture::Texture(const std::string& path, unsigned char* pixels, unsigned int size, std::string&& textureType):
+		Asset{path}, type{textureType}
+	{
+	}
+
+	Texture::Texture(Texture&& ref): Asset{std::move(ref)}, type{std::move(ref.type)}
 	{
 
 	}
 
 	Texture& Texture::operator=(Texture&& ref)
 	{
+		type = std::move(ref.type);
 		return *this;
 	}
 
@@ -38,5 +44,10 @@ namespace te
 	const int Texture::getChannels() const
 	{
 		return nChannels;
+	}
+
+	const std::string Texture::getAssetType() const
+	{
+		return "Texture";
 	}
 }

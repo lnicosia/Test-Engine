@@ -40,13 +40,13 @@ static std::vector<const char*> verboseColors =
 // TODO: Don't print verbose level below Display
 // TODO: handle fatal errors
 
-#define LOG(CATEGORY, VERBOSE_LEVEL, format, ...)	\
-	fprintf(Logger::files[CATEGORY], "%s: %s: " format , catNames[CATEGORY], verboseNames[VERBOSE_LEVEL] __VA_OPT__(,) __VA_ARGS__); \
+#define TE_LOG(CATEGORY, VERBOSE_LEVEL, format, ...)	\
+	fprintf(Logger::files[CATEGORY], "%s: " format , catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
 	\
-	fprintf(Logger::files[TE_ALL_LOG], "%s: %s: " format, catNames[CATEGORY], verboseNames[VERBOSE_LEVEL] __VA_OPT__(,) __VA_ARGS__); \
+	fprintf(Logger::files[TE_ALL_LOG], "%s: " format, catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
 	\
-	VERBOSE_LEVEL < TE_LOG ? \
-		(void)printf("%s%s: %s: " format TE_CONSOLE_RESET, verboseColors[VERBOSE_LEVEL], catNames[CATEGORY], verboseNames[VERBOSE_LEVEL] __VA_OPT__(,) __VA_ARGS__) \
+	VERBOSE_LEVEL <= TE_DISPLAY ? \
+		(void)printf("%s%s: " format TE_CONSOLE_RESET, verboseColors[VERBOSE_LEVEL], catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__) \
 		: (void)0 \
 
 namespace te
@@ -79,7 +79,6 @@ namespace te
 		TE_ERROR,
 		TE_WARNING,
 		TE_DISPLAY,
-		TE_LOG,
 		TE_VERBOSE,
 		TE_VERYVERBOSE
 	};

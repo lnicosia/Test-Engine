@@ -3,18 +3,18 @@
 
 namespace te
 {
-	GLRenderer::GLRenderer(): Renderer(RendererType::TE_GL, WindowManager::TE_SDL)
+	GLRenderer::GLRenderer(): Renderer(RendererType::TE_GL, WindowAPI::TE_SDL)
 	{
 		// TODO
 		uninplemented();
 
 	}
 
-	GLRenderer::GLRenderer(WindowManager wManage): Renderer(RendererType::TE_GL, wManager)
+	GLRenderer::GLRenderer(WindowAPI windowAPI): Renderer(RendererType::TE_GL, windowAPI)
 	{
 		// TODO
 		uninplemented();
-		if (wManager != WindowManager::TE_SDL)
+		if (windowAPI != WindowAPI::TE_SDL)
 		{
 			ThrowException("Only SDL is implemented for now");
 		}

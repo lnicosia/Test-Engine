@@ -2,7 +2,7 @@
 # define _WINDOW_HPP_
 
 #include "Maths/math_tmp.hpp"
-#include "RendererType.hpp"
+#include "../RendererType.hpp"
 #include "Inputs/Events.hpp"
 
 #include "Platform.hpp"

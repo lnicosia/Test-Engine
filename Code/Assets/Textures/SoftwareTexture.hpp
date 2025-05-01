@@ -18,6 +18,10 @@ namespace te
 		const std::string getAssetType() const override;
 
 	private:
+		void setup(const std::string& path) override;
+		void cleanUp() override;
+
+	private:
 		unsigned char* img;
 	};
 }
