@@ -1,7 +1,7 @@
 #ifndef _CAMERA_HPP_
 # define _CAMERA_HPP_
 
-#include "Maths/math.hpp"
+#include "Maths/math_tmp.hpp"
 
 namespace te
 {

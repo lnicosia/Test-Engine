@@ -7,7 +7,7 @@ namespace te
 
 	TTFFont::TTFFont(const std::string& path): Font(path), ptr(nullptr)
 	{
-		LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Loading TTF font %s\n", path.c_str());
+		TE_LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Loading TTF font %s\n", path.c_str());
 		ptr = TTF_OpenFont(path.c_str(), 12);
 		if (!ptr)
 			ThrowException( "Couldn't load " + path + "\n");
@@ -26,7 +26,7 @@ namespace te
 	{
 		if (this->ptr)
 		{
-			LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Destroying TTF font %s\n", paths[0].string().c_str());
+			TE_LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Destroying TTF font %s\n", paths[0].string().c_str());
 			TTF_CloseFont(this->ptr);
 		}
 	}

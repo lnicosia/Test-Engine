@@ -11,7 +11,7 @@ namespace te
 {
 	SoftwareTexture::SoftwareTexture(const std::string& path): Texture(path), img(nullptr)
 	{
-		LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Loading software texture %s\n", path.c_str());
+		TE_LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Loading software texture %s\n", path.c_str());
 		this->img = stbi_load(path.c_str(), &this->w, &this->h, &this->nChannels, 0);
 		if (!this->img)
 		{
@@ -28,6 +28,16 @@ namespace te
 		uninplemented();
 	}
 
+	void SoftwareTexture::setup(const std::string& path)
+	{
+
+	}
+
+	void SoftwareTexture::cleanUp()
+	{
+
+	}
+
 	SoftwareTexture& SoftwareTexture::operator=(SoftwareTexture&& ref)
 	{
 		return *this;
@@ -35,7 +45,7 @@ namespace te
 
 	SoftwareTexture::~SoftwareTexture()
 	{
-		LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Destroying software texture %s\n", paths[0].string().c_str());
+		TE_LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Destroying software texture %s\n", paths[0].string().c_str());
 		if (this->img)
 		{
 			stbi_image_free(this->img);

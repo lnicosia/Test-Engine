@@ -2,6 +2,8 @@
 # define _ASSET_MANAGER_HPP_
 
 #include "Asset.hpp"
+#include "Debug/Log.hpp"
+#include "Textures/Texture.hpp"
 #include "CheckFileType.hpp"
 
 #include <map>
@@ -30,8 +32,11 @@ namespace te
 		template <typename T, typename ... Args>
 		std::shared_ptr<T> loadAsset(const std::string& path, Args... args)
 		{
+			TE_LOG(TE_RESOURCE_LOG, TE_DISPLAY, "Loading '%s'\n", path.c_str());
 			if (!IsReg(path))
+			{
 				return std::shared_ptr<T>();
+			}
 			for (const auto& pair : this->assets)
 			{
 				std::shared_ptr<Asset> asset = pair.second;
@@ -193,6 +198,18 @@ namespace te
 			return res;
 		}
 
+		template <typename T, typename ... Args>
+		std::shared_ptr<Texture> loadDefaultTexture(const std::string& path, Args... args)
+		{
+			defaultTexture = loadAsset<T>(path, args...);
+			return defaultTexture;
+		}
+
+		std::shared_ptr<Texture> getDefaultTexture()
+		{
+			return defaultTexture;
+		}
+
 		void
 			printContent(void) const;
 
@@ -207,6 +224,7 @@ namespace te
 		AssetManager();
 
 		std::map<uint32_t, std::shared_ptr<Asset>>	assets;
+		std::shared_ptr<Texture> defaultTexture{};
 	};
 }
 #endif // _ASSET_MANAGER_HPP_

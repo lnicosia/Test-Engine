@@ -2,7 +2,7 @@
 # define _BINDING_HPP_
 
 #include "Action.hpp"
-#include "Maths/math.hpp"
+#include "Maths/math_tmp.hpp"
 
 #include <string>
 #include <vector>

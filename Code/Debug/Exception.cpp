@@ -8,7 +8,7 @@ namespace te
 	{
 		// TODO: Custom Exception implementation (with crash report for example)
 		// Log to every file?
-		LOG(TE_GENERAL_LOG, TE_FATAL, "%s", what.c_str());
+		fprintf(stderr, TE_CONSOLE_RED "%s" TE_CONSOLE_RESET, what.c_str());
 		throw (std::runtime_error(""));
 	}
 }

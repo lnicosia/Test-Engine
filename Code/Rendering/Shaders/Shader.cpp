@@ -10,7 +10,7 @@ namespace te
 	{
 		if (!IsReg(path))
 		{
-			LOG(TE_RENDERING_LOG, TE_ERROR, "Invalid shader path: \"%s\"\n", path.string().c_str());
+			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Invalid shader path: \"%s\"\n", path.string().c_str());
 			return;
 		}
 
@@ -19,7 +19,7 @@ namespace te
 		file.open(path, std::ios::ate | std::ios::binary);
 		if (!file.is_open())
 		{
-			LOG(TE_RENDERING_LOG, TE_ERROR, "Could not open shader \"%s\"\n", path.string().c_str());
+			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Could not open shader \"%s\"\n", path.string().c_str());
 			return;
 		}
 		size_t fileSize = static_cast<size_t>(file.tellg());

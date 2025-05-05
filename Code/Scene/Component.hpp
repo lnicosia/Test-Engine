@@ -1,0 +1,34 @@
+#ifndef _COMPONENT_HPP_
+#define _COMPONENT_HPP_
+
+#include "Scene/Transform.hpp"
+#include "Rendering/MeshInternal.hpp"
+
+#include <vector>
+
+namespace te
+{
+	class Component
+	{
+
+	public:
+		Component();
+		virtual ~Component();
+
+		void setRelativeTransform(const Transform& newTransform);
+		const std::vector<std::shared_ptr<Component>>& getComponents() const;
+		const std::shared_ptr<MeshInternal>& getMeshInternal() const;
+
+		void setMeshInternal(std::shared_ptr<MeshInternal> inMesh);
+
+	private:
+		Transform relativeTransform{};
+		std::vector<std::shared_ptr<Component>> components{};
+		std::shared_ptr<MeshInternal> meshInternal;
+
+	};
+	
+} // namespace te
+
+
+#endif // _COMPONENT_HPP_
