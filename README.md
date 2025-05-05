@@ -33,7 +33,8 @@ Game engine for training purposes.
 * Basic window handling using SDL
 * Basic input/event handling using SDL
 * Clunky software raycaster
-* Single triangle in Vulkan
+* Meshes in Vulkan
+* Basic scene
 * Basic log system
 
 ## How to build
