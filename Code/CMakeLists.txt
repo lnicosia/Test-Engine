@@ -85,6 +85,9 @@ add_executable (${PROJECT_NAME}
 	"Rendering/D3D/D3DRenderer.cpp"
 	"Rendering/D3D/D3DRenderer.hpp"
 
+	"Rendering/Materials/Material.cpp"
+	"Rendering/Materials/Material.hpp"
+
 	"Rendering/OpenGL/GLRenderer.cpp"
 	"Rendering/OpenGL/GLRenderer.hpp"
 
@@ -98,6 +101,8 @@ add_executable (${PROJECT_NAME}
 	"Rendering/Vulkan/QueueFamilyIndices.hpp"
 	"Rendering/Vulkan/VulkanDevice.cpp"
 	"Rendering/Vulkan/VulkanDevice.hpp"
+	"Rendering/Vulkan/VulkanMaterial.cpp"
+	"Rendering/Vulkan/VulkanMaterial.hpp"
 	"Rendering/Vulkan/VulkanMesh.cpp"
 	"Rendering/Vulkan/VulkanMesh.hpp"
 	"Rendering/Vulkan/VulkanRenderer.cpp"

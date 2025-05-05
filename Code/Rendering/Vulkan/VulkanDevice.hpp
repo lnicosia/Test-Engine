@@ -3,6 +3,7 @@
 
 #include "Rendering/Window/Window.hpp"
 #include "Rendering/GPUDevice.hpp"
+#include "Rendering/Vulkan/VulkanMaterial.hpp"
 #include "Rendering/Vulkan/QueueFamilyIndices.hpp"
 #include "Rendering/Vulkan/DescriptorSets/VulkanDescriptorAllocator.hpp"
 
@@ -18,6 +19,12 @@ namespace te
 		VkSurfaceCapabilitiesKHR capabilities;
 		std::vector<VkSurfaceFormatKHR> formats;
 		std::vector<VkPresentModeKHR> presentModes;
+	};
+	
+	struct SceneBufferObject
+	{
+		alignas(16) sml::mat4 view;
+		alignas(16) sml::mat4 projection;
 	};
 
 	class VulkanDevice : public GPUDevice
@@ -35,11 +42,11 @@ namespace te
 
 			/** Descriptors */
 			VulkanDescriptorAllocator descriptorAllocator{};
-
-			/** Uniform buffers */
-			std::vector<VkBuffer> uniformBuffers{};
-			std::vector<VkDeviceMemory> uniformBuffersMemory{};
-			std::vector<void*> uniformBuffersMapped{};
+			
+			/** Scene buffers */
+			VkBuffer sceneBuffer{};
+			VkDeviceMemory sceneBufferMemory{};
+			void* sceneBufferMapped{};
 		};
 
 	public:
@@ -60,8 +67,6 @@ namespace te
 			VkBuffer& outBuffer, VkDeviceMemory& outMemory);
 		void createIndexBuffer(const std::vector<uint32_t>& inIndices,
 			VkBuffer& outBuffer, VkDeviceMemory& outMemory);
-		void createUniformBuffers(std::array<VkBuffer, MAX_FRAMES_IN_FLIGHT>& outBuffers,
-			std::array<VkDeviceMemory, MAX_FRAMES_IN_FLIGHT>& outMemories);
 
 		/** Textures */
 		void createTexture(const std::string& path, VkImage& outImage, VkDeviceMemory& outImageMemory);
@@ -73,17 +78,15 @@ namespace te
 		void cleanUpTexture(VkImage textureImage, VkDeviceMemory textureImageMemory,
 			VkImageView textureImageView, VkSampler textureSampler);
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-		void addImageInfo(VkDescriptorImageInfo& imageInfo);
 
 		/** Descriptor sets */
 		void createDescriptorSets(std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& outDescriptorSets);
-		void updateDescriptorSet(VkDescriptorSet descriptorSet,
-			const VkBuffer uniformBuffer, const std::shared_ptr<VulkanTexture> texture);
+		void updateDescriptorSet(VkDescriptorSet descriptorSet, const std::shared_ptr<VulkanTexture> texture);
 
 		/** Drawing */
-		void updateUniformBuffer(uint32_t currentFrame);
+		void updateSceneBuffer(uint32_t currentFrame);
 		void drawFrame() override;
-		void updateBuffers(const Scene& scene) override;
+		void updateDrawContext(const Scene& scene) override;
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 		/** Getters */
@@ -102,13 +105,14 @@ namespace te
 
 		void createImageViews();
 		void createRenderPass();
-		void createGraphicsPipeline();
+		void createOpaquePipeline();
 		void createFrameBuffers();
 		void createCommandPools();
 		void createCommandBuffers();
 
-		void createDescriptorSetLayout();
-		void createDescriptorPool();
+		void createDescriptorSetLayouts();
+		void createDescriptorPools();
+		void createSceneBuffers();
 
 		/** Depth buffer */
 		void createDepthResources();
@@ -187,13 +191,11 @@ namespace te
 		VkRenderPass renderPass{};
 
 		/** Descriptor sets */
-		VkDescriptorSetLayout defaultDescriptorSetLayout{};
-		VkDescriptorPool descriptorPool{};
-		std::array<std::vector<VkDescriptorSet>, MAX_FRAMES_IN_FLIGHT> descriptorSets{};
+		std::array<VkDescriptorSetLayout, 2> descriptorSetLayouts{};
+		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> sceneDescriptorSets{};
 
-		/** Pipeline */
-		VkPipelineLayout pipelineLayout{};
-		VkPipeline graphicsPipeline{};
+		/** Pipelines */
+		VulkanMaterialPipeline opaquePipeline;
 
 		/** Buffers */
 		std::vector<VkFramebuffer> framebuffers{};
@@ -229,20 +231,34 @@ namespace te
 		const bool enableValidationLayers = false;
 #endif
 
+		/** -- Draw context -- */
+		struct RenderObject
+		{
+			VkBuffer vertexBuffer{};
+			VkBuffer indexBuffer{};
+			size_t indexBufferSize = 0;
+			VkDeviceSize vertexBufferOffset{0};
+			std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> desc{};
+			sml::mat4 transform;
+		};
+		std::vector<RenderObject> renderObjects{};
+		SceneBufferObject sceneBufferObject;
+
 		/** To-draw vertex and index data */
 		std::vector<VkBuffer> drawnVertexBuffers{};
 		std::vector<VkBuffer> drawnIndexBuffers{};
 		std::vector<size_t> drawnIndexBufferSizes{};
 		std::vector<VkDeviceSize> vertexBufferOffsets = {0};
 
-		/** Vertex and index data */
+		/** Owned data. Don't forget to delete this */
 		std::vector<VkBuffer> vertexBuffers{};
 		std::vector<VkDeviceMemory> vertexBufferMemories{};
 		std::vector<VkBuffer> indexBuffers{};
 		std::vector<VkDeviceMemory> indexBufferMemories{};
-
-		std::vector<VkDescriptorImageInfo> imageInfos{};
-		std::vector<uint32_t> textureIndices{};
+		std::vector<VkImage> images{};
+		std::vector<VkImageView> imageViews{};
+		std::vector<VkDeviceMemory> imageMemories{};
+		std::vector<VkSampler> imageSamplers{};
 	};
 } // namespace te
 

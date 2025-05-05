@@ -2,7 +2,9 @@
 #define _VULKAN_TEXTURE_HPP_
 
 #include "Texture.hpp"
+
 #include "Rendering/Vulkan/VulkanDevice.hpp"
+
 #include "vulkan/vulkan.h"
 
 class VulkanDevice;
@@ -26,9 +28,6 @@ namespace te
 
 		void cleanUp() override;
 		
-		/** */
-		void setOwnerDevice(VkDevice inDevice);
-		
 		VkImageView getImageView();
 		VkSampler getSampler();
 
@@ -47,7 +46,6 @@ namespace te
 		VkImageView textureImageView{};
 		VkSampler textureSampler{};
 		VkDescriptorImageInfo imageInfo{};
-		VkDescriptorSet descriptorSet{};
 
 		VulkanDevice* vulkanDevice = nullptr;
 	};

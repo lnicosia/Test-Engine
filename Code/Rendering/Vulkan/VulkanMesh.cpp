@@ -9,22 +9,9 @@
 namespace te
 {
 	VulkanMesh::VulkanMesh(const std::string& path, VulkanDevice* vulkanDevice):
-		vulkanDevice{vulkanDevice}, MeshInternal(path)
+		MeshInternal(path), vulkanDevice{vulkanDevice}
 	{
-		
-	}
-
-	VulkanMesh::VulkanMesh(VulkanDevice* vulkanDevice, const MeshGeometry& geometry): MeshInternal(),
-		vulkanDevice{vulkanDevice}
-	{
-		setupVertices(geometry.vertices);
-		setupIndices(geometry.indices);
-		setupUniformBuffers();
-		setupDescriptors();
-	}
-
-	void VulkanMesh::load()
-	{
+		material = std::make_shared<VulkanMaterial>();
 		AssimpImporter importer;
 		if (importer.readFile(paths[0].string(), 0))
 		{
@@ -36,6 +23,15 @@ namespace te
 			return;
 		}
 		setup(importer);
+	}
+
+	VulkanMesh::VulkanMesh(VulkanDevice* vulkanDevice, const MeshGeometry& geometry): MeshInternal(),
+		vulkanDevice{vulkanDevice}
+	{
+		material = std::make_shared<VulkanMaterial>();
+		setupVertices(geometry.vertices);
+		setupIndices(geometry.indices);
+		setupDescriptors();
 	}
 
 	void VulkanMesh::setup(AssimpImporter& importer)
@@ -50,7 +46,6 @@ namespace te
 			setupVertices(geometry.vertices);
 			setupIndices(geometry.indices);
 		}
-		setupUniformBuffers();
 		setupDescriptors();
 	}
 
@@ -75,11 +70,6 @@ namespace te
 		indexBufferSize = indices.size();
 	}
 
-	void VulkanMesh::setupUniformBuffers()
-	{
-		vulkanDevice->createUniformBuffers(uniformBuffers, uniformBufferMemories);
-	}
-
 	void VulkanMesh::setupDescriptors()
 	{
 		if (!vulkanDevice)
@@ -88,18 +78,37 @@ namespace te
 			return;
 		}
 		vulkanDevice->createDescriptorSets(descriptorSets);
-		std::shared_ptr<VulkanTexture> texture;
-		if (!textures.empty())
+		std::shared_ptr<VulkanTexture> vulkanTexture = std::dynamic_pointer_cast<VulkanTexture>(
+			material->texture);
+		if (!vulkanTexture)
 		{
-			texture = std::dynamic_pointer_cast<VulkanTexture>(textures[0]);
-		}
-		else
-		{
-			texture = std::dynamic_pointer_cast<VulkanTexture>(AssetManager::getInstance().getDefaultTexture());
+			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Could not set material: no valid vulkan texture\n");
+			return;
 		}
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			vulkanDevice->updateDescriptorSet(descriptorSets[i], uniformBuffers[i], texture);
+			vulkanDevice->updateDescriptorSet(descriptorSets[i], vulkanTexture);
+		}
+	}
+
+	void VulkanMesh::setMaterial(std::shared_ptr<Material> newMat)
+	{
+		if (!vulkanDevice)
+		{
+			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "No valid vulkan device\n");
+			return;
+		}
+		std::shared_ptr<VulkanTexture> vulkanTexture = std::dynamic_pointer_cast<VulkanTexture>(
+			newMat->texture);
+		if (!vulkanTexture)
+		{
+			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Could not set material: no valid vulkan texture\n");
+			return;
+		}
+		material = newMat;
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			vulkanDevice->updateDescriptorSet(descriptorSets[i], vulkanTexture);
 		}
 	}
 
@@ -131,6 +140,11 @@ namespace te
 	size_t VulkanMesh::getIndexBufferSize() const
 	{
 		return indexBufferSize;
+	}
+
+	const std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& VulkanMesh::getDescriptorSets() const
+	{
+		return descriptorSets;
 	}
 
 } // namespace te

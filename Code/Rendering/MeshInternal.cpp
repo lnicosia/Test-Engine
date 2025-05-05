@@ -11,6 +11,7 @@ namespace te
 
 	MeshInternal::MeshInternal(const std::string& path): Asset(path)
 	{
+		
 	}
 	
 	MeshInternal::~MeshInternal()

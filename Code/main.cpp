@@ -1,7 +1,6 @@
 ﻿
 #include "Rendering/SoftwareRendering/SoftwareRenderer.hpp"
 #include "Rendering/Vulkan/VulkanRenderer.hpp"
-#include "Rendering/Vulkan/VulkanMesh.hpp"
 #include "Rendering/OpenGL/GLRenderer.hpp"
 #include "Rendering/D3D/D3DRenderer.hpp"
 #include "Rendering/SoftwareRendering/Raycaster.hpp"
@@ -49,10 +48,22 @@ int main()
 
 		std::shared_ptr<te::Actor> actor = std::make_shared<te::Actor>();
 		std::shared_ptr<te::Component> component = std::make_shared<te::Component>();
+		std::shared_ptr<te::Component> component2 = std::make_shared<te::Component>();
+
+		std::shared_ptr<te::Texture> newTex = renderer->loadTexture(
+			te::Logger::ROOT_DIR_PATH + "Resources/Objects/viking_room/viking_room.png"
+		);
+
+		std::shared_ptr<te::Material> mat = std::make_shared<te::Material>(newTex);
+
+		loadedMesh->setMaterial(mat);
 		component->setMeshInternal(loadedMesh);
+		component2->setMeshInternal(squareMesh);
 		actor->addComponent(component);
+		actor->addComponent(component2);
 		renderer->scene.addActor(actor);
 		renderer->render();
+		newTex->cleanUp();
 	}
 	catch (std::runtime_error& e)
 	{

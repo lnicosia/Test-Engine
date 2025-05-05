@@ -25,7 +25,7 @@ namespace te
 			const std::vector<uint32_t>& indices, void* outBuffer, void* outBufferMemory) = 0;
 
 		virtual void drawFrame() = 0;
-		virtual void updateBuffers(const Scene& scene) = 0;
+		virtual void updateDrawContext(const Scene& scene) = 0;
 		
 	public:
 

@@ -3,8 +3,12 @@
 
 #include "Assets/Asset.hpp"
 #include "Assets/Importers/Assimp/AssimpImporter.hpp"
-#include "MeshGeometry.hpp"
-#include "Vertex.hpp"
+
+#include "Rendering/MeshGeometry.hpp"
+#include "Rendering/Materials/Material.hpp"
+#include "Rendering/Vertex.hpp"
+
+#include "Maths/Matrix.hpp"
 
 namespace te
 {
@@ -18,8 +22,8 @@ namespace te
 		~MeshInternal();
 
 		bool isVisible() const;
-
-		virtual void load() = 0;
+		
+		virtual void setMaterial(std::shared_ptr<Material> newMat) = 0;
 
 	protected:
 
@@ -27,13 +31,17 @@ namespace te
 		virtual void setupVertices(const std::vector<Vertex>& indices) = 0;
 		virtual void setupIndices(const std::vector<uint32_t>& indices) = 0;
 		virtual void cleanup() = 0;
-
+		
 		const std::string getAssetType() const override;
 
 	protected:
 
-		std::vector<std::shared_ptr<Texture>> textures;
+		std::shared_ptr<Material> material{};
+
 		bool bIsVisible = true;
+
+		sml::mat4 localTransform;
+		sml::mat4 worldTransform;
 	};
 	
 } // namespace te

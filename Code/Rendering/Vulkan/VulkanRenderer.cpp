@@ -74,11 +74,13 @@ namespace te
 			te::AssetManager::getInstance().loadAsset<te::VulkanMesh>(
 			path, vulkanDevice.get());
 		
-		if (newMesh)
-		{
-			newMesh->load();
-		}
 		return newMesh;
+	}
+
+	std::shared_ptr<Texture> VulkanRenderer::loadTexture(const std::string& path)
+	{
+		return te::AssetManager::getInstance().loadAsset<te::VulkanTexture>(
+			path, vulkanDevice.get());
 	}
 
 	std::shared_ptr<VulkanDevice> VulkanRenderer::getVulkanDevice()

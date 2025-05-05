@@ -25,13 +25,13 @@ namespace te
 			Point2<int> pos, int size) = 0;
 		virtual std::shared_ptr<MeshInternal> createSolidMesh(const MeshGeometry& geometry) = 0;
 		virtual std::shared_ptr<MeshInternal> loadMesh(const std::string& path) = 0;
+		virtual std::shared_ptr<Texture> loadTexture(const std::string& path) = 0;
 
 		std::shared_ptr<Window> getWindow() const;
 		std::shared_ptr<GPUDevice> getDevice() const;
 		const RendererType getType() const;
 		const WindowAPI getWindowAPI() const;
 		const Scene& getScene() const;
-
 
 	public:
 

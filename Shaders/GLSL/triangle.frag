@@ -2,12 +2,8 @@
 #extension GL_EXT_nonuniform_qualifier : enable
 #define MAX_TEXTURE_COUNT
 
-layout(binding = 1) uniform sampler texSampler;
-layout(binding = 2) uniform texture2D textures[MAX_TEXTURE_COUNT];
-layout(push_constant) uniform constants
-{
-    uint textureIndex;
-} pushConstants;
+layout(set = 1, binding = 0) uniform sampler texSampler;
+layout(set = 1, binding = 1) uniform texture2D textures[MAX_TEXTURE_COUNT];
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;

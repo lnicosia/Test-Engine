@@ -23,6 +23,7 @@ namespace te
 
 		std::shared_ptr<MeshInternal> createSolidMesh(const MeshGeometry& geometry) override;
 		virtual std::shared_ptr<MeshInternal> loadMesh(const std::string& path) override;
+		virtual std::shared_ptr<Texture> loadTexture(const std::string& path) override;
 
 		std::shared_ptr<VulkanDevice> getVulkanDevice();
 

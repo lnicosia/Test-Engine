@@ -10,8 +10,8 @@ static std::vector<const char*> catNames =
 {
 	"Log",
 	"General",
-	"Resource",
-	"Rendering API",
+	"Resources",
+	"Rendering",
 	"Invalid"
 };
 

@@ -39,7 +39,7 @@ namespace te
 			}
 			if (scene.isDirty())
 			{
-				device->updateBuffers(scene);
+				device->updateDrawContext(scene);
 				scene.setIsDirty(false);
 			}
 			device->drawFrame();

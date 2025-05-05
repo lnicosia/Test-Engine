@@ -4,6 +4,7 @@
 #include "../MeshInternal.hpp"
 
 #include "Rendering/Vulkan/VulkanDevice.hpp"
+#include "Rendering/Vulkan/VulkanMaterial.hpp"
 #include "Maths/Matrix.hpp"
 
 #include "vulkan/vulkan.h"
@@ -12,13 +13,6 @@ class VulkanDevice;
 
 namespace te
 {
-	
-	struct UniformBufferObject
-	{
-		alignas(16) sml::mat4 model;
-		alignas(16) sml::mat4 view;
-		alignas(16) sml::mat4 projection;
-	};
 
 	class VulkanMesh : public MeshInternal
 	{
@@ -27,14 +21,16 @@ namespace te
 
 		VulkanMesh(const std::string& path, VulkanDevice* device);
 		VulkanMesh(VulkanDevice* vulkanDevice, const MeshGeometry& geometry);
+
 		const VkBuffer getVertexBuffer() const;
 		const VkDeviceMemory getVertexBufferMemory() const;
 		const VkBuffer getIndexBuffer() const;
 		const VkDeviceMemory getIndexBufferMemory() const;
 		size_t getIndexBufferSize() const;
-		
-		void load() override;
+		const std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& getDescriptorSets() const;
 
+		void setMaterial(std::shared_ptr<Material> newMat) override;
+		
 	protected:
 
 		void setup(AssimpImporter& importer) override;
@@ -44,7 +40,6 @@ namespace te
 
 	private:
 
-		void setupUniformBuffers();
 		void setupDescriptors();
 
 	private:
@@ -57,10 +52,6 @@ namespace te
 		VkBuffer indexBuffer{};
 		VkDeviceMemory indexBufferMemory{};
 		size_t indexBufferSize;
-
-		/** Uniform buffer */
-		std::array<VkBuffer, MAX_FRAMES_IN_FLIGHT> uniformBuffers{};
-		std::array<VkDeviceMemory, MAX_FRAMES_IN_FLIGHT> uniformBufferMemories{};
 
 		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptorSets;
 

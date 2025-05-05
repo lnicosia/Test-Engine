@@ -42,8 +42,6 @@ namespace te
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		imageInfo.imageView = textureImageView;
 		imageInfo.sampler = textureSampler;
-
-		vulkanDevice->addImageInfo(imageInfo);
 	}
 
 	VulkanTexture& VulkanTexture::operator=(VulkanTexture&& ref)
