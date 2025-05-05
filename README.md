@@ -6,7 +6,7 @@ Game engine for training purposes.
 
 * Learn/improve graphics programming and libraries
 * Improve my C++ skills
-* Rely as less as possible on external libraries
+* Try not to rely on external libraries too much
 * Make the project modular so new features (ex: physics, audio, new graphics API) can be added and tested easily
 * Learn and use CI (Continuous integration) and automated build tools and maintain the project cross-platform (for the moment, Windows and Linux, I don't own a Mac 😥).
 
