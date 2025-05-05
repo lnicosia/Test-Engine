@@ -1,5 +1,5 @@
 # Test-Engine
-![](Resources/Docs/2meshes.png)
+![](Resources/Doc/2meshes.png)
 Game engine for training purposes.
 
 ## Objectives
