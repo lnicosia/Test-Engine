@@ -7,15 +7,15 @@
 namespace te
 {
 	Camera::Camera():
-		pos{2.0f, 2.0f, 2.0f},
+		moveSpeed{0.01f}, rotationSpeed{0.001f},
+		pos{2.0f, 2.0f, 2.0f}, view{},
 		front{-2.0f, -2.0f, -2.0f},
 		right{sml::vec3::fnormalized(sml::vec3::cross(front, up))},
-		view{sml::lookAt(pos, pos + front, up)},
 		up{0.0f, 0.0f, 1.0f},
 		yaw{0.0f}, pitch{0.0f}, roll{0.0f},
-		moveSpeed{0.01f}, rotationSpeed{0.001f},
-		hfov{90.0/ 180.0 * (float)M_PI}, vfov{90.0/ 180.0 * (float)M_PI}
+		vfov{90.0/ 180.0 * (float)M_PI}, hfov{90.0/ 180.0 * (float)M_PI}
 	{
+		view = sml::lookAt(pos, pos + front, up);
 	}
 
 	Camera::~Camera()

@@ -3,6 +3,7 @@
 
 #include "DebugLevel.hpp"
 #include <stdint.h>
+#include <cstddef>
 
 namespace te
 {

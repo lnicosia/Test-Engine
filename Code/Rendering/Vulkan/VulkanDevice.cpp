@@ -1690,7 +1690,7 @@ namespace te
 			}
 			meshCount++;
 		}
-		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "%llu meshes to render\n", meshCount);
+		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "%zu meshes to render\n", meshCount);
 		renderObjects.resize(meshCount);
 		const std::vector<std::shared_ptr<MeshInternal>>& internalMeshes = scene.getInternalMeshes();
 		for (size_t i = 0; i < meshCount; i++)

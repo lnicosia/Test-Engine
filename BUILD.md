@@ -2,8 +2,9 @@
 
 ## Requirements
 
-* CMake at least 3.10
+* CMake 3.10 minimum
 * C++ 20 compiler
+* gcc 10 minimum
 
 ## Tested builds
 

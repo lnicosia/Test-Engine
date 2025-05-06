@@ -154,8 +154,8 @@ add_executable (${PROJECT_NAME}
 	"Scene/Transform.hpp"
 )
 
-set(Vulkan_LIBRARY ../../Binaries/ThirdParty/vulkan)	
-set(Vulkan_INCLUDE_DIR ../../Code/ThirdParty/vulkan)	
+set(Vulkan_LIBRARY ../../Binaries/ThirdParty/vulkan)
+set(Vulkan_INCLUDE_DIR ../../Code/ThirdParty/vulkan)
 find_package(Vulkan REQUIRED)
 
 add_subdirectory(Maths)

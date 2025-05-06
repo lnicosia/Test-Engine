@@ -39,4 +39,4 @@ Game engine for training purposes.
 
 ## How to build
 
-Read [](#BUILD.md)
+Read ![](#BUILD.md)

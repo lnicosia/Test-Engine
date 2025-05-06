@@ -32,24 +32,24 @@ namespace te
 		void moveLeft();
 		void moveRight();
 
-	private:
-		sml::vec3 front;
-		sml::vec3 right;
-		sml::vec3 up;
-
-		float yaw;
-		float pitch;
-		float roll;
-
-		float vfov;
-		float hfov;
-
 	public:
-		float moveSpeed;
-		float rotationSpeed;
-		sml::vec3 pos;
-		sml::mat4 view;
+		float moveSpeed{};
+		float rotationSpeed{};
+		sml::vec3 pos{};
+		sml::mat4 view{};
 		bool bIsDirty = true;
+		
+	private:
+		sml::vec3 front{};
+		sml::vec3 right{};
+		sml::vec3 up{};
+
+		float yaw{};
+		float pitch{};
+		float roll{};
+
+		float vfov{};
+		float hfov{};
 	};
 
 }

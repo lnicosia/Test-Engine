@@ -37,3 +37,5 @@ CMakeFiles/
 .vs/
 .vscode/
 Logs/
+
+CMakeSettings.json
