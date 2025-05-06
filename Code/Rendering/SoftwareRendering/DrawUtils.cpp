@@ -2,21 +2,21 @@
 
 namespace te
 {
-	void drawCircleClamped(const Point2<int> pos, double radius, uint32_t color,
-		SoftwareRenderer* renderer, Point2<int> minClamp, Point2<int> maxClamp)
+	void drawCircleClamped(const sml::Vector<int, 2> pos, float radius, uint32_t color,
+		SoftwareRenderer* renderer, sml::Vector<int, 2> minClamp, sml::Vector<int, 2> maxClamp)
 	{
-		Point2<int> p;
-		double squareRad;
+		sml::Vector<int, 2> p;
+		float squareRad;
 
 		squareRad = radius * radius;
-		for (int y = pos.y - radius; y < pos.y + radius; y++)
+		for (int y = static_cast<int>(pos.y - radius); y < pos.y + radius; y++)
 		{
-			for (int x = pos.x - radius; x < pos.x + radius; x++)
+			for (int x = static_cast<int>(pos.x - radius); x < pos.x + radius; x++)
 			{
 				p.x = x;
 				p.y = y;
-				double xDiff = pos.x - x;
-				double yDiff = pos.y - y;
+				float xDiff = static_cast<float>(pos.x - x);
+				float yDiff = static_cast<float>(pos.y - y);
 				if (xDiff * xDiff + yDiff * yDiff < squareRad &&
 					x >= minClamp.x && x < maxClamp.x
 					&& y >= minClamp.y && y < maxClamp.y)
@@ -27,20 +27,20 @@ namespace te
 		}
 	}
 
-	void drawCircle(Point2<int> pos, double radius, uint32_t color, SoftwareRenderer* renderer)
+	void drawCircle(sml::Vector<int, 2> pos, float radius, uint32_t color, SoftwareRenderer* renderer)
 	{
-		Point2<int> p;
-		double squareRad;
+		sml::Vector<int, 2> p;
+		float squareRad;
 
 		squareRad = radius * radius;
-		for (int y = pos.y - radius; y < pos.y + radius; y++)
+		for (int y = static_cast<int>(pos.y - radius); y < pos.y + radius; y++)
 		{
-			for (int x = pos.x - radius; x < pos.x + radius; x++)
+			for (int x = static_cast<int>(pos.x - radius); x < pos.x + radius; x++)
 			{
 				p.x = x;
 				p.y = y;
-				double xDiff = pos.x - x;
-				double yDiff = pos.y - y;
+				float xDiff = static_cast<float>(pos.x - x);
+				float yDiff = static_cast<float>(pos.y - y);
 				if (xDiff * xDiff + yDiff * yDiff < squareRad &&
 					x >= 0 && x < renderer->w && y >= 0 && y < renderer->h)
 				{
@@ -50,15 +50,15 @@ namespace te
 		}
 	}
 
-	void drawCircle(Point2<int> pos, double radius, uint32_t insideColor, uint32_t outsideColor,
+	void drawCircle(sml::Vector<int, 2> pos, float radius, uint32_t insideColor, uint32_t outsideColor,
 		SoftwareRenderer* renderer)
 	{
 
 	}
 
-	void drawRectangle(Point2<int> pos, Point2<int> size, uint32_t color, SoftwareRenderer* renderer)
+	void drawRectangle(sml::Vector<int, 2> pos, sml::Vector<int, 2> size, uint32_t color, SoftwareRenderer* renderer)
 	{
-		Point2<int> coord;
+		sml::Vector<int, 2> coord;
 
 		for (int y = 0; y < size.h; y++)
 		{
@@ -92,7 +92,7 @@ namespace te
 		}
 	}
 
-	void drawRectangle(Point2<int> pos, Point2<int> size, uint32_t outsideColor, uint32_t insideColor,
+	void drawRectangle(sml::Vector<int, 2> pos, sml::Vector<int, 2> size, uint32_t outsideColor, uint32_t insideColor,
 		SoftwareRenderer* renderer)
 	{
 		for (int y = pos.y; y < pos.y + size.h; y++)
@@ -107,10 +107,10 @@ namespace te
 		}
 	}
 
-	void drawRectangleClamped(Point2<int> pos, Point2<int> size, uint32_t color,
-		SoftwareRenderer* renderer, Point2<int> minClamp, Point2<int> maxClamp)
+	void drawRectangleClamped(sml::Vector<int, 2> pos, sml::Vector<int, 2> size, uint32_t color,
+		SoftwareRenderer* renderer, sml::Vector<int, 2> minClamp, sml::Vector<int, 2> maxClamp)
 	{
-		Point2<int> coord;
+		sml::Vector<int, 2> coord;
 
 		for (int y = 0; y < size.h; y++)
 		{
@@ -148,8 +148,8 @@ namespace te
 		}
 	}
 
-	void drawRectangleClamped(Point2<int> pos, Point2<int> size, uint32_t outsideColor, uint32_t insideColor,
-		SoftwareRenderer* renderer, Point2<int> minClamp, Point2<int> maxClamp)
+	void drawRectangleClamped(sml::Vector<int, 2> pos, sml::Vector<int, 2> size, uint32_t outsideColor, uint32_t insideColor,
+		SoftwareRenderer* renderer, sml::Vector<int, 2> minClamp, sml::Vector<int, 2> maxClamp)
 	{
 		for (int y = pos.y; y < pos.y + size.h; y++)
 		{
@@ -164,11 +164,11 @@ namespace te
 		}
 	}
 
-	void	drawLine(Point2<int> p1, Point2<int> p2, uint32_t color, SoftwareRenderer* renderer)
+	void drawLine(sml::Vector<int, 2> p1, sml::Vector<int, 2> p2, uint32_t color, SoftwareRenderer* renderer)
 	{
-		Vector2<double> v(p1, p2);
-		double x = p1.x;
-		double y = p1.y;
+		sml::vec2 v(p2 - p1);
+		float x = static_cast<float>(p1.x);
+		float y = static_cast<float>(p1.y);
 		v.normalize();
 		while ((int)x != p2.x || (int)y != p2.y)
 		{
@@ -187,12 +187,12 @@ namespace te
 		}
 	}
 
-	void drawLineClamped(Point2<int> p1, Point2<int> p2, uint32_t color,
-		SoftwareRenderer* renderer, Point2<int> minClamp, Point2<int> maxClamp)
+	void drawLineClamped(sml::Vector<int, 2> p1, sml::Vector<int, 2> p2, uint32_t color,
+		SoftwareRenderer* renderer, sml::Vector<int, 2> minClamp, sml::Vector<int, 2> maxClamp)
 	{
-		Vector2<double> v(p1, p2);
-		double x = p1.x;
-		double y = p1.y;
+		sml::vec2 v(p2 - p1);
+		float x = static_cast<float>(p1.x);
+		float y = static_cast<float>(p1.y);
 		v.normalize();
 		while ((int)x != p2.x || (int)y != p2.y)
 		{

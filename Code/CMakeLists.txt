@@ -29,7 +29,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(assimp)
 
-
 # Add source to this project's executable.
 
 add_executable (${PROJECT_NAME}
@@ -94,6 +93,15 @@ add_executable (${PROJECT_NAME}
 	"Rendering/Shaders/Shader.cpp"
 	"Rendering/Shaders/Shader.hpp"
 
+	"Rendering/SoftwareRendering/DrawUtils.cpp"
+	"Rendering/SoftwareRendering/DrawUtils.hpp"
+	"Rendering/SoftwareRendering/Raycaster.cpp"
+	"Rendering/SoftwareRendering/Raycaster.hpp"
+	"Rendering/SoftwareRendering/SoftwareMesh.cpp"
+	"Rendering/SoftwareRendering/SoftwareMesh.hpp"
+	"Rendering/SoftwareRendering/SoftwareRenderer.cpp"
+	"Rendering/SoftwareRendering/SoftwareRenderer.hpp"
+
 	"Rendering/Vulkan/DescriptorSets/VulkanDescriptorAllocator.cpp"
 	"Rendering/Vulkan/DescriptorSets/VulkanDescriptorAllocator.hpp"
 	"Rendering/Vulkan/DescriptorSets/VulkanDescriptorWriter.cpp"
@@ -118,17 +126,12 @@ add_executable (${PROJECT_NAME}
 	"Rendering/Window/Window.cpp"
 	"Rendering/Window/Window.hpp"
 	"Rendering/Window/WindowAPI.hpp"
-
-	"Rendering/SoftwareRendering/DrawUtils.cpp"
-	"Rendering/SoftwareRendering/DrawUtils.hpp"
-	"Rendering/SoftwareRendering/Raycaster.cpp"
-	"Rendering/SoftwareRendering/Raycaster.hpp"
-	"Rendering/SoftwareRendering/SoftwareRenderer.cpp"
-	"Rendering/SoftwareRendering/SoftwareRenderer.hpp"
 	
 	"Rendering/Camera.cpp"
 	"Rendering/Camera.hpp"
 	"Rendering/DebugLevel.hpp"
+	"Rendering/DeletionQueue.cpp"
+	"Rendering/DeletionQueue.hpp"
 	"Rendering/FrameStats.cpp"
 	"Rendering/FrameStats.hpp"
 	"Rendering/GPUDevice.cpp"

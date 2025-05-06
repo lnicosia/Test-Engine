@@ -6,14 +6,14 @@ namespace te
 	GLRenderer::GLRenderer(): Renderer(RendererType::TE_GL, WindowAPI::TE_SDL)
 	{
 		// TODO
-		uninplemented();
+		unimplemented();
 
 	}
 
 	GLRenderer::GLRenderer(WindowAPI windowAPI): Renderer(RendererType::TE_GL, windowAPI)
 	{
 		// TODO
-		uninplemented();
+		unimplemented();
 		if (windowAPI != WindowAPI::TE_SDL)
 		{
 			ThrowException("Only SDL is implemented for now");
@@ -23,18 +23,18 @@ namespace te
 	GLRenderer::~GLRenderer()
 	{
 		// TODO
-		uninplemented();
+		unimplemented();
 	}
 
 	void GLRenderer::render()
 	{
 		// TODO
-		uninplemented();
+		unimplemented();
 	}
 
 	void GLRenderer::renderText(const char* text, std::shared_ptr<Font> font, Point2<int> pos, int size)
 	{
 		// TODO
-		uninplemented();
+		unimplemented();
 	}
 }

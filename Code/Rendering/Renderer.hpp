@@ -8,6 +8,7 @@
 #include "Rendering/GPUDevice.hpp"
 #include "Window/WindowAPI.hpp"
 #include "Scene/Scene.hpp"
+#include "Camera.hpp"
 
 #define DEFAULT_TEXTURE_PATH "Resources/Textures/bigdoor3.bmp"
 
@@ -33,6 +34,10 @@ namespace te
 		const WindowAPI getWindowAPI() const;
 		const Scene& getScene() const;
 
+	protected:
+
+		void initCameraBindings();
+
 	public:
 
 		Scene scene{};
@@ -45,6 +50,7 @@ namespace te
 
 		RendererType rType{};
 		WindowAPI windowAPI{};
+		Camera camera{};
 		
 		std::shared_ptr<Window> window{};
 		std::shared_ptr<Font> uiFont{};

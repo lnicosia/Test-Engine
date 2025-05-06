@@ -25,7 +25,7 @@ namespace te
 	SoftwareTexture::SoftwareTexture(SoftwareTexture&& ref): Texture(std::move(ref))
 	{
 		// TODO
-		uninplemented();
+		unimplemented();
 	}
 
 	void SoftwareTexture::setup(const std::string& path)

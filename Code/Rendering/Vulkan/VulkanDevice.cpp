@@ -52,10 +52,11 @@ namespace te
 		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Destroying descriptor pools\n");
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			frames[i].descriptorAllocator.cleanupPools(devices[0]);
+			frames[i].sceneDescriptorAllocator.cleanupPools(devices[0]);
+			frames[i].meshDescriptorAllocator.cleanupPools(devices[0]);
 		}
-		vkDestroyDescriptorSetLayout(devices[0], descriptorSetLayouts[0], nullptr);
-		vkDestroyDescriptorSetLayout(devices[0], descriptorSetLayouts[1], nullptr);
+		vkDestroyDescriptorSetLayout(devices[0], sceneDescriptorSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(devices[0], meshDescriptorSetLayout, nullptr);
 
 		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Destroying vertex buffers\n");
 		for (size_t i = 0; i < vertexBuffers.size(); i++)
@@ -131,15 +132,17 @@ namespace te
 		createSceneBuffers();
 		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Creating descriptor pool\n");
 		createDescriptorPools();
-		VulkanDescriptorWriter writer;
 		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			sceneDescriptorSets[i] = frames[i].descriptorAllocator.allocate(devices[0], descriptorSetLayouts[0]);
-			updateSceneBuffer(i);
+			//sceneDescriptorSets[i] = frames[i].sceneDescriptorAllocator.allocate(devices[0], sceneDescriptorSetLayout);
+			/*updateSceneBuffer(i);
 			writer.writeBuffer(0, frames[i].sceneBuffer, sizeof(SceneBufferObject),
 			0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-			writer.updateSet(devices[0], sceneDescriptorSets[i]);
+			writer.updateSet(devices[0], sceneDescriptorSets[i]);*/
 		}
+		//sceneBufferObject.view = sml::lookAt(sml::vec3(2.0f, 2.0f, 2.0f), sml::vec3(0.0f, 0.0f, 0.0f), sml::vec3(0.0f, 0.0f, 1.0f));
+		sceneBufferObject.projection = sml::perspective(SML_TO_RADIANS * 45.0f, swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+		sceneBufferObject.projection[1][1] *= -1;
 		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Creating command buffer\n");
 		createCommandBuffers();
 		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Creating synchronization objects\n");
@@ -689,7 +692,7 @@ namespace te
 		layoutCreateInfo.bindingCount = static_cast<uint32_t>(sceneBindings.size());
 		layoutCreateInfo.pBindings = sceneBindings.data();
 
-		if (vkCreateDescriptorSetLayout(devices[0], &layoutCreateInfo, nullptr, &descriptorSetLayouts[0]) != VK_SUCCESS)
+		if (vkCreateDescriptorSetLayout(devices[0], &layoutCreateInfo, nullptr, &sceneDescriptorSetLayout) != VK_SUCCESS)
 		{
 			ThrowException("Failed to create descriptor set layout!");
 		}
@@ -713,7 +716,7 @@ namespace te
 		layoutCreateInfo.bindingCount = static_cast<uint32_t>(meshBindings.size());
 		layoutCreateInfo.pBindings = meshBindings.data();
 
-		if (vkCreateDescriptorSetLayout(devices[0], &layoutCreateInfo, nullptr, &descriptorSetLayouts[1]) != VK_SUCCESS)
+		if (vkCreateDescriptorSetLayout(devices[0], &layoutCreateInfo, nullptr, &meshDescriptorSetLayout) != VK_SUCCESS)
 		{
 			ThrowException("Failed to create descriptor set layout!");
 		}
@@ -834,7 +837,10 @@ namespace te
 		pushConstantRanges.size = sizeof(sml::mat4);
 		pushConstantRanges.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-		pipelineLayoutInfo.setLayoutCount = 2;
+		std::array<VkDescriptorSetLayout, 2> descriptorSetLayouts{
+			sceneDescriptorSetLayout, meshDescriptorSetLayout
+		};
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
 		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRanges;
@@ -1118,7 +1124,7 @@ namespace te
 			{
 				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1.0f }
 			};
-			frames[i].descriptorAllocator.init(devices[0], 1000, scenePoolSizes);
+			frames[i].sceneDescriptorAllocator.init(devices[0], 1000, scenePoolSizes);
 			
 			std::vector<VulkanDescriptorAllocator::PoolSize> meshPoolSizes =
 			{
@@ -1126,7 +1132,7 @@ namespace te
 				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1.0f }
 			};
 
-			frames[i].descriptorAllocator.init(devices[0], 1000, meshPoolSizes);
+			frames[i].meshDescriptorAllocator.init(devices[0], 1000, meshPoolSizes);
 		}
 	}
 
@@ -1141,11 +1147,11 @@ namespace te
 		writer.updateSet(devices[0], descriptorSet);
 	}
 
-	void VulkanDevice::createDescriptorSets(std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& outDescriptorSets)
+	void VulkanDevice::createMeshDescriptorSets(std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& outDescriptorSets)
 	{
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			outDescriptorSets[i] = frames[i].descriptorAllocator.allocate(devices[0], descriptorSetLayouts[1]);
+			outDescriptorSets[i] = frames[i].meshDescriptorAllocator.allocate(devices[0], meshDescriptorSetLayout);
 		}
 	}
 
@@ -1412,10 +1418,17 @@ namespace te
 		}
 	}
 
-	void VulkanDevice::drawFrame()
+	void VulkanDevice::drawFrame(const Camera& camera)
 	{
 		vkWaitForFences(devices[0], 1, &frames[currentFrame].inFlightFence, VK_TRUE, UINT64_MAX);
 
+		frames[currentFrame].deletionQueue.flush();
+		if (frames[currentFrame].mustUpdateCamera)
+		{
+			updateCameraDescriptors(currentFrame);
+			frames[currentFrame].mustUpdateCamera = false;
+		}
+		
 		uint32_t imageIndex;
 		VkResult res = vkAcquireNextImageKHR(devices[0], swapChain, UINT64_MAX, frames[currentFrame].imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR || frameBufferResized)
@@ -1637,6 +1650,28 @@ namespace te
 			1, &region);
 
 		endSingleTimeCommands(devices[0], transferQueue, commandBuffer, transferCommandPool);
+	}
+
+	void VulkanDevice::updateCameraContext(const Camera& camera)
+	{
+		sceneBufferObject.view = camera.view;
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			memcpy(frames[i].sceneBufferMapped, &sceneBufferObject, sizeof(sceneBufferObject));
+			frames[i].mustUpdateCamera = true;
+		}
+	}
+
+	void VulkanDevice::updateCameraDescriptors(uint32_t frameIndex)
+	{
+		VulkanDescriptorWriter writer;
+		frames[frameIndex].sceneDescriptorAllocator.clearPools(devices[0]);
+		sceneDescriptorSets[frameIndex] = frames[frameIndex].sceneDescriptorAllocator.allocate(devices[0],
+			sceneDescriptorSetLayout);
+		memcpy(frames[frameIndex].sceneBufferMapped, &sceneBufferObject, sizeof(sceneBufferObject));
+		writer.writeBuffer(0, frames[frameIndex].sceneBuffer, sizeof(SceneBufferObject),
+		0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+		writer.updateSet(devices[0], sceneDescriptorSets[frameIndex]);
 	}
 
 	void VulkanDevice::updateDrawContext(const Scene& scene)

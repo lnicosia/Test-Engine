@@ -4,6 +4,7 @@
 #include "Rendering/Vertex.hpp"
 #include "Rendering/MeshInternal.hpp"
 #include "Rendering/FrameStats.hpp"
+#include "Rendering/Camera.hpp"
 #include "Assets/Textures/Texture.hpp"
 #include "Scene/Scene.hpp"
 
@@ -24,8 +25,9 @@ namespace te
 		virtual void createVertexBuffer(const std::vector<Vertex>& vertices,
 			const std::vector<uint32_t>& indices, void* outBuffer, void* outBufferMemory) = 0;
 
-		virtual void drawFrame() = 0;
+		virtual void drawFrame(const Camera& camera) = 0;
 		virtual void updateDrawContext(const Scene& scene) = 0;
+		virtual void updateCameraContext(const Camera& camera) = 0;
 		
 	public:
 

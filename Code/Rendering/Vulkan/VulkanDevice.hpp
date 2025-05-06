@@ -3,6 +3,7 @@
 
 #include "Rendering/Window/Window.hpp"
 #include "Rendering/GPUDevice.hpp"
+#include "Rendering/DeletionQueue.hpp"
 #include "Rendering/Vulkan/VulkanMaterial.hpp"
 #include "Rendering/Vulkan/QueueFamilyIndices.hpp"
 #include "Rendering/Vulkan/DescriptorSets/VulkanDescriptorAllocator.hpp"
@@ -41,12 +42,16 @@ namespace te
 			VkCommandBuffer commandBuffer{};
 
 			/** Descriptors */
-			VulkanDescriptorAllocator descriptorAllocator{};
+			VulkanDescriptorAllocator sceneDescriptorAllocator{};
+			VulkanDescriptorAllocator meshDescriptorAllocator{};
 			
 			/** Scene buffers */
 			VkBuffer sceneBuffer{};
 			VkDeviceMemory sceneBufferMemory{};
 			void* sceneBufferMapped{};
+
+			DeletionQueue deletionQueue;
+			bool mustUpdateCamera = true;
 		};
 
 	public:
@@ -80,13 +85,15 @@ namespace te
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
 		/** Descriptor sets */
-		void createDescriptorSets(std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& outDescriptorSets);
+		void createMeshDescriptorSets(std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& outDescriptorSets);
 		void updateDescriptorSet(VkDescriptorSet descriptorSet, const std::shared_ptr<VulkanTexture> texture);
 
 		/** Drawing */
 		void updateSceneBuffer(uint32_t currentFrame);
-		void drawFrame() override;
+		void drawFrame(const Camera& camera) override;
 		void updateDrawContext(const Scene& scene) override;
+		void updateCameraDescriptors(uint32_t frameIndex);
+		void updateCameraContext(const Camera& camera) override;
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 		/** Getters */
@@ -191,7 +198,8 @@ namespace te
 		VkRenderPass renderPass{};
 
 		/** Descriptor sets */
-		std::array<VkDescriptorSetLayout, 2> descriptorSetLayouts{};
+		VkDescriptorSetLayout sceneDescriptorSetLayout{};
+		VkDescriptorSetLayout meshDescriptorSetLayout{};
 		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> sceneDescriptorSets{};
 
 		/** Pipelines */

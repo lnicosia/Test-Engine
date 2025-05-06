@@ -40,8 +40,8 @@ namespace te
 
 	Raycaster::Raycaster(SoftwareRenderer* renderer): running(true),
 		minimapPos(),
-		minimapSize(Point2<int>(200, 200)),
-		minimapCenter(Point2<int>(minimapPos + minimapSize / 2.0)),
+		minimapSize(sml::Vector<int, 2>(200, 200)),
+		minimapCenter(sml::Vector<int, 2>(minimapPos + minimapSize / 2)),
 		mapMaxX(24), mapMaxY(24), mapScale(20.0),
 		gameState(PLAYING), renderer(renderer)
 	{
@@ -87,7 +87,7 @@ namespace te
 			{2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,5,5,5,5,5,5,5,5,5}
 		};
 
-		camera.pos = { 5, 5 };
+		camera.pos = { 5.0f, 5.0f, 0.0f };
 
 		Binding forward("forward", SDLK_UP, SDLK_w, true);
 		std::function<void(Camera&)> func = Forward;
@@ -124,11 +124,12 @@ namespace te
 
 	void	Raycaster::drawMap()
 	{
-		te::Point2<int> size(mapScale, mapScale);
-		te::Point2<int> pos;
-		te::Point2<int> startPos(minimapCenter.x  - camera.getPos().x * size.x,
-			minimapCenter.y  - camera.getPos().y * size.y);
-		te::Point2<double> startPos2(camera.getPos().x - map.size(), camera.getPos().y - map.size());
+		sml::Vector<int, 2> size(static_cast<int>(mapScale), static_cast<int>(mapScale));
+		sml::Vector<int, 2> pos;
+		sml::Vector<int, 2> startPos(
+			static_cast<int>(minimapCenter.x  - camera.getPos().x * size.x),
+			static_cast<int>(minimapCenter.y  - camera.getPos().y * size.y));
+		sml::vec2 startPos2(camera.getPos().x - map.size(), camera.getPos().y - map.size());
 		pos.y = startPos.y;
 		for (size_t y = 0; y < map.size(); y++)
 		{
@@ -153,17 +154,19 @@ namespace te
 
 	void	Raycaster::drawPlayerOnMinimap() const
 	{
-		Point2<int> winPos(minimapCenter.x , minimapCenter.y);
-		Point2<int> end(winPos.x + cos(camera.getYaw()) * 70, winPos.y + sin(camera.getYaw()) * 70);
+		sml::Vector<int, 2> winPos(minimapCenter.x , minimapCenter.y);
+		sml::Vector<int, 2> end(
+			static_cast<int>(winPos.x + cos(camera.getYaw()) * 70),
+			static_cast<int>(winPos.y + sin(camera.getYaw()) * 70));
 		//drawLineOnMap(winPos, end, 0xFF0000FF, pixels); 
-		/*end = te::Point2<int>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
+		/*end = sml::Vector<int, 2>(winPos.x + cos(topRayAngle) * 100, winPos.y + sin(topRayAngle) * 100);
 		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);
-		end = te::Point2<int>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
+		end = sml::Vector<int, 2>(winPos.x + cos(bottomRayAngle) * 100, winPos.y + sin(bottomRayAngle) * 100);
 		drawLineOnMap(winPos, end, 0xFFFFFFFF, pixels);*/
-		end = winPos + camera.getRightVec() * 150;
-		//Point2<int> pos = winPos - camera.getRightVec() * 150;
+		end = winPos + sml::vec2(camera.getRightVec().x, camera.getRightVec().y) * 150;
+		//sml::Vector<int, 2> pos = winPos - camera.getRightVec() * 150;
 		drawLineClamped(winPos, end, 0x00FF00FF, renderer, minimapPos, minimapPos + minimapSize);
-		drawCircleClamped(winPos, mapScale / 8.0, 0xFFFFFFFF, renderer, minimapPos, minimapPos + minimapSize);
+		drawCircleClamped(winPos, mapScale / 8.0f, 0xFFFFFFFF, renderer, minimapPos, minimapPos + minimapSize);
 	}
 
 	void Raycaster::render()
@@ -194,7 +197,7 @@ namespace te
 	void	Raycaster::drawFloorAndCeiling()
 	{
 		uint8_t R, G, B;
-		double distance;
+		float distance;
 		std::shared_ptr<SoftwareTexture> ceilingTex = textures[7];
 		if (!ceilingTex)
 		{
@@ -208,10 +211,10 @@ namespace te
 		for (int y = 0; y < renderer->h / 2; y++)
 		{
 			distance = (0.5 * renderer->h) / (renderer->h * 0.5 - y);
-			double leftX = camera.getPos().x + (camera.getFrontVec().x - camera.getRightVec().x) * distance;
-			double rightX = camera.getPos().x + (camera.getFrontVec().x + camera.getRightVec().x) * distance;
-			double leftY = camera.getPos().y + (camera.getFrontVec().y - camera.getRightVec().y) * distance;
-			double rightY = camera.getPos().y + (camera.getFrontVec().y + camera.getRightVec().y) * distance;
+			float leftX = camera.getPos().x + (camera.getFrontVec().x - camera.getRightVec().x) * distance;
+			float rightX = camera.getPos().x + (camera.getFrontVec().x + camera.getRightVec().x) * distance;
+			float leftY = camera.getPos().y + (camera.getFrontVec().y - camera.getRightVec().y) * distance;
+			float rightY = camera.getPos().y + (camera.getFrontVec().y + camera.getRightVec().y) * distance;
 			distance = (0.5 * renderer->h) / (renderer->h * 0.5 - y);
 			for (int x = 0; x < renderer->w; x++)
 			{
@@ -219,8 +222,8 @@ namespace te
 				G = 0x33 / distance;
 				B = 0x42 / distance;
 				pixels[x + y * (int)renderer->w] = R << 24 | G << 16 | B << 8 | 0xFF;*/
-				double currX = leftX + (rightX - leftX) * (x / (double)renderer->w);
-				double currY = leftY + (rightY - leftY) * (x / (double)renderer->w);
+				float currX = leftX + (rightX - leftX) * (x / (float)renderer->w);
+				float currY = leftY + (rightY - leftY) * (x / (float)renderer->w);
 				//printf("y = %d, x = %d, current pos = [%f %f]\n", y, x, currX, currY);
 				//currX = (int)currX % floorTex.getWidth();
 				//currY = (int)currY % floorTex.getHeight();
@@ -253,7 +256,7 @@ namespace te
 				renderer->pixels[x + y * (int)renderer->w] = R << 24 | G << 16 | B << 8 | 0xFF;
 			}
 		}
-		distance = std::numeric_limits<double>::infinity();
+		distance = std::numeric_limits<float>::infinity();
 		std::shared_ptr<SoftwareTexture> floorTex = textures[3];
 		if (!floorTex)
 		{
@@ -264,18 +267,18 @@ namespace te
 		for (int y = renderer->h / 2; y < renderer->h; y++)
 		{
 			distance = (0.5 * renderer->h) / (y - renderer->h * 0.5);
-			double leftX = camera.getPos().x + (camera.getFrontVec().x - camera.getRightVec().x) * distance;
-			double rightX = camera.getPos().x + (camera.getFrontVec().x + camera.getRightVec().x) * distance;
-			double leftY = camera.getPos().y + (camera.getFrontVec().y - camera.getRightVec().y) * distance;
-			double rightY = camera.getPos().y + (camera.getFrontVec().y + camera.getRightVec().y) * distance;
-			//double currY = camera.getPos().y + camera.getFrontVec().y * distance;
+			float leftX = camera.getPos().x + (camera.getFrontVec().x - camera.getRightVec().x) * distance;
+			float rightX = camera.getPos().x + (camera.getFrontVec().x + camera.getRightVec().x) * distance;
+			float leftY = camera.getPos().y + (camera.getFrontVec().y - camera.getRightVec().y) * distance;
+			float rightY = camera.getPos().y + (camera.getFrontVec().y + camera.getRightVec().y) * distance;
+			//float currY = camera.getPos().y + camera.getFrontVec().y * distance;
 			//printf("y = %d, left x = %f, right x = %f\n", y, leftX, rightX);
 			//printf("y = %d, left y = %f, right y = %f\n", y, leftY, rightY);
 			//printf("distance = %f\n", distance);
 			for (int x = 0; x < renderer->w; x++)
 			{
-				double currX = leftX + (rightX - leftX) * (x / (double)renderer->w);
-				double currY = leftY + (rightY - leftY) * (x / (double)renderer->w);
+				float currX = leftX + (rightX - leftX) * (x / (float)renderer->w);
+				float currY = leftY + (rightY - leftY) * (x / (float)renderer->w);
 				//printf("y = %d, x = %d, current pos = [%f %f]\n", y, x, currX, currY);
 				//currX = (int)currX % floorTex.getWidth();
 				//currY = (int)currY % floorTex.getHeight();
@@ -315,19 +318,19 @@ namespace te
 		}
 	}
 
-	void Raycaster::drawRay(Point2<double> pos, double angle, int x, uint32_t color)
+	void Raycaster::drawRay(sml::vec2 pos, float angle, int x, uint32_t color)
 	{
-		Vector2<double> v(cos(angle), sin(angle));
-		double mapX = pos.x;
-		double mapY = pos.y;
-		double diffX;
-		double diffY;
-		double newMapX = mapX, newMapY = mapY;
-		Point2<double> screen(this->minimapCenter);
-		Point2<double> end;
-		Point2<int> coord;
+		sml::vec2 v(cos(angle), sin(angle));
+		float mapX = pos.x;
+		float mapY = pos.y;
+		float diffX;
+		float diffY;
+		float newMapX = mapX, newMapY = mapY;
+		sml::vec2 screen(this->minimapCenter);
+		sml::vec2 end;
+		sml::Vector<int, 2> coord;
 		bool hit = false;
-		double dist;
+		float dist;
 		v.normalize();
 		//printf("Ray starting from [%f %f] with angle = %f\n", pos.x, pos.y, angle / M_PI * 180);
 		//printf("Vector = [%f %f]\n", v.x, v.y);
@@ -340,7 +343,7 @@ namespace te
 			//if (screenX >= 0 && screenX < renderer->w && screenY >= 0 && screenY < renderer->h)
 			//	pixels[screenX + screenY * renderer->w] = color;
 			//printf("ceil(%f) = %f\n", 5.0f, ceil(5.0f));
-			double nextX;
+			float nextX;
 			if (v.x > 0)
 			{
 				nextX = floor(mapX) + 1;
@@ -349,7 +352,7 @@ namespace te
 			{
 				nextX = ceil(mapX) - 1;
 			}
-			double nextY;
+			float nextY;
 			if (v.y > 0)
 			{
 				nextY = floor(mapY) + 1;
@@ -397,7 +400,7 @@ namespace te
 			}
 			else
 			{
-				drawCircleClamped(end, this->mapScale / 10.0, 0x00FF00FF, this->renderer,
+				drawCircleClamped(end, this->mapScale / 10.0f, 0x00FF00FF, this->renderer,
 					this->minimapPos, this->minimapPos + this->minimapSize);
 				hit = true;
 				//printf("Hit on [%f %f]\n", mapX, mapY);
@@ -416,17 +419,17 @@ namespace te
 		}
 		//printf("Intersects at map[%f %f] ([%d %d]\n", mapX, mapY, coord.x, coord.y);
 		// TODO Could be replaced by cos/sin formula (cheaper)
-		dist = pointDistance(pos, Point2<double>(mapX, mapY));
+		dist = pointDistance(pos, sml::vec2{mapX, mapY});
 		//dist = abs(mapX - pos.x) / v.x;
-		//double alpha = camera.getAngle() - angle;
+		//float alpha = camera.getAngle() - angle;
 		//dist = abs(pos.x - mapX) / cos(camera.getFov());
 
 		//printf("Player angle = %f\n", camera.getAngle());
 		//printf("Current angle = %f\n", angle);
 		//printf("Dist = %f\n", dist);
-		double distCorrec = dist * cos((angle - camera.getYaw()) / (1.0));
+		float distCorrec = dist * cos((angle - camera.getYaw()) / (1.0));
 		//printf("Correc dist = %f\n", distCorrec);
-		double size;
+		float size;
 		if (distCorrec < 400 / this->renderer->h)
 		{
 			size = this->renderer->h / 2;
@@ -435,8 +438,8 @@ namespace te
 		{
 			size = this->renderer->h / distCorrec;
 		}
-		double column;
-		double dummy;
+		float column;
+		float dummy;
 		bool side;
 		if (diffX < diffY)
 		{
@@ -451,27 +454,30 @@ namespace te
 			side = false;
 		}
 		//printf("column = %f\n", column);
-		/*drawLine(Point2<int>(renderer->w - 1 - x, renderer->h / 2 - size),
-		Point2<int>(renderer->w - 1 - x, renderer->h / 2 + size),
+		/*drawLine(sml::Vector<int, 2>(renderer->w - 1 - x, renderer->h / 2 - size),
+		sml::Vector<int, 2>(renderer->w - 1 - x, renderer->h / 2 + size),
 		color, pixels);*/
 
-		drawColumnOfImg(Point2<int>(x, this->renderer->h / 2 - size / 2), size, column,
-			side, this->textures[textIndex]);
+		drawColumnOfImg(sml::Vector<int, 2>(
+			static_cast<int>(x), static_cast<int>(this->renderer->h / 2 - size / 2)),
+			size, column, side, this->textures[textIndex]);
 	}
 
 	void Raycaster::drawRays()
 	{
-		double ratio = camera.getHFov() / this->renderer->w;
-		double currAngle = camera.getYaw() - camera.getHFov() / 2.0;
+		float ratio = camera.getHFov() / this->renderer->w;
+		float currAngle = camera.getYaw() - camera.getHFov() / 2.0;
 		//uint32_t color;
-		Point2<int> winPos(this->renderer->w / 2, this->renderer->h / 2);
+		sml::Vector<int, 2> winPos(this->renderer->w / 2, this->renderer->h / 2);
 
 		for (int x = 0; x < this->renderer->w; x++)
 		{
-			Point2<int> end(winPos.x + cos(currAngle) * 100, winPos.y + sin(currAngle) * 100);
-			drawRay(camera.getPos(), currAngle, x, 0xFFFF00FF);
+			sml::Vector<int, 2> end(
+				static_cast<int>(winPos.x + cos(currAngle) * 100),
+				static_cast<int>(winPos.y + sin(currAngle) * 100));
+			drawRay(sml::vec2(camera.getPos().x, camera.getPos().y), currAngle, x, 0xFFFF00FF);
 			//printf("Dist[%d] = %f\n", x, dist);
-			//printf("angle = %f\n", (camera.getYaw() - currAngle) / (double)M_PI * 180);
+			//printf("angle = %f\n", (camera.getYaw() - currAngle) / (float)M_PI * 180);
 			//if (cos(dist) == )
 			currAngle += ratio;
 			//break;
@@ -479,7 +485,7 @@ namespace te
 	}
 
 
-	void	Raycaster::drawColumnOfImg(Point2<int> start, int length, double column, bool side,
+	void	Raycaster::drawColumnOfImg(sml::Vector<int, 2> start, int length, float column, bool side,
 		const std::shared_ptr<SoftwareTexture> texture)
 	{
 		if (!texture || texture->isLoaded() == false)
@@ -492,7 +498,7 @@ namespace te
 		//printf("column index = %d\n", columnIndex);
 		while (i < length)
 		{
-			int rowIndex = (i / (double)length) * texture->getHeight();
+			int rowIndex = (i / (float)length) * texture->getHeight();
 			if (start.y + i >= 0 && start.y + i < this->renderer->h
 				&& this->renderer->pixels[start.x + (start.y + i) * this->renderer->w] != 0xFFFF00FF
 				&& this->renderer->pixels[start.x + (start.y + i) * this->renderer->w] != 0x00FF00FF)

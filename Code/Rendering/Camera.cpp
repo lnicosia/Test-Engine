@@ -1,14 +1,20 @@
 #include "Camera.hpp"
 
+#include "Debug/Log.hpp"
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace te
 {
 	Camera::Camera():
-		pos(0, 0),
-		front(1, 0),
-		right(front.x + cos(M_PI / 2.0), front.y + sin(M_PI / 2.0)),
-		yaw(0.0), pitch(0.0), roll(0.0),
-		moveSpeed(0.1), rotationSpeed(0.001),
-		hfov(90.0/ 180.0 * (double)M_PI), vfov(90.0/ 180.0 * (double)M_PI)
+		pos{2.0f, 2.0f, 2.0f},
+		front{-2.0f, -2.0f, -2.0f},
+		right{sml::vec3::fnormalized(sml::vec3::cross(front, up))},
+		view{sml::lookAt(pos, pos + front, up)},
+		up{0.0f, 0.0f, 1.0f},
+		yaw{0.0f}, pitch{0.0f}, roll{0.0f},
+		moveSpeed{0.01f}, rotationSpeed{0.001f},
+		hfov{90.0/ 180.0 * (float)M_PI}, vfov{90.0/ 180.0 * (float)M_PI}
 	{
 	}
 
@@ -16,83 +22,89 @@ namespace te
 	{
 	}
 
-	void	Camera::rotateY(double yaw)
+	void Camera::rotateY(float yaw)
 	{
 		this->yaw += yaw * rotationSpeed;
-		this->front.x = cos(this->yaw);
-		this->front.y = sin(this->yaw);
-		this->right.x = cos(this->yaw + M_PI / 2.0);
-		this->right.y = sin(this->yaw + M_PI / 2.0);
+		this->front.x = cosf(this->yaw);
+		this->front.y = sinf(this->yaw);
+		this->right.x = cosf(this->yaw + (float)M_PI / 2.0f);
+		this->right.y = sinf(this->yaw +(float) M_PI / 2.0f);
 	}
 
-	void	Camera::rotateX(double roll)
+	void Camera::rotateX(float roll)
 	{
 
 	}
 
-	void	Camera::rotateZ(double pitch)
+	void Camera::rotateZ(float pitch)
 	{
 
 	}
 
-	const double Camera::getYaw() const
+	const float Camera::getYaw() const
 	{
 		return yaw;
 	}
-	const double Camera::getPitch() const
+
+	const float Camera::getPitch() const
 	{
 		return pitch;
 	}
-	const double Camera::getRoll() const
+	
+	const float Camera::getRoll() const
 	{
 		return roll;
 	}
 
-	void	Camera::moveForward()
+	void Camera::moveForward()
 	{
-		this->pos.x += this->front.x * this->moveSpeed;
-		this->pos.y += this->front.y * this->moveSpeed;
+		pos += this->front * this->moveSpeed;
+		view = sml::lookAt(pos, pos + front, up);
+		bIsDirty = true;
 	}
 
-	void	Camera::moveBackward()
+	void Camera::moveBackward()
 	{
-		this->pos.x -= this->front.x * this->moveSpeed;
-		this->pos.y -= this->front.y * this->moveSpeed;
+		pos -= this->front * this->moveSpeed;
+		view = sml::lookAt(pos, pos + front, up);
+		bIsDirty = true;
 	}
 
-	void	Camera::moveLeft()
+	void Camera::moveLeft()
 	{
-		this->pos.x -= this->right.x * this->moveSpeed;
-		this->pos.y -= this->right.y * this->moveSpeed;
+		pos -= sml::vec3::fnormalized(sml::vec3::cross(front, up)) * this->moveSpeed;
+		view = sml::lookAt(pos, pos + front, up);
+		bIsDirty = true;
 	}
 
-	void	Camera::moveRight()
+	void Camera::moveRight()
 	{
-		this->pos.x += this->right.x * this->moveSpeed;
-		this->pos.y += this->right.y * this->moveSpeed;
+		pos += sml::vec3::fnormalized(sml::vec3::cross(front, up)) * this->moveSpeed;
+		view = sml::lookAt(pos, pos + front, up);
+		bIsDirty = true;
 	}
 
-	const Point2<double>& Camera::getPos() const
+	const sml::vec3& Camera::getPos() const
 	{
 		return pos;
 	}
 
-	const Vector2<double>& Camera::getFrontVec() const
+	const sml::vec3& Camera::getFrontVec() const
 	{
 		return front;
 	}
 
-	const Vector2<double>& Camera::getRightVec() const
+	const sml::vec3& Camera::getRightVec() const
 	{
 		return right;
 	}
 
-	const double Camera::getHFov() const
+	const float Camera::getHFov() const
 	{
 		return hfov;
 	}
 
-	const double Camera::getVFov() const
+	const float Camera::getVFov() const
 	{
 		return vfov;
 	}

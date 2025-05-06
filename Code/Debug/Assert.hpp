@@ -8,7 +8,7 @@
 
 #define assert(X) X ? (void)0 : throw (std::runtime_error(""));
 
-#define uninplemented() \
+#define unimplemented() \
 	ThrowException(__FILE__ ":" + std::to_string(__LINE__) + ": " + __func__ + "() is not implemented yet hehe"); \
 
 #endif // _ASSERT_HPP_

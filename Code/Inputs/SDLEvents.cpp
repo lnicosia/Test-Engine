@@ -1,4 +1,7 @@
 #include "SDLEvents.hpp"
+
+#include "Debug/Log.hpp"
+
 #include <iostream>
 
 namespace te
@@ -38,8 +41,10 @@ namespace te
 			}
 			case InputState::TE_PRESSED:
 			{
+				//TE_LOG(TE_GENERAL_LOG, TE_DISPLAY, "Trying to executed when pressed\n");
 				if (binding.whenPressed)
 				{
+					//TE_LOG(TE_GENERAL_LOG, TE_DISPLAY, "Executing\n");
 					binding.whenPressed->execute();
 				}
 				break;
@@ -124,7 +129,7 @@ namespace te
 					if (e.key.keysym.sym == binding.getKey1()
 						|| e.key.keysym.sym == binding.getKey2())
 					{
-						if (binding.getState() == InputState::TE_RELEASED)
+					if (binding.getState() == InputState::TE_RELEASED)
 						{
 							binding.setState(InputState::TE_PRESS);
 						}

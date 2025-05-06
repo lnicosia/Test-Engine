@@ -26,12 +26,12 @@ namespace te
 
 		std::vector<MouseBinding> mouseBindings;
 
-		Point2<float>	mousePos;
-		Point2<float>	mouseGlobalPos;
-		Point2<float>	mouseRelativePos;
-		InputState	mouseState;
+		sml::vec2 mousePos;
+		sml::vec2 mouseGlobalPos;
+		sml::vec2 mouseRelativePos;
+		InputState mouseState;
 
-		std::vector<Binding>	bindings;
+		std::vector<Binding> bindings;
 
 	};
 

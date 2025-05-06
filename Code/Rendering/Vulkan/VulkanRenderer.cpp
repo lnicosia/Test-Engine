@@ -27,7 +27,13 @@ namespace te
 		window = winPtr;
 
 		window->loadVulkan();
+		initCameraBindings();
+
 		vulkanDevice = std::make_shared<VulkanDevice>(winPtr);
+		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			vulkanDevice->updateCameraDescriptors(i);
+		}
 		device = vulkanDevice;
 		AssetManager::getInstance().loadDefaultTexture<VulkanTexture>(Logger::ROOT_DIR_PATH + DEFAULT_TEXTURE_PATH, vulkanDevice.get());
 	}
@@ -35,7 +41,7 @@ namespace te
 	VulkanRenderer::VulkanRenderer(WindowAPI wManager): Renderer(RendererType::TE_VULKAN, wManager)
 	{
 		// TODO
-		uninplemented();
+		unimplemented();
 		if (wManager != WindowAPI::TE_SDL)
 		{
 			ThrowException("Only SDL is implemented for now\n");
@@ -60,7 +66,7 @@ namespace te
 	void VulkanRenderer::renderText(const char* text, std::shared_ptr<Font> font, Point2<int> pos, int size)
 	{
 		// TODO
-		uninplemented();
+		unimplemented();
 	}
 	
 	std::shared_ptr<MeshInternal> VulkanRenderer::createSolidMesh(const MeshGeometry& geometry)

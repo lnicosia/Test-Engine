@@ -15,8 +15,26 @@ namespace te
 
 		struct PoolSize
 		{
-			VkDescriptorType type;
-			float ratio;
+			PoolSize() {}
+			PoolSize(const PoolSize& ref): type{ref.type}, ratio{ref.ratio} {}
+			PoolSize(PoolSize&& ref): type{std::move(ref.type)}, ratio{std::move(ref.ratio)} {}
+			PoolSize(VkDescriptorType type, float ratio): type{type}, ratio{ratio} {}
+
+			PoolSize& operator=(const PoolSize& ref)
+			{
+				type = ref.type;
+				ratio = ref.ratio;
+				return *this;
+			}
+			PoolSize& operator=(PoolSize&& ref)
+			{
+				type = std::move(ref.type);
+				ratio = std::move(ref.ratio);
+				return *this;
+			}
+			
+			VkDescriptorType type{};
+			float ratio{};
 		};
 
 		void init(VkDevice device, uint32_t maxSets, std::span<PoolSize> inPoolSizes);

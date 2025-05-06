@@ -2,7 +2,7 @@
 # define _BINDING_HPP_
 
 #include "Action.hpp"
-#include "Maths/math_tmp.hpp"
+#include "Maths/Vector.hpp"
 
 #include <string>
 #include <vector>
@@ -58,7 +58,7 @@ namespace te
 	struct MouseBinding : public Binding
 	{
 		MouseBinding(std::string name, uint32_t key1, uint32_t key2, bool editable);
-		Point2<float>	start;
+		sml::vec2 start;
 	};
 }
 

@@ -1,7 +1,13 @@
 #include "SoftwareRenderer.hpp"
+
 #include "Inputs/SDLEvents.hpp"
+
 #include "Assets/Fonts/TTFFont.hpp"
 #include "Assets/AssetManager.hpp"
+
+#include "Assets/Textures/SoftwareTexture.hpp"
+#include "Rendering/SoftwareRendering/SoftwareMesh.hpp"
+
 #include "Debug/Exception.hpp"
 
 namespace te
@@ -106,4 +112,21 @@ namespace te
 		SDL_DestroyTexture(texture);
 		SDL_DestroySurface(surf);
 	}
+
+	std::shared_ptr<MeshInternal> SoftwareRenderer::createSolidMesh(const MeshGeometry& geometry)
+	{
+		return std::make_shared<SoftwareMesh>();
+	}
+
+	std::shared_ptr<MeshInternal> SoftwareRenderer::loadMesh(const std::string& path)
+	{
+		return std::make_shared<SoftwareMesh>();
+	}
+
+	std::shared_ptr<Texture> SoftwareRenderer::loadTexture(const std::string& path)
+	{
+		return std::make_shared<SoftwareTexture>(path);
+	}
+
+
 }

@@ -4,6 +4,7 @@
 #include "Rendering/SoftwareRendering/SoftwareRenderer.hpp"
 #include "Rendering/Camera.hpp"
 #include "Assets/Textures/SoftwareTexture.hpp"
+#include "Maths/Vector.hpp"
 
 namespace te
 {
@@ -21,8 +22,8 @@ namespace te
 
 		void	render();
 		void	drawRays();
-		void	drawRay(Point2<double> pos, double angle, int x, uint32_t color);
-		void	drawColumnOfImg(Point2<int> start, int length, double column, bool side,
+		void	drawRay(sml::vec2 pos, float angle, int x, uint32_t color);
+		void	drawColumnOfImg(sml::Vector<int, 2> start, int length, float column, bool side,
 			const std::shared_ptr<SoftwareTexture> texture);
 		void	drawFloorAndCeiling();
 		void	drawMap();
@@ -30,14 +31,14 @@ namespace te
 
 		bool	running;
 		std::vector<std::vector<int>>	map;
-		Point2<int> minimapPos;
-		Point2<int> minimapSize;
-		Point2<int> minimapCenter;
+		sml::Vector<int, 2> minimapPos;
+		sml::Vector<int, 2> minimapSize;
+		sml::Vector<int, 2> minimapCenter;
 		int	mapMaxX;
 		int	mapMaxY;
-		double	mapScale;
+		float	mapScale;
 		GameState	gameState;
-		Point2<double>	oldMouse;
+		sml::vec2 oldMouse;
 		
 	private:
 		SoftwareRenderer* renderer;

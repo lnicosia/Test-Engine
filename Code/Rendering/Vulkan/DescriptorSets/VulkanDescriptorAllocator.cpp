@@ -11,15 +11,16 @@ namespace te
 		poolSizes.clear();
 		poolSizes.resize(inPoolSizes.size());
 
-		for (PoolSize& poolSize : inPoolSizes)
+		for (size_t i = 0; i < inPoolSizes.size(); i++)
 		{
-			poolSizes.emplace_back(poolSize);
+			poolSizes[i] = inPoolSizes[i];
 		}
 
 		VkDescriptorPool newPool = createPool(device, maxSets, inPoolSizes);
 
 		setsPerPool = static_cast<uint32_t>(maxSets * 1.5);
 
+		
 		readyPools.emplace_back(newPool);
 	}
 	
@@ -108,11 +109,11 @@ namespace te
 
 		std::vector<VkDescriptorPoolSize> descriptorPoolSizes{};
 		descriptorPoolSizes.reserve(inPoolSizes.size());
-		for (const PoolSize& poolSize : inPoolSizes)
+		
+		for (size_t i = 0; i < inPoolSizes.size(); i++)
 		{
-			descriptorPoolSizes.push_back(VkDescriptorPoolSize{
-				.type = poolSize.type,
-				.descriptorCount = static_cast<uint32_t>(poolSize.ratio * setCount)});
+			descriptorPoolSizes[i] = VkDescriptorPoolSize{
+				inPoolSizes[i].type, static_cast<uint32_t>(inPoolSizes[i].ratio * setCount)};
 		}
 
 		VkDescriptorPoolCreateInfo poolInfo{};

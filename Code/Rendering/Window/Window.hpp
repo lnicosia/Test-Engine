@@ -25,7 +25,6 @@ namespace te
 		const int getHeight() const;
 
 		int	handleEvents();
-		std::shared_ptr<Events> events;
 
 		/* Vulkan specifics */
 		virtual int	loadVulkan() = 0;
@@ -38,6 +37,10 @@ namespace te
 
 		/* Rendering API independant */
 		virtual int getFrameSize(int* w, int* h) = 0;
+
+	public:
+
+		std::shared_ptr<Events> events{};
 
 	private:
 		bool	resizable;

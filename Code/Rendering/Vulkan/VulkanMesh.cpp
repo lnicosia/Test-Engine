@@ -77,7 +77,7 @@ namespace te
 			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "No valid vulkan device\n");
 			return;
 		}
-		vulkanDevice->createDescriptorSets(descriptorSets);
+		vulkanDevice->createMeshDescriptorSets(descriptorSets);
 		std::shared_ptr<VulkanTexture> vulkanTexture = std::dynamic_pointer_cast<VulkanTexture>(
 			material->texture);
 		if (!vulkanTexture)

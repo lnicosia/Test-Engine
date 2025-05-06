@@ -21,6 +21,10 @@ namespace te
 		void render() override;
 		void renderText(const char* text, std::shared_ptr<Font> font,
 			Point2<int> pos, int size) override;
+		virtual std::shared_ptr<MeshInternal> createSolidMesh(const MeshGeometry& geometry) override;
+		virtual std::shared_ptr<MeshInternal> loadMesh(const std::string& path) override;
+		virtual std::shared_ptr<Texture> loadTexture(const std::string& path) override;
+
 		void showFrameStats();
 
 		uint32_t*		pixels;

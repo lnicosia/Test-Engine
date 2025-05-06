@@ -1,7 +1,8 @@
 #ifndef _CAMERA_HPP_
 # define _CAMERA_HPP_
 
-#include "Maths/math_tmp.hpp"
+#include "Maths/Vector.hpp"
+#include "Maths/Matrix.hpp"
 
 namespace te
 {
@@ -11,19 +12,19 @@ namespace te
 		Camera();
 		~Camera();
 
-		void rotateY(double yaw);
-		void rotateX(double roll);
-		void rotateZ(double pitch);
+		void rotateY(float yaw);
+		void rotateX(float roll);
+		void rotateZ(float pitch);
 
 		/* Getters */
-		const double getYaw() const;
-		const double getPitch() const;
-		const double getRoll() const;
-		const double getHFov() const;
-		const double getVFov() const;
-		const Point2<double>& getPos() const;
-		const Vector2<double>& getFrontVec() const;
-		const Vector2<double>& getRightVec() const;
+		const float getYaw() const;
+		const float getPitch() const;
+		const float getRoll() const;
+		const float getHFov() const;
+		const float getVFov() const;
+		const sml::vec3& getPos() const;
+		const sml::vec3& getFrontVec() const;
+		const sml::vec3& getRightVec() const;
 
 		/* Movement */
 		void moveForward();
@@ -31,22 +32,24 @@ namespace te
 		void moveLeft();
 		void moveRight();
 
-		Point2<double> pos;
-
 	private:
-		Vector2<double> front;
-		Vector2<double> right;
+		sml::vec3 front;
+		sml::vec3 right;
+		sml::vec3 up;
 
-		double yaw;
-		double pitch;
-		double roll;
+		float yaw;
+		float pitch;
+		float roll;
 
-		double vfov;
-		double hfov;
+		float vfov;
+		float hfov;
 
 	public:
-		double moveSpeed;
-		double rotationSpeed;
+		float moveSpeed;
+		float rotationSpeed;
+		sml::vec3 pos;
+		sml::mat4 view;
+		bool bIsDirty = true;
 	};
 
 }

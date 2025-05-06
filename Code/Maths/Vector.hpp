@@ -28,6 +28,12 @@ namespace sml
 
 		}
 
+		template < typename U >
+		constexpr VectorUnion(const VectorUnion<U, size>& from): data(from.data)
+		{
+			
+		}
+
 		template < typename ... Tn >
 		VectorUnion(Tn... args): data{args...}
 		{
@@ -43,10 +49,11 @@ namespace sml
 	{
 		union
 		{
-			std::array<T,3> data;
+			std::array<T,2> data;
 			struct { T x; T y; };
 			struct { T s; T t; };
 			struct { T u; T v; };
+			struct { T w; T h; };
 		};
 
 		constexpr VectorUnion<T, 2>() = default;
@@ -95,6 +102,15 @@ namespace sml
 		constexpr Vector(const std::array<T, size>& from): VectorUnion<T, size>(from)
 		{
 
+		}
+
+		template < typename U >
+		constexpr Vector(const Vector<U, size>& from)
+		{
+			for (size_t i = 0; i < size; i++)
+			{
+				(*this)[i] = static_cast<T>(from[i]);
+			}
 		}
 
 		template < typename ... Tn >
@@ -175,7 +191,7 @@ namespace sml
 		}
 
 		/** Assignment operators */
-		constexpr Vector<T, size>& operator+=(const Vector<T, size>& v) const
+		constexpr Vector<T, size>& operator+=(const Vector<T, size>& v)
 		{
 			for (size_t i = 0; i < size; i++)
 			{
@@ -184,29 +200,29 @@ namespace sml
 			return *this;
 		}
 
-		constexpr Vector<T, size>& operator-=(const Vector<T, size>& v) const
+		constexpr Vector<T, size>& operator-=(const Vector<T, size>& v)
 		{
 			for (size_t i = 0; i < size; i++)
 			{
-				(*this)[i] += v[i];
+				(*this)[i] -= v[i];
 			}
 			return *this;
 		}
 
-		constexpr Vector<T, size>& operator*=(const Vector<T, size>& v) const
+		constexpr Vector<T, size>& operator*=(const Vector<T, size>& v)
 		{
 			for (size_t i = 0; i < size; i++)
 			{
-				(*this)[i] += v[i];
+				(*this)[i] ()= v[i];
 			}
 			return *this;
 		}
 
-		constexpr Vector<T, size>& operator/=(const Vector<T, size>& v) const
+		constexpr Vector<T, size>& operator/=(const Vector<T, size>& v)
 		{
 			for (size_t i = 0; i < size; i++)
 			{
-				(*this)[i] += v[i];
+				(*this)[i] /= v[i];
 			}
 			return *this;
 		}
@@ -219,6 +235,16 @@ namespace sml
 		constexpr bool operator!=(const Vector<T, size>& v) const
 		{
 			return this->data != v.data;
+		}
+
+		constexpr Vector<T, size> operator*(const T& v) const
+		{
+			Vector<T, size> res = *this;
+			for (size_t i = 0; i < size; i++)
+			{
+				res[i] *= v;
+			}
+			return res;
 		}
 
 		/** Utilities */
@@ -338,7 +364,7 @@ namespace sml
 			return this->length();
 		}
 
-		constexpr T mangitude() const
+		constexpr T magnitude() const
 		{
 			return this->length();
 		}
@@ -349,6 +375,14 @@ namespace sml
 	using vec3 = Vector<float, 3>;
 	using vec4 = Vector<float, 4>;
 	
+	template < typename T >
+	constexpr T pointDistance(const Vector<T, 2>& p1, const Vector<T, 2>& p2)
+	{
+		T x = p2.x - p1.x;
+		T y = p2.y - p1.y;
+		return sqrt(x * x + y * y);
+	}
+
 } // namespace sml
 
 #endif // _VECTOR_HPP_

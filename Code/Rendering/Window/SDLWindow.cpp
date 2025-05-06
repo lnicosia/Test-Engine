@@ -74,7 +74,7 @@ namespace te
 			ThrowException("Could not create SDL window: " + std::string(SDL_GetError()) + "\n");
 		}
 
-		events = std::shared_ptr<SDLEvents>(new SDLEvents());
+		events = std::make_shared<SDLEvents>();
 	}
 
 	int SDLWindow::loadVulkan()
