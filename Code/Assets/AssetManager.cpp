@@ -16,7 +16,7 @@ namespace te
 		return instance;
 	}
 
-	void	AssetManager::printContent() const
+	void AssetManager::printContent() const
 	{
 		if (assets.size() == 0)
 		{
@@ -28,7 +28,7 @@ namespace te
 		}
 	}
 
-	void	AssetManager::clear()
+	void AssetManager::clear()
 	{
 		this->assets.clear();
 	}

@@ -17,12 +17,11 @@ namespace te
 	public:
 		AssetManager(const AssetManager& ref) = delete;
 		AssetManager(const AssetManager&& ref) = delete;
-		AssetManager&	operator=(const AssetManager& ref) = delete;
-		AssetManager&	operator=(const AssetManager&& ref) = delete;
+		AssetManager& operator=(const AssetManager& ref) = delete;
+		AssetManager& operator=(const AssetManager&& ref) = delete;
 		~AssetManager();
 
-		static AssetManager&
-			getInstance();
+		static AssetManager& getInstance();
 
 		/**	For a given type, path and args, search the content of the manager
 		**	for an existing and corresponding asset. If found, return it.
@@ -138,9 +137,9 @@ namespace te
 		**	IDs are unique
 		*/
 		template <typename T>
-		std::shared_ptr<T> getAsset(uint32_t id)
+		std::shared_ptr<T> getAsset(uint64_t id)
 		{
-			std::map<uint32_t, std::shared_ptr<Asset>>::iterator it =
+			std::map<uint64_t, std::shared_ptr<Asset>>::iterator it =
 				this->assets.find(id);
 			if (it == this->assets.end())
 			{
@@ -210,20 +209,18 @@ namespace te
 			return defaultTexture;
 		}
 
-		void
-			printContent(void) const;
+		void printContent(void) const;
 
 		/**	Clear contents
 		*	It would be nice to change this because we have to manually clear
 		*	to make sure that assets are released before their context is destroyed
 		*/
-		void
-			clear(void);
+		void clear(void);
 
 	private:
 		AssetManager();
 
-		std::map<uint32_t, std::shared_ptr<Asset>>	assets;
+		std::map<uint64_t, std::shared_ptr<Asset>> assets;
 		std::shared_ptr<Texture> defaultTexture{};
 	};
 }

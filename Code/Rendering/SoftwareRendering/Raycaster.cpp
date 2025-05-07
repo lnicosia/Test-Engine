@@ -127,8 +127,8 @@ namespace te
 		sml::Vector<int, 2> size(static_cast<int>(mapScale), static_cast<int>(mapScale));
 		sml::Vector<int, 2> pos;
 		sml::Vector<int, 2> startPos(
-			static_cast<int>(minimapCenter.x  - camera.getPos().x * size.x),
-			static_cast<int>(minimapCenter.y  - camera.getPos().y * size.y));
+			minimapCenter.x - static_cast<int>(camera.getPos().x * size.x),
+			minimapCenter.y - static_cast<int>(camera.getPos().y * size.y));
 		sml::vec2 startPos2(camera.getPos().x - map.size(), camera.getPos().y - map.size());
 		pos.y = startPos.y;
 		for (size_t y = 0; y < map.size(); y++)
@@ -210,12 +210,12 @@ namespace te
 		}
 		for (int y = 0; y < renderer->h / 2; y++)
 		{
-			distance = (0.5 * renderer->h) / (renderer->h * 0.5 - y);
+			distance = (0.5f * renderer->h) / (renderer->h * 0.5f - y);
 			float leftX = camera.getPos().x + (camera.getFrontVec().x - camera.getRightVec().x) * distance;
 			float rightX = camera.getPos().x + (camera.getFrontVec().x + camera.getRightVec().x) * distance;
 			float leftY = camera.getPos().y + (camera.getFrontVec().y - camera.getRightVec().y) * distance;
 			float rightY = camera.getPos().y + (camera.getFrontVec().y + camera.getRightVec().y) * distance;
-			distance = (0.5 * renderer->h) / (renderer->h * 0.5 - y);
+			distance = (0.5f * renderer->h) / (renderer->h * 0.5f - y);
 			for (int x = 0; x < renderer->w; x++)
 			{
 				/*R = 0x25 / distance;
@@ -266,7 +266,7 @@ namespace te
 		//printf("Right dir = [%f %f]\n", camera.getRightVec().x, camera.getRightVec().y);
 		for (int y = renderer->h / 2; y < renderer->h; y++)
 		{
-			distance = (0.5 * renderer->h) / (y - renderer->h * 0.5);
+			distance = (0.5f * renderer->h) / (y - renderer->h * 0.5f);
 			float leftX = camera.getPos().x + (camera.getFrontVec().x - camera.getRightVec().x) * distance;
 			float rightX = camera.getPos().x + (camera.getFrontVec().x + camera.getRightVec().x) * distance;
 			float leftY = camera.getPos().y + (camera.getFrontVec().y - camera.getRightVec().y) * distance;
@@ -382,8 +382,8 @@ namespace te
 			drawLineClamped(screen, end, color, this->renderer,
 				this->minimapPos, this->minimapPos + this->minimapSize);
 
-			coord.x = mapX;
-			coord.y = mapY;
+			coord.x = static_cast<int>(mapX);
+			coord.y = static_cast<int>(mapY);
 			//printf("Coord = [%d %d]\n", coord.x, coord.y);
 			if (diffX < diffY && v.x < 0)
 			{
@@ -427,12 +427,12 @@ namespace te
 		//printf("Player angle = %f\n", camera.getAngle());
 		//printf("Current angle = %f\n", angle);
 		//printf("Dist = %f\n", dist);
-		float distCorrec = dist * cos((angle - camera.getYaw()) / (1.0));
+		float distCorrec = dist * cosf((angle - camera.getYaw()) / (1.0f));
 		//printf("Correc dist = %f\n", distCorrec);
 		float size;
 		if (distCorrec < 400 / this->renderer->h)
 		{
-			size = this->renderer->h / 2;
+			size = this->renderer->h / 2.0f;
 		}
 		else
 		{
@@ -459,14 +459,14 @@ namespace te
 		color, pixels);*/
 
 		drawColumnOfImg(sml::Vector<int, 2>(
-			static_cast<int>(x), static_cast<int>(this->renderer->h / 2 - size / 2)),
-			size, column, side, this->textures[textIndex]);
+			x, static_cast<int>(this->renderer->h / 2.0f - size / 2)),
+			static_cast<int>(size), column, side, this->textures[textIndex]);
 	}
 
 	void Raycaster::drawRays()
 	{
-		float ratio = camera.getHFov() / this->renderer->w;
-		float currAngle = camera.getYaw() - camera.getHFov() / 2.0;
+		float ratio = camera.getHFov() / static_cast<float>(this->renderer->w);
+		float currAngle = camera.getYaw() - camera.getHFov() / 2.0f;
 		//uint32_t color;
 		sml::Vector<int, 2> winPos(this->renderer->w / 2, this->renderer->h / 2);
 
@@ -494,11 +494,11 @@ namespace te
 		}
 		int i = 0;
 		const unsigned char* img = texture->getImg();
-		int columnIndex = column * texture->getWidth();
+		int columnIndex = static_cast<int>(column * texture->getWidth());
 		//printf("column index = %d\n", columnIndex);
 		while (i < length)
 		{
-			int rowIndex = (i / (float)length) * texture->getHeight();
+			int rowIndex = static_cast<int>((i / static_cast<float>(length)) * texture->getHeight());
 			if (start.y + i >= 0 && start.y + i < this->renderer->h
 				&& this->renderer->pixels[start.x + (start.y + i) * this->renderer->w] != 0xFFFF00FF
 				&& this->renderer->pixels[start.x + (start.y + i) * this->renderer->w] != 0x00FF00FF)

@@ -23,7 +23,8 @@ namespace te
 	private:
 		std::vector<std::shared_ptr<Component>> components{};
 		Transform worldTransform{};
-		std::string name;
+		std::string name{""};
+		uint32_t id{0};
 
 	};
 	
