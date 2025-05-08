@@ -3,8 +3,7 @@
 
 namespace te
 {
-	
-	Actor::Actor()
+	Actor::Actor() : Entity{}
 	{
 	}
 	
@@ -12,13 +11,13 @@ namespace te
 	{
 	}
 
-	void Actor::addComponent(std::shared_ptr<Component> newComponent, const Transform& transform)
+	void Actor::addComponent(Component* newComponent, const Transform& transform)
 	{
-		components.push_back(newComponent);
+		components.emplace_back(newComponent->getId());
 		newComponent->setRelativeTransform(transform);
 	}
 
-	const std::vector<std::shared_ptr<Component>>& Actor::getComponents() const
+	const std::vector<EntityRef>& Actor::getComponents() const
 	{
 		return components;
 	}

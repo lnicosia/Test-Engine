@@ -4,11 +4,13 @@
 #include "Exception.hpp"
 #include "Log.hpp"
 
-// TODO
-
-#define assert(X) X ? (void)0 : throw (std::runtime_error(""));
-
 #define unimplemented() \
 	ThrowException(__FILE__ ":" + std::to_string(__LINE__) + ": " + __func__ + "() is not implemented yet hehe"); \
+
+#if defined(NDEBUG)
+#define TE_ASSERT(X) (void)0
+#else
+#define TE_ASSERT(X) X ? (void)0 : ThrowException(__FILE__ ":" + std::to_string(__LINE__) + ": " + #X + " failed");
+#endif
 
 #endif // _ASSERT_HPP_

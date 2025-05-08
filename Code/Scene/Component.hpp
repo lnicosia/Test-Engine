@@ -2,29 +2,35 @@
 #define _COMPONENT_HPP_
 
 #include "Scene/Transform.hpp"
+#include "Scene/Entity.hpp"
 #include "Rendering/MeshInternal.hpp"
+#include "Misc/Arena.hpp"
 
 #include <vector>
 
 namespace te
 {
-	class Component
+	class Component : public Entity
 	{
+		friend class Scene;
+		friend class Arena<Component>;
 
 	public:
-		Component();
 		virtual ~Component();
 
 		void setRelativeTransform(const Transform& newTransform);
-		const std::vector<std::shared_ptr<Component>>& getComponents() const;
+		const std::vector<EntityRef>& getComponents() const;
 		const std::shared_ptr<MeshInternal>& getMeshInternal() const;
 
 		void setMeshInternal(std::shared_ptr<MeshInternal> inMesh);
 
 	private:
+		Component();
+		
+	private:
 		Transform relativeTransform{};
-		std::vector<std::shared_ptr<Component>> components{};
-		std::shared_ptr<MeshInternal> meshInternal;
+		std::vector<EntityRef> components{};
+		std::shared_ptr<MeshInternal> meshInternal{};
 
 	};
 	

@@ -3,7 +3,7 @@
 namespace te
 {
 
-	Component::Component()
+	Component::Component() : Entity{}
 	{
 	}
 	
@@ -16,7 +16,7 @@ namespace te
 		relativeTransform = newTransform;
 	}
 
-	const std::vector<std::shared_ptr<Component>>& Component::getComponents() const
+	const std::vector<EntityRef>& Component::getComponents() const
 	{
 		return components;
 	}

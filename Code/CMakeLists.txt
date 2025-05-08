@@ -79,7 +79,10 @@ add_executable (${PROJECT_NAME}
 	"Inputs/SDLEvents.hpp"
 
 	"Maths/math_tmp.cpp"
-	"Maths/math_tmp.hpp" 
+	"Maths/math_tmp.hpp"
+
+	"Misc/Arena.cpp"
+	"Misc/Arena.hpp"
 
 	"Rendering/D3D/D3DRenderer.cpp"
 	"Rendering/D3D/D3DRenderer.hpp"
@@ -145,13 +148,17 @@ add_executable (${PROJECT_NAME}
 	"Rendering/RendererType.hpp"
 	"Rendering/Vertex.hpp"
 
-	"Scene/Scene.cpp"
-	"Scene/Scene.hpp"
 	"Scene/Actor.cpp"
 	"Scene/Actor.hpp"
 	"Scene/Component.cpp"
 	"Scene/Component.hpp"
+	"Scene/Entity.hpp"
+	"Scene/Scene.cpp"
+	"Scene/Scene.hpp"
 	"Scene/Transform.hpp"
+
+	"Tests/ArenaTest.cpp"
+	"Tests/ArenaTest.hpp"
 )
 
 set(Vulkan_LIBRARY ../../Binaries/ThirdParty/vulkan)
