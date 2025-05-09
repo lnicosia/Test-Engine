@@ -32,6 +32,7 @@ FetchContent_MakeAvailable(assimp)
 set(EXEC_NAME ${PROJECT_NAME}-App)
 
 add_executable (${EXEC_NAME}
+	"Test-Engine.rc"
 	"main.cpp"
 )
 
@@ -46,7 +47,6 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 target_link_libraries(${EXEC_NAME} PUBLIC ${PROJECT_NAME})
 
 set(SOURCE_LIST
-	#TODO: remake: Test-Engine.rc
 	"Platform.hpp"
 
 	"Assets/Fonts/Font.cpp"
