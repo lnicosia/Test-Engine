@@ -21,10 +21,9 @@ namespace te
 		*/
 		Asset(const Asset& ref) = delete;
 		Asset(Asset&& ref);
-		/**	The goal of assets is to keep their unicity
-		*/
 		Asset& operator=(const Asset& ref) = delete;
 		Asset& operator=(Asset&& ref);
+
 		virtual ~Asset();
 
 		//	Accessors
@@ -33,7 +32,7 @@ namespace te
 
 		virtual const std::string& getEmbeddedName() const;
 
-		const uint32_t& getId() const;
+		const uint64_t& getId() const;
 
 		const std::filesystem::path& getPath(int index = 0) const;
 
@@ -57,7 +56,7 @@ namespace te
 
 	protected:
 
-		std::string				name;
+		std::string name;
 
 		/**	Some assets (including Shaders) may have 2 or even more paths defining them
 		**	In this case all of their paths will be checked when requesting them
@@ -73,7 +72,7 @@ namespace te
 
 	private:
 
-		uint32_t id;
+		uint64_t id;
 
 		static uint32_t count;
 	};

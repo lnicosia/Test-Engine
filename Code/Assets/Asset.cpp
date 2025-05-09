@@ -63,7 +63,7 @@ namespace te
 		return embeddedName;
 	}
 
-	const uint32_t& Asset::getId() const
+	const uint64_t& Asset::getId() const
 	{
 		return id;
 	}

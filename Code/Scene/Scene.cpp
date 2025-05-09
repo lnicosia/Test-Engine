@@ -4,33 +4,74 @@
 
 namespace te
 {
+	uint64_t Entity::count = 0;
+	
 	Scene::Scene()
 	{
-
 	}
 
 	Scene::~Scene()
 	{
-		
 	}
 
-	void Scene::addComponentGeometry(const std::shared_ptr<Component>& component)
+	void Scene::addComponentGeometry(const Component* component)
 	{
-		for (auto childComponent: component->getComponents())
+		for (auto childComponentRef: component->getComponents())
 		{
+			const Component* childComponent = getComponent(childComponentRef);
 			addComponentGeometry(childComponent);
 		}
 		internalMeshes.push_back(component->getMeshInternal());
 	}
 
-	void Scene::addActor(std::shared_ptr<Actor> newActor)
+	void Scene::addActor(const EntityRef& actorRef)
 	{
 		bIsDirty = true;
-		actors.insert(newActor);
-		for (auto component: newActor->getComponents())
+		sceneActors.push_back(actorRef);
+		const Actor* actor = getActor(actorRef);
+		for (auto componentRef: actor->getComponents())
 		{
+			const Component* component = getComponent(componentRef);
 			addComponentGeometry(component);
 		}
+	}
+
+	Actor* Scene::createActor()
+	{
+		Actor* newActor = actorArena.allocate();
+		actors.push_back(newActor);
+		return newActor;
+	}
+
+	Component* Scene::createComponent()
+	{
+		Component* newComponent = componentArena.allocate();
+		components.push_back(newComponent);
+		return newComponent;
+	}
+
+	Actor* Scene::getActor(const EntityRef& actorRef)
+	{
+		for (auto& a: actors)
+		{
+			if (a->getId() == actorRef.getId())
+			{
+				return a;
+			}
+		}
+		return nullptr;
+	}
+	
+	Component* Scene::getComponent(const EntityRef& component)
+	{
+		for (auto& c: components)
+		{
+			if (c->getId() == component.getId())
+			{
+				return c;
+			}
+		}
+		return nullptr;
 	}
 
 	const std::vector<std::shared_ptr<MeshInternal>>& Scene::getInternalMeshes() const

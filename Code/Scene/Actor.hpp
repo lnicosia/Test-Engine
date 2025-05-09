@@ -1,29 +1,36 @@
 #ifndef _ACTOR_HPP_
 #define _ACTOR_HPP_
 
-#include "Component.hpp"
+#include "Scene/Component.hpp"
+#include "Scene/Entity.hpp"
+#include "Misc/Arena.hpp"
 
 #include <vector>
 #include <memory>
 
 namespace te
 {
-	class Actor
+	class Actor : public Entity
 	{
+		friend class Scene;
+		friend class Arena<Actor>;
+
 	public:
-		Actor();
 		virtual ~Actor();
 
 		/** Components */
-		void addComponent(std::shared_ptr<Component> newComponent, const Transform& transform = {});
+		void addComponent(Component* newComponent, const Transform& transform = {});
 
-		const std::vector<std::shared_ptr<Component>>& getComponents() const;
+		const std::vector<EntityRef>& getComponents() const;
 		std::string getName() const;
 
 	private:
-		std::vector<std::shared_ptr<Component>> components{};
+		Actor();
+
+	private:
+		std::vector<EntityRef> components{};
 		Transform worldTransform{};
-		std::string name;
+		std::string name{""};
 
 	};
 	

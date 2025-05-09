@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-static std::vector<const char*> catNames =
+static const std::vector<const char*> catNames =
 {
 	"Log",
 	"General",
@@ -15,7 +15,7 @@ static std::vector<const char*> catNames =
 	"Invalid"
 };
 
-static std::vector<const char*> verboseNames =
+static const std::vector<const char*> verboseNames =
 {
 	"Fatal",
 	"Error",
@@ -26,7 +26,7 @@ static std::vector<const char*> verboseNames =
 	"VeryVerbose"
 };
 
-static std::vector<const char*> verboseColors =
+static const std::vector<const char*> verboseColors =
 {
 	TE_CONSOLE_RED,
 	TE_CONSOLE_RED,
@@ -41,9 +41,9 @@ static std::vector<const char*> verboseColors =
 // TODO: handle fatal errors
 
 #define TE_LOG(CATEGORY, VERBOSE_LEVEL, format, ...)	\
-	fprintf(Logger::files[CATEGORY], "%s: " format , catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
+	fprintf(Logger::getFiles()[CATEGORY], "%s: " format , catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
 	\
-	fprintf(Logger::files[TE_ALL_LOG], "%s: " format, catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
+	fprintf(Logger::getFiles()[TE_ALL_LOG], "%s: " format, catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
 	\
 	VERBOSE_LEVEL <= TE_DISPLAY ? \
 		(void)printf("%s%s: " format TE_CONSOLE_RESET, verboseColors[VERBOSE_LEVEL], catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__) \
@@ -82,25 +82,29 @@ namespace te
 		TE_VERBOSE,
 		TE_VERYVERBOSE
 	};
+	
 	class Logger
 	{
 	public:
 		
 		static void Init();
 		static void Quit();
+		static std::string& getRootDirPath();
+		static std::vector<FILE*>& getFiles();
 
 		static std::vector<FILE*> files;
 		static std::string ROOT_DIR_PATH;
 
 	private:
-		Logger();
-		~Logger();
+		Logger() = default;
+		~Logger() = default;
 
 		static void findRootDirPath();
 
 		static bool initialized;
 
 	};
+
 }
 
 #endif // _LOG_HPP_

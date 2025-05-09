@@ -1,8 +1,11 @@
 #ifndef _SCENE_HPP_
 #define _SCENE_HPP_
 
-#include "Actor.hpp"
+#include "Scene/Actor.hpp"
+#include "Scene/Entity.hpp"
 #include "Rendering/MeshInternal.hpp"
+#include "Debug/Exception.hpp"
+#include "Misc/Arena.hpp"
 
 #include <set>
 
@@ -16,7 +19,9 @@ namespace te
 		Scene();
 		~Scene();
 
-		void addActor(std::shared_ptr<Actor> newActor);
+		void addActor(const EntityRef& actorRef);
+		Actor* createActor();
+		Component* createComponent();
 
 		const std::vector<std::shared_ptr<MeshInternal>>& getInternalMeshes() const;
 
@@ -25,11 +30,24 @@ namespace te
 		
 	private:
 
-		void addComponentGeometry(const std::shared_ptr<Component>& component);
+		void addComponentGeometry(const Component* component);
+
+		Actor* getActor(const EntityRef& actorRef);
+		Component* getComponent(const EntityRef& componentRef);
 
 	private:
 
-		std::set<std::shared_ptr<Actor>> actors{};
+		/** Scene graph */
+		std::vector<EntityRef> sceneActors{};
+
+		/** Scene data
+		 */
+		Arena<Actor> actorArena{};
+		Arena<Component> componentArena{};
+		std::vector<Actor*> actors{};
+		std::vector<Component*> components{};
+
+		/** Draw data */
 		std::vector<std::shared_ptr<MeshInternal>> internalMeshes{};
 
 		bool bIsDirty = false;

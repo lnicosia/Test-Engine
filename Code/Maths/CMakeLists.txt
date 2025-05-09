@@ -2,8 +2,7 @@ cmake_minimum_required (VERSION 3.10)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS True)
 
-add_library(sml SHARED
-
+set(SOURCE_LIST
 	# TODO: make this optional
 	"Tests/MatrixTest.cpp"
 
@@ -19,7 +18,10 @@ add_library(sml SHARED
 	"Vector.hpp"
 )
 
-target_include_directories(sml PRIVATE Maths)
+add_library(sml SHARED ${SOURCE_LIST})
+
+target_include_directories(sml PRIVATE "Maths")
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
 
 set_target_properties(sml PROPERTIES PUBLIC_HEADER "Maths/Math.h")
 set_target_properties(sml PROPERTIES LINKER_LANGUAGE CXX)
