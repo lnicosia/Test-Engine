@@ -169,9 +169,6 @@ set(SOURCE_LIST
 	"Scene/Scene.cpp"
 	"Scene/Scene.hpp"
 	"Scene/Transform.hpp"
-
-	"Tests/ArenaTest.cpp"
-	"Tests/ArenaTest.hpp"
 )
 
 add_library (${PROJECT_NAME} SHARED ${SOURCE_LIST})
@@ -184,6 +181,7 @@ set(Vulkan_INCLUDE_DIR ../../Code/ThirdParty/vulkan)
 find_package(Vulkan REQUIRED)
 
 add_subdirectory(Maths)
+add_subdirectory(Tests)
 
 set(SDL_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build)
 set(SDL_TTF_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build)
@@ -207,9 +205,9 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 )
 
 target_include_directories(${PROJECT_NAME}
-	PRIVATE "ThirdParty"
-	PRIVATE "./"
-	PRIVATE "Maths"
+	PUBLIC "ThirdParty"
+	PUBLIC "./"
+	PUBLIC "Maths"
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
@@ -274,7 +272,6 @@ elseif (UNIX)
 	)
 
 endif ()
-
 
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor)

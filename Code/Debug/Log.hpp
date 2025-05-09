@@ -41,9 +41,9 @@ static const std::vector<const char*> verboseColors =
 // TODO: handle fatal errors
 
 #define TE_LOG(CATEGORY, VERBOSE_LEVEL, format, ...)	\
-	fprintf(Logger::files[CATEGORY], "%s: " format , catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
+	fprintf(Logger::getFiles()[CATEGORY], "%s: " format , catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
 	\
-	fprintf(Logger::files[TE_ALL_LOG], "%s: " format, catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
+	fprintf(Logger::getFiles()[TE_ALL_LOG], "%s: " format, catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__); \
 	\
 	VERBOSE_LEVEL <= TE_DISPLAY ? \
 		(void)printf("%s%s: " format TE_CONSOLE_RESET, verboseColors[VERBOSE_LEVEL], catNames[CATEGORY] __VA_OPT__(,) __VA_ARGS__) \
@@ -90,6 +90,7 @@ namespace te
 		static void Init();
 		static void Quit();
 		static std::string& getRootDirPath();
+		static std::vector<FILE*>& getFiles();
 
 		static std::vector<FILE*> files;
 		static std::string ROOT_DIR_PATH;

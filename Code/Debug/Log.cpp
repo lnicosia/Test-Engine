@@ -138,4 +138,9 @@ namespace te
 	{
 		return ROOT_DIR_PATH;
 	}
+
+	std::vector<FILE*>& Logger::getFiles()
+	{
+		return files;
+	}
 }
