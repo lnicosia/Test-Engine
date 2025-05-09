@@ -9,10 +9,6 @@ add_executable(Tests ${SOURCE_LIST})
 
 target_link_libraries(Tests PUBLIC Test-Engine)
 
-set(Vulkan_LIBRARY ../../../Binaries/ThirdParty/vulkan)
-set(Vulkan_INCLUDE_DIR ../../../Code/ThirdParty/vulkan)
-find_package(Vulkan REQUIRED)
-
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
 
 set_target_properties(sml PROPERTIES LINKER_LANGUAGE CXX)

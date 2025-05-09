@@ -176,10 +176,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS 1)
 
-set(Vulkan_LIBRARY ../../Binaries/ThirdParty/vulkan)
-set(Vulkan_INCLUDE_DIR ../../Code/ThirdParty/vulkan)
-find_package(Vulkan REQUIRED)
-
 add_subdirectory(Maths)
 add_subdirectory(Tests)
 
