@@ -35,7 +35,7 @@ namespace te
 			vulkanDevice->updateCameraDescriptors(i);
 		}
 		device = vulkanDevice;
-		AssetManager::getInstance().loadDefaultTexture<VulkanTexture>(Logger::ROOT_DIR_PATH + DEFAULT_TEXTURE_PATH, vulkanDevice.get());
+		AssetManager::getInstance().loadDefaultTexture<VulkanTexture>(Logger::getRootDirPath() + DEFAULT_TEXTURE_PATH, vulkanDevice.get());
 	}
 
 	VulkanRenderer::VulkanRenderer(WindowAPI wManager): Renderer(RendererType::TE_VULKAN, wManager)

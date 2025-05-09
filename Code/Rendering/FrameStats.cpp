@@ -18,7 +18,7 @@ namespace te
 		if (frameTime - lastUpdate >= 1000)
 		{
 			lastUpdate = newTime;
-			fps = currFps;
+			fps = static_cast<uint64_t>(currFps);
 		}
 		frameTime = newTime;
 	}

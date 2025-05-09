@@ -8,19 +8,10 @@ namespace te
 	
 	Scene::Scene()
 	{
-
 	}
 
 	Scene::~Scene()
 	{
-		for (auto& a: actors)
-		{
-			delete a;
-		}
-		for (auto& c: components)
-		{
-			delete c;
-		}
 	}
 
 	void Scene::addComponentGeometry(const Component* component)

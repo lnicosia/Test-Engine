@@ -1,23 +1,26 @@
 #include "Log.hpp"
 #include "Assets/CheckFileType.hpp"
 #include "Debug/Exception.hpp"
+#include "Platform.hpp"
 
-#ifdef _WIN32
-
-#include <windows.h>
-
+#ifdef TE_WINDOWS
+# include <windows.h>
 #else
-
-#define __STDC_WANT_LIB_EXT1__ 1
-#include <stdio.h>
-
-#endif // _WIN32
+# define __STDC_WANT_LIB_EXT1__ 1
+# include <stdio.h>
+#endif // TE_WINDOWS
 
 namespace te
 {
 
+	bool Logger::initialized = false;
+	std::vector<FILE*> Logger::files{};
+	std::string Logger::ROOT_DIR_PATH;
+
 	void Logger::Init()
 	{
+		static Logger instance{};
+		
 		if (initialized)
 		{
 			return;
@@ -81,7 +84,7 @@ namespace te
 
 	void Logger::findRootDirPath()
 	{
-#ifdef _WIN32
+#ifdef TE_WINDOWS
 		char path[MAX_PATH] = { 0 };
 		GetModuleFileNameA(nullptr, path, MAX_PATH);
 		std::filesystem::path executablePath(path);
@@ -131,7 +134,8 @@ namespace te
 		}
 	}
 
-	bool Logger::initialized = false;
-	std::vector<FILE*> Logger::files;
-	std::string Logger::ROOT_DIR_PATH;
+	std::string& Logger::getRootDirPath()
+	{
+		return ROOT_DIR_PATH;
+	}
 }

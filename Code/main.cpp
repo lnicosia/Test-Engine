@@ -6,13 +6,15 @@
 #include "Rendering/SoftwareRendering/Raycaster.hpp"
 #include "Rendering/MeshInternal.hpp"
 #include "Scene/Actor.hpp"
+#include "Debug/Log.hpp"
 
 #include "Platform.hpp"
+
 #if !defined(NDEBUG) && defined(TE_WINDOWS)
 #define __CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
-#endif // (NDEBUG)
+#endif
 
 #include <memory>
 
@@ -50,14 +52,14 @@ int main()
 		std::shared_ptr<te::MeshInternal> squareMesh = renderer->createSolidMesh(geometry);
 		std::shared_ptr<te::MeshInternal> squareMesh2 = renderer->createSolidMesh(geometry);
 		std::shared_ptr<te::MeshInternal> loadedMesh =
-			renderer->loadMesh(te::Logger::ROOT_DIR_PATH + "Resources/Objects/viking_room/viking_room.obj");
+			renderer->loadMesh(te::Logger::getRootDirPath() + "Resources/Objects/viking_room/viking_room.obj");
 
 		te::Actor* actor = renderer->scene.createActor();
 		te::Component* component = renderer->scene.createComponent();
 		te::Component* component2 = renderer->scene.createComponent();
 
 		std::shared_ptr<te::Texture> newTex = renderer->loadTexture(
-			te::Logger::ROOT_DIR_PATH + "Resources/Objects/viking_room/viking_room.png"
+			te::Logger::getRootDirPath() + "Resources/Objects/viking_room/viking_room.png"
 		);
 
 		std::shared_ptr<te::Material> mat = std::make_shared<te::Material>(newTex);
@@ -79,7 +81,9 @@ int main()
 	{
 		std::cerr << e.what() << std::endl;
 	}
-	//printf("Exiting...\n");
-	//_CrtDumpMemoryLeaks();
+#ifdef __CRTDBG_MAP_ALLOC
+	printf("Dumping leaks...\n");
+	_CrtDumpMemoryLeaks();
+#endif
 	return 0;
 }

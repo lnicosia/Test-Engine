@@ -724,8 +724,8 @@ namespace te
 
 	void VulkanDevice::createOpaquePipeline()
 	{
-		Shader vertex(Logger::ROOT_DIR_PATH + "Shaders/SPIR-V/triangle.vert.spv");
-		Shader fragment(Logger::ROOT_DIR_PATH + "Shaders/SPIR-V/triangle.frag.spv");
+		Shader vertex(Logger::getRootDirPath() + "Shaders/SPIR-V/triangle.vert.spv");
+		Shader fragment(Logger::getRootDirPath() + "Shaders/SPIR-V/triangle.frag.spv");
 
 		VkShaderModule vertShaderModule = createShaderModule(vertex.buff);
 		VkShaderModule fragShaderModule = createShaderModule(fragment.buff);

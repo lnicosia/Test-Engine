@@ -107,8 +107,7 @@ namespace te
 	{
 		VkDescriptorPool newPool{};
 
-		std::vector<VkDescriptorPoolSize> descriptorPoolSizes{};
-		descriptorPoolSizes.reserve(inPoolSizes.size());
+		std::vector<VkDescriptorPoolSize> descriptorPoolSizes { inPoolSizes.size() };
 		
 		for (size_t i = 0; i < inPoolSizes.size(); i++)
 		{

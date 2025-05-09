@@ -45,7 +45,7 @@ namespace te
 		mapMaxX(24), mapMaxY(24), mapScale(20.0),
 		gameState(PLAYING), renderer(renderer)
 	{
-		std::string texturesBasePath = Logger::ROOT_DIR_PATH + "Resources/Textures/Wolfenstein/";
+		std::string texturesBasePath = Logger::getRootDirPath() + "Resources/Textures/Wolfenstein/";
 
 		AssetManager& assetManager = AssetManager::getInstance();
 

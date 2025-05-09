@@ -29,11 +29,24 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(assimp)
 
-# Add source to this project's executable.
+set(EXEC_NAME ${PROJECT_NAME}-App)
 
-add_executable (${PROJECT_NAME}
-	#TODO: remake: Test-Engine.rc
+add_executable (${EXEC_NAME}
 	"main.cpp"
+)
+
+target_include_directories(${EXEC_NAME}
+	PRIVATE "ThirdParty"
+	PRIVATE "./"
+	PRIVATE "Maths"
+)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${EXEC_NAME})
+target_link_libraries(${EXEC_NAME} PUBLIC ${PROJECT_NAME})
+
+set(SOURCE_LIST
+	#TODO: remake: Test-Engine.rc
 	"Platform.hpp"
 
 	"Assets/Fonts/Font.cpp"
@@ -161,16 +174,25 @@ add_executable (${PROJECT_NAME}
 	"Tests/ArenaTest.hpp"
 )
 
+add_library (${PROJECT_NAME} SHARED ${SOURCE_LIST})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS 1)
+
 set(Vulkan_LIBRARY ../../Binaries/ThirdParty/vulkan)
 set(Vulkan_INCLUDE_DIR ../../Code/ThirdParty/vulkan)
 find_package(Vulkan REQUIRED)
 
 add_subdirectory(Maths)
 
+set(SDL_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build)
+set(SDL_TTF_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build)
+set(ASSIMP_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/assimp-build)
+
 target_link_directories(${PROJECT_NAME}
-	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build
-	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build
-	PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/_deps/assimp-build
+	PRIVATE ${SDL_BUILD_DIR}
+	PRIVATE ${SDL_TTF_BUILD_DIR}
+	PRIVATE ${ASSIMP_BUILD_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -194,12 +216,39 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 	$<$<CONFIG:Debug>:>
 	$<$<CONFIG:RenderingDebug>:-DENABLE_VALIDATION_LAYERS>
 	$<$<CONFIG:Release>:-DNDEBUG>
+	-DTE_COMPILING_DLL
 )
-
-#set_property(${PROJECT_NAME} tgt PROPERTY CXX_STANDARD 11)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+get_target_property(SDL3_OG SDL3::SDL3 ALIASED_TARGET)
+get_target_property(SDL3_TTF_OG SDL3_ttf::SDL3_ttf ALIASED_TARGET)
+
+get_property(OUTS DIRECTORY "${ASSIMP_BUILD_DIR}" PROPERTY IMPORT_TARGETS)
+foreach(OUT IN LISTS OUTS)
+	message(STATUS "Assimp links : ${OUT}")
+endforeach()
+
+function(create_target_tree DIR LIB)
+    get_property(TGTS DIRECTORY "${DIR}" PROPERTY BUILDSYSTEM_TARGETS)
+    foreach(TGT IN LISTS TGTS)
+        #message(STATUS "Target: Lib/ThirdParty/${LIB}/${TGT}")
+		set_target_properties(${TGT} PROPERTIES FOLDER "Lib/ThirdParty/${LIB}")
+        # TODO: Do something about it
+    endforeach()
+
+    get_property(SUBDIRS DIRECTORY "${DIR}" PROPERTY SUBDIRECTORIES)
+    foreach(SUBDIR IN LISTS SUBDIRS)
+        create_target_tree("${SUBDIR}" ${LIB})
+    endforeach()
+endfunction()
+
+create_target_tree("${ASSIMP_BUILD_DIR}" assimp)
+create_target_tree("${SDL_BUILD_DIR}" ${SDL3_OG})
+create_target_tree("${SDL_TTF_BUILD_DIR}" ${SDL3_TTF_OG})
+set_target_properties(sml PROPERTIES FOLDER "Lib/")
+
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E echo 
 			"Config = $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RenderingDebug>:RenderingDebug>"
@@ -208,25 +257,10 @@ if (WIN32)
 
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			#"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3.dll"
-			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build/SDL3.dll"
-			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
-	)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			#"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/SDL3_ttf.dll"
-			"${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build/SDL3_ttf.dll"
-			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
-	)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${CMAKE_CURRENT_BINARY_DIR}/_deps/assimp-build/bin/assimp-vc143-mt.dll"
-			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
-	)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${CMAKE_CURRENT_BINARY_DIR}/Maths/sml.dll"
-			${CMAKE_CURRENT_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>
+			$<TARGET_FILE:SDL3::SDL3> ${CMAKE_CURRENT_BINARY_DIR}
+			$<TARGET_FILE:SDL3_ttf::SDL3_ttf> ${CMAKE_CURRENT_BINARY_DIR}
+			$<TARGET_FILE:assimp> ${CMAKE_CURRENT_BINARY_DIR}
+			$<TARGET_FILE:sml> ${CMAKE_CURRENT_BINARY_DIR}
 	)
 
 	target_link_libraries(${PROJECT_NAME} PUBLIC

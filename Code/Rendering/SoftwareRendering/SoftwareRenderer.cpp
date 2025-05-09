@@ -44,7 +44,7 @@ namespace te
 		}
 
 		AssetManager& assetManager = AssetManager::getInstance();
-		uiFont = assetManager.loadAsset<TTFFont>(Logger::ROOT_DIR_PATH + "Resources/Fonts/Alice-Regular.ttf");
+		uiFont = assetManager.loadAsset<TTFFont>(Logger::getRootDirPath() + "Resources/Fonts/Alice-Regular.ttf");
 	}
 
 	SoftwareRenderer::~SoftwareRenderer()
