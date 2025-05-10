@@ -32,7 +32,7 @@ FetchContent_MakeAvailable(assimp)
 set(EXEC_NAME ${PROJECT_NAME}-App)
 
 add_executable (${EXEC_NAME}
-	"Test-Engine.rc"
+	"../Resources/Test-Engine.rc"
 	"main.cpp"
 )
 
