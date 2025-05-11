@@ -141,7 +141,7 @@ namespace te
 			writer.updateSet(devices[0], sceneDescriptorSets[i]);*/
 		}
 		//sceneBufferObject.view = sml::lookAt(sml::vec3(2.0f, 2.0f, 2.0f), sml::vec3(0.0f, 0.0f, 0.0f), sml::vec3(0.0f, 0.0f, 1.0f));
-		sceneBufferObject.projection = sml::perspective(SML_TO_RADIANS * 45.0f, swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+		sceneBufferObject.projection = sml::perspective(SML_TO_RADIANS * 45.0f, swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 1000.0f);
 		sceneBufferObject.projection[1][1] *= -1;
 		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Creating command buffer\n");
 		createCommandBuffers();

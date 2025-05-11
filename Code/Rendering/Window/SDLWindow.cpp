@@ -27,8 +27,9 @@ namespace te
 
 	SDLWindow::~SDLWindow()
 	{
-		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Destroying SDL Window\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Destroying SDL Window\n");
 		SDL_DestroyWindow(windowPtr);
+		SDL::Quit();
 	}
 
 	void	SDLWindow::initWindow(RendererType rType)
