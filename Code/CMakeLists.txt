@@ -47,10 +47,11 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 target_link_libraries(${EXEC_NAME} PUBLIC ${PROJECT_NAME})
 
 set(SOURCE_LIST
-	"Platform.hpp"
 
 	"Assets/Fonts/Font.cpp"
 	"Assets/Fonts/Font.hpp"
+	"Assets/Fonts/TTFFont.cpp"
+	"Assets/Fonts/TTFFont.hpp"
 
 	"Assets/Importers/Assimp/AssimpHelpers.cpp"
 	"Assets/Importers/Assimp/AssimpHelpers.hpp"
@@ -58,9 +59,6 @@ set(SOURCE_LIST
 	"Assets/Importers/Assimp/AssimpImporter.hpp"
 	"Assets/Importers/ObjectImporter.cpp"
 	"Assets/Importers/ObjectImporter.hpp"
-
-	"Assets/Fonts/TTFFont.cpp"
-	"Assets/Fonts/TTFFont.hpp"
 
 	"Assets/Textures/SoftwareTexture.cpp"
 	"Assets/Textures/SoftwareTexture.hpp"
@@ -169,6 +167,8 @@ set(SOURCE_LIST
 	"Scene/Scene.cpp"
 	"Scene/Scene.hpp"
 	"Scene/Transform.hpp"
+
+	"Platform.hpp"
 )
 
 add_library (${PROJECT_NAME} SHARED ${SOURCE_LIST})
@@ -218,11 +218,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 get_target_property(SDL3_OG SDL3::SDL3 ALIASED_TARGET)
 get_target_property(SDL3_TTF_OG SDL3_ttf::SDL3_ttf ALIASED_TARGET)
-
-get_property(OUTS DIRECTORY "${ASSIMP_BUILD_DIR}" PROPERTY IMPORT_TARGETS)
-foreach(OUT IN LISTS OUTS)
-	message(STATUS "Assimp links : ${OUT}")
-endforeach()
 
 function(create_target_tree DIR LIB)
     get_property(TGTS DIRECTORY "${DIR}" PROPERTY BUILDSYSTEM_TARGETS)
