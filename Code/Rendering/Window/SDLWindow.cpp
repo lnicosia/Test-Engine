@@ -144,6 +144,23 @@ namespace te
 		return 0;
 	}
 
+	void SDLWindow::hideCursor()
+	{
+		SDL_HideCursor();
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+	}
+
+	void SDLWindow::showCursor()
+	{
+		SDL_ShowCursor();
+		SDL_SetRelativeMouseMode(SDL_FALSE);
+	}
+
+	void SDLWindow::startRecordingMouse()
+	{
+		events->mouseStart = events->mouseRelativePos;
+	}
+
 	int SDLWindow::loadOpenGL()
 	{
 		return 0;

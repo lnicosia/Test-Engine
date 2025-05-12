@@ -34,13 +34,13 @@ namespace te
 		const WindowAPI getWindowAPI() const;
 		const Scene& getScene() const;
 
-	protected:
-
-		void initCameraBindings();
+		void addBinding(const Binding& binding);
+		void addMouseBinding(const MouseBinding& binding);
 
 	public:
 
 		Scene scene{};
+		Camera camera{};
 	
 		DebugLevel	debugLevel;
 
@@ -50,7 +50,6 @@ namespace te
 
 		RendererType rType{};
 		WindowAPI windowAPI{};
-		Camera camera{};
 		
 		std::shared_ptr<Window> window{};
 		std::shared_ptr<Font> uiFont{};

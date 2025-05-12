@@ -45,51 +45,24 @@ namespace te
 			if (camera.bIsDirty)
 			{
 				device->updateCameraContext(camera);
+				camera.updateView();
 				camera.bIsDirty = false;
 			}
 			device->drawFrame(camera);
 		}
 	}
 
-	void Renderer::initCameraBindings()
+	void Renderer::addBinding(const Binding& binding)
 	{
-		Binding forward("forward", SDLK_UP, SDLK_w, true);
-		forward.whenPressed = std::make_shared<Action<void>>([this]()
-		{
-			camera.moveForward();
-		});
-		window->events->bindings.push_back(forward);
-
-		Binding backward("backward", SDLK_DOWN, SDLK_s, true);
-		backward.whenPressed = std::make_shared<Action<void>>([this]()
-		{
-			camera.moveBackward();
-		});
-		window->events->bindings.push_back(backward);
-
-		Binding left("left", SDLK_LEFT, SDLK_a, true);
-		left.whenPressed = std::make_shared<Action<void>>([this]()
-		{
-			camera.moveLeft();
-		});
-		window->events->bindings.push_back(left);
-
-		Binding right("right", SDLK_RIGHT, SDLK_d, true);
-		right.whenPressed = std::make_shared<Action<void>>([this]()
-		{
-			camera.moveRight();
-		});
-		window->events->bindings.push_back(right);
-
-		/*MouseBinding leftB("Mouse left", SDL_BUTTON_LEFT, 0, false);
-		leftB.onRelease = std::make_shared<ActionWrapper>(Action<void, GameState&>(std::function<void(GameState&)>(ChangeGameState), gameState));
-		window->events->mouseBindings.push_back(leftB);
-
-		Binding updateRotate("updateRotate", SDLK_ESCAPE, 0, true);
-		updateRotate.onRelease = leftB.onRelease;
-		window->events->bindings.push_back(updateRotate);*/
+		window->events->bindings.push_back(binding);
 	}
 
+	void Renderer::addMouseBinding(const MouseBinding& binding)
+	{
+		window->events->mouseBindings.push_back(binding);
+	}
+
+	/** Getters */
 	std::shared_ptr<Window> Renderer::getWindow() const
 	{
 		return window;

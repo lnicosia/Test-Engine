@@ -27,7 +27,6 @@ namespace te
 		window = winPtr;
 
 		window->loadVulkan();
-		initCameraBindings();
 
 		vulkanDevice = std::make_shared<VulkanDevice>(winPtr);
 		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)

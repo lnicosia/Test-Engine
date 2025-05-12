@@ -27,6 +27,7 @@ namespace te
 		std::vector<MouseBinding> mouseBindings;
 
 		sml::vec2 mousePos;
+		sml::vec2 mouseStart;
 		sml::vec2 mouseGlobalPos;
 		sml::vec2 mouseRelativePos;
 		InputState mouseState;

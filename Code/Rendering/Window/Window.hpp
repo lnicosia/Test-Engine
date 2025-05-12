@@ -37,6 +37,10 @@ namespace te
 
 		/* Rendering API independant */
 		virtual int getFrameSize(int* w, int* h) = 0;
+		
+		virtual void hideCursor() = 0;
+		virtual void showCursor() = 0;
+		virtual void startRecordingMouse() = 0;
 
 	public:
 

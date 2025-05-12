@@ -32,6 +32,10 @@ namespace te
 		/* Rendering API independant */
 		int getFrameSize(int* w, int* h) override;
 
+		void hideCursor() override;
+		void showCursor() override;
+		void startRecordingMouse() override;
+
 	private:
 
 		SDL_Window* windowPtr;

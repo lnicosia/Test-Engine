@@ -16,6 +16,9 @@ namespace te
 		void rotateX(float roll);
 		void rotateZ(float pitch);
 
+		void setYaw(float newYaw);
+		void setPitch(float newPitch);
+
 		/* Getters */
 		const float getYaw() const;
 		const float getPitch() const;
@@ -31,6 +34,8 @@ namespace te
 		void moveBackward();
 		void moveLeft();
 		void moveRight();
+
+		void updateView();
 
 	public:
 		float moveSpeed{};
