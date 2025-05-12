@@ -146,6 +146,7 @@ namespace te
 
 	void SDLWindow::hideCursor()
 	{
+		SDL_GetGlobalMouseState(&preHideMousePos.x, &preHideMousePos.y);
 		SDL_HideCursor();
 		SDL_SetRelativeMouseMode(SDL_TRUE);
 	}
@@ -154,6 +155,7 @@ namespace te
 	{
 		SDL_ShowCursor();
 		SDL_SetRelativeMouseMode(SDL_FALSE);
+		SDL_WarpMouseGlobal(preHideMousePos.x, preHideMousePos.y);
 	}
 
 	void SDLWindow::startRecordingMouse()

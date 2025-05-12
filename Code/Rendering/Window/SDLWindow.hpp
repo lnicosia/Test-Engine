@@ -40,6 +40,8 @@ namespace te
 
 		SDL_Window* windowPtr;
 
+		sml::vec2 preHideMousePos;
+
 		void initWindow(RendererType rType);
 	};
 
