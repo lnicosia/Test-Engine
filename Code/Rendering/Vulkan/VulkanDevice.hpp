@@ -78,7 +78,7 @@ namespace te
 			VkImage& outImage, VkDeviceMemory& outImageMemory, 
 			uint32_t& outMipLevels);
 		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels,
-			VkFormat format, VkImageTiling tiling,
+			VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling,
 			VkImageUsageFlags usage, VkMemoryPropertyFlags properties,
 			VkImage& outImage, VkDeviceMemory& outImageMemory);
 		VkImageView createImageView(VkImage image, VkFormat format,
@@ -123,6 +123,7 @@ namespace te
 		void createRenderPass();
 		void createOpaquePipeline();
 		void createFrameBuffers();
+
 		void createCommandPools();
 		void createCommandBuffers();
 
@@ -133,6 +134,7 @@ namespace te
 		/** Depth buffer */
 		void createDepthResources();
 		VkFormat findDepthFormat();
+		void createColorResources();
 
 		void createSyncObjects();
 		
@@ -145,6 +147,7 @@ namespace te
 		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates,
 			VkImageTiling tiling, VkFormatFeatureFlags features);
+		VkSampleCountFlagBits getMaxUsableSampleCount();
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -225,6 +228,13 @@ namespace te
 		VkImage depthImage{};
 		VkDeviceMemory depthImageMemory{};
 		VkImageView depthImageView{};
+
+		/** Multisampling */
+		VkSampleCountFlagBits MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		VkSampleCountFlagBits maxMSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		VkImage colorImage{};
+		VkDeviceMemory colorImageMemory{};
+		VkImageView colorImageView{};
 
 		/** Frames */
 		uint32_t currentFrame = 0;
