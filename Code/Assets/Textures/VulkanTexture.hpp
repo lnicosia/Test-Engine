@@ -46,6 +46,7 @@ namespace te
 		VkImageView textureImageView{};
 		VkSampler textureSampler{};
 		VkDescriptorImageInfo imageInfo{};
+		uint32_t mipLevels;
 
 		VulkanDevice* vulkanDevice = nullptr;
 	};
