@@ -3,8 +3,6 @@
 #include "Assets/AssetManager.hpp"
 #include "Window/SDL.hpp"
 
-#include <format>
-
 namespace te
 {
 
