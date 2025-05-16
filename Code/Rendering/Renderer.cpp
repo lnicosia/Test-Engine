@@ -28,13 +28,18 @@ namespace te
 
 	void Renderer::render()
 	{
+		timerManager.update();
+		if (debugLevel == DebugLevel::TE_SHOW_FPS)
+		{
+			timerManager.setTimer(std::make_unique<Action<void>>([this]()
+			{
+				updateWindowTitle();
+			}), 1, true);
+		}
+		
 		while (running == true)
 		{
 			timerManager.update();
-			if (debugLevel == DebugLevel::TE_SHOW_FPS)
-			{
-				updateWindowTitle();
-			}
 			device->frameStats.drawCallCount = 0;
 			if (window->handleEvents() == 1)
 			{
