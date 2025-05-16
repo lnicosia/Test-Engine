@@ -35,9 +35,10 @@ namespace te
 
 	void VulkanTexture::setup(const std::string& path)
 	{
-		vulkanDevice->createTexture(path, textureImage, textureImageMemory);
-		textureImageView = vulkanDevice->createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
-		textureSampler = vulkanDevice->createTextureSampler();
+		vulkanDevice->createTextureImage(path, textureImage, textureImageMemory, mipLevels);
+		textureImageView = vulkanDevice->createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB,
+			VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
+		textureSampler = vulkanDevice->createTextureSampler(mipLevels);
 
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		imageInfo.imageView = textureImageView;

@@ -18,6 +18,61 @@
 
 #include <memory>
 
+void initBasicBindings(te::Renderer* renderer)
+{
+	te::Binding forward("forward", SDLK_UP, SDLK_w, true);
+	forward.whenPressed = std::make_shared<te::Action<void>>([renderer]()
+	{
+		renderer->camera.moveForward();
+	});
+	renderer->addBinding(forward);
+
+	te::Binding backward("backward", SDLK_DOWN, SDLK_s, true);
+	backward.whenPressed = std::make_shared<te::Action<void>>([renderer]()
+	{
+		renderer->camera.moveBackward();
+	});
+	renderer->addBinding(backward);
+
+	te::Binding left("left", SDLK_LEFT, SDLK_a, true);
+	left.whenPressed = std::make_shared<te::Action<void>>([renderer]()
+	{
+		renderer->camera.moveLeft();
+	});
+	renderer->addBinding(left);
+
+	te::Binding right("right", SDLK_RIGHT, SDLK_d, true);
+	right.whenPressed = std::make_shared<te::Action<void>>([renderer]()
+	{
+		renderer->camera.moveRight();
+	});
+	renderer->addBinding(right);
+
+	te::MouseBinding mouseMove("mouseMove", SDL_BUTTON_LEFT, 0, true);
+	mouseMove.onPress= std::make_shared<te::Action<void>>([renderer]()
+	{
+		renderer->getWindow()->hideCursor();
+		renderer->getWindow()->startRecordingMouse();
+	});
+	mouseMove.whenPressed = std::make_shared<te::Action<void>>([renderer]()
+	{
+		renderer->camera.setYaw(
+			renderer->camera.getYaw() +
+			-(renderer->getWindow()->events->mouseRelativePos.x
+			) * renderer->camera.rotationSpeed);
+		renderer->camera.setPitch(
+			renderer->camera.getPitch() +
+			-(renderer->getWindow()->events->mouseRelativePos.y
+			) * renderer->camera.rotationSpeed);
+		renderer->getWindow()->startRecordingMouse();
+	});
+	mouseMove.onRelease = std::make_shared<te::Action<void>>([renderer]()
+	{
+		renderer->getWindow()->showCursor();
+	});
+	renderer->addMouseBinding(mouseMove);
+}
+
 int main()
 {
 	/*try
@@ -27,36 +82,16 @@ int main()
 		raycaster.render();
 	}*/
 
-	std::vector<te::Vertex> vertices =
-	{
-		{{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-		{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-		{{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-
-		{{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-		{{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-		{{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-		{{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}}
-	};
-	std::vector<uint32_t> indices =
-	{
-		0, 1, 2, 2, 3, 0,
-		4, 5, 6, 6, 7, 4
-	};
 	try
 	{
 		std::unique_ptr<te::Renderer> renderer = std::make_unique<te::VulkanRenderer>();
+		initBasicBindings(renderer.get());
 
-		te::MeshGeometry geometry(std::move(vertices), std::move(indices));
-		std::shared_ptr<te::MeshInternal> squareMesh = renderer->createSolidMesh(geometry);
-		std::shared_ptr<te::MeshInternal> squareMesh2 = renderer->createSolidMesh(geometry);
 		std::shared_ptr<te::MeshInternal> loadedMesh =
 			renderer->loadMesh(te::Logger::getRootDirPath() + "Resources/Objects/viking_room/viking_room.obj");
 
 		te::Actor* actor = renderer->scene.createActor();
 		te::Component* component = renderer->scene.createComponent();
-		te::Component* component2 = renderer->scene.createComponent();
 
 		std::shared_ptr<te::Texture> newTex = renderer->loadTexture(
 			te::Logger::getRootDirPath() + "Resources/Objects/viking_room/viking_room.png"
@@ -66,9 +101,7 @@ int main()
 
 		loadedMesh->setMaterial(mat);
 		component->setMeshInternal(loadedMesh);
-		component2->setMeshInternal(squareMesh);
 		actor->addComponent(component);
-		actor->addComponent(component2);
 		renderer->scene.addActor(actor->getId());
 		renderer->render();
 		newTex->cleanUp();

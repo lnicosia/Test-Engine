@@ -29,12 +29,19 @@ namespace te
 		/* OpenGL specifics */
 		int loadOpenGL() override;
 
-		/* Rendering API independant */
+
+		/** Utils */
 		int getFrameSize(int* w, int* h) override;
+		void hideCursor() override;
+		void showCursor() override;
+		void startRecordingMouse() override;
+		void setTitle(const std::string& newTitle) override;
 
 	private:
 
 		SDL_Window* windowPtr;
+
+		sml::vec2 preHideMousePos;
 
 		void initWindow(RendererType rType);
 	};

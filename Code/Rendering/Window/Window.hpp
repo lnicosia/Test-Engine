@@ -26,6 +26,8 @@ namespace te
 
 		int	handleEvents();
 
+		std::string getTitle() const;
+
 		/* Vulkan specifics */
 		virtual int	loadVulkan() = 0;
 		virtual int getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names,
@@ -35,22 +37,29 @@ namespace te
 		/* OpenGL specifics */
 		virtual int loadOpenGL() = 0;
 
-		/* Rendering API independant */
+		/** Utils */
 		virtual int getFrameSize(int* w, int* h) = 0;
+		virtual void hideCursor() = 0;
+		virtual void showCursor() = 0;
+		virtual void startRecordingMouse() = 0;
+		virtual void setTitle(const std::string& newTitle) = 0;
 
 	public:
 
 		std::shared_ptr<Events> events{};
 
 	private:
-		bool	resizable;
-		double	ratio;
+
+		bool resizable;
+		double ratio;
 		RendererType rType;
 
 	protected:
+
 		int w = 1600;
 		int h = 900;
 		
+		std::string title;
 	};
 
 

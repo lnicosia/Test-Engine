@@ -50,6 +50,7 @@ namespace te
 			ThrowException( "Couldn't initialize SDL_ttf : \n" + std::string(TTF_GetError()) + "\n" );
 		}
 
+		/** Don't atexit in shared libraries..
 		if (std::atexit(Quit) != 0)
 		{
 			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL TTF\n");
@@ -59,7 +60,7 @@ namespace te
 			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL\n");
 			SDL_Quit();
 			ThrowException( "Failed to setup SDL cleanup function\n" );
-		}
+		}*/
 
 		initialized = true;
 	}

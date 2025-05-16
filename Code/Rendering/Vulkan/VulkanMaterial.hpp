@@ -10,7 +10,7 @@ class VulkanTexture;
 namespace te
 {
 	
-	struct VulkanMaterialPipeline
+	struct VulkanPipeline
 	{
 		VkPipeline pipeline{};
 		VkPipelineLayout layout{};
@@ -25,7 +25,7 @@ namespace te
 
 	public:
 		
-		VulkanMaterialPipeline* pipeline{};
+		VulkanPipeline* pipeline{};
 		VkDescriptorSet desc{};
 	};
 } // namespace te

@@ -37,18 +37,26 @@ namespace te
 			VkSemaphore imageAvailableSemaphore{};
 			VkSemaphore renderFinishedSemaphore{};
 			VkFence inFlightFence{};
+			VkSemaphore computeFinishedSemaphore{};
+			VkFence computeInFlightFence{};
 
 			/** Command buffer */
-			VkCommandBuffer commandBuffer{};
+			VkCommandBuffer graphicsCommandBuffer{};
+			VkCommandBuffer computeCommandBuffer{};
 
 			/** Descriptors */
 			VulkanDescriptorAllocator sceneDescriptorAllocator{};
 			VulkanDescriptorAllocator meshDescriptorAllocator{};
+			VulkanDescriptorAllocator particleDescriptorAllocator{};
 			
 			/** Scene buffers */
 			VkBuffer sceneBuffer{};
 			VkDeviceMemory sceneBufferMemory{};
 			void* sceneBufferMapped{};
+
+			/** Compute */
+			VkBuffer computeBuffer{};
+			VkDeviceMemory computeBufferMemory{};
 
 			DeletionQueue deletionQueue;
 			bool mustUpdateCamera = true;
@@ -74,27 +82,38 @@ namespace te
 			VkBuffer& outBuffer, VkDeviceMemory& outMemory);
 
 		/** Textures */
-		void createTexture(const std::string& path, VkImage& outImage, VkDeviceMemory& outImageMemory);
-		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling,
-			VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& outImage, VkDeviceMemory& outImageMemory);
-		VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-		VkSampler createTextureSampler();
-		void transitionImageLayout(VkCommandPool commandPool, VkQueue queue, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+		void createTextureImage(const std::string& path,
+			VkImage& outImage, VkDeviceMemory& outImageMemory, 
+			uint32_t& outMipLevels);
+		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels,
+			VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling,
+			VkImageUsageFlags usage, VkMemoryPropertyFlags properties,
+			VkImage& outImage, VkDeviceMemory& outImageMemory);
+		VkImageView createImageView(VkImage image, VkFormat format,
+			VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+		VkSampler createTextureSampler(uint32_t mipLevels = 1);
+		void transitionImageLayout(VkCommandPool commandPool, VkQueue queue,
+			VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
+			uint32_t mipLevels);
 		void cleanUpTexture(VkImage textureImage, VkDeviceMemory textureImageMemory,
 			VkImageView textureImageView, VkSampler textureSampler);
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+		void generateMipmaps(VkImage image, VkFormat imageFormat,
+			int32_t width, int32_t height, uint32_t mipLevels);
 
 		/** Descriptor sets */
 		void createMeshDescriptorSets(std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& outDescriptorSets);
-		void updateDescriptorSet(VkDescriptorSet descriptorSet, const std::shared_ptr<VulkanTexture> texture);
+		void createParticleDescriptorSets(std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT>& outDescriptorSets);
+		void updateMeshDescriptorSet(VkDescriptorSet descriptorSet, const std::shared_ptr<VulkanTexture> texture);
+		void updateParticleDescriptorSet(VkDescriptorSet descriptorSet,
+			VkBuffer firstBuffer, VkBuffer secondBuffer, size_t bufferSize);
 
 		/** Drawing */
 		void updateSceneBuffer(uint32_t currentFrame);
-		void drawFrame(const Camera& camera) override;
+		void drawFrame(const Camera& camera, float deltaTime) override;
 		void updateDrawContext(const Scene& scene) override;
 		void updateCameraDescriptors(uint32_t frameIndex);
 		void updateCameraContext(const Camera& camera) override;
-		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 		/** Getters */
 		std::vector<VkDevice>& getDevices();
@@ -113,20 +132,34 @@ namespace te
 		void createImageViews();
 		void createRenderPass();
 		void createOpaquePipeline();
+		void createComputePipeline();
+		void createParticleGraphicsPipeline();
 		void createFrameBuffers();
+
 		void createCommandPools();
 		void createCommandBuffers();
 
 		void createDescriptorSetLayouts();
 		void createDescriptorPools();
 		void createSceneBuffers();
+		
+		/** Compute data creation */
+		void createTMPComputeBuffer();
+		void createParticleDescriptorSet(VkDescriptorSet VkDescriptorSetLayout, VkBuffer buffer);
 
 		/** Depth buffer */
 		void createDepthResources();
 		VkFormat findDepthFormat();
+		void createColorResources();
 
 		void createSyncObjects();
 		
+		/** Command records */
+		void recordGraphicsCommandBuffer(VkCommandBuffer commandBuffer,
+			uint32_t imageIndex);
+		void recordComputeCommandBuffer(VkCommandBuffer commandBuffer,
+			uint32_t imageIndex, float deltaTime);
+
 		bool checkValidationLayerSupport();
 		
 		/** Utils/queries */
@@ -136,6 +169,7 @@ namespace te
 		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates,
 			VkImageTiling tiling, VkFormatFeatureFlags features);
+		VkSampleCountFlagBits getMaxUsableSampleCount();
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -185,6 +219,7 @@ namespace te
 		VkQueue graphicsQueue{};
 		VkQueue presentQueue{};
 		VkQueue transferQueue{};
+		VkQueue computeQueue{};
 		
 		/** Swap chain */
 		VkSwapchainKHR swapChain{};
@@ -195,15 +230,18 @@ namespace te
 		bool frameBufferResized = false;
 
 		/** Render pass */
-		VkRenderPass renderPass{};
+		VkRenderPass MSAArenderPass{};
 
 		/** Descriptor sets */
 		VkDescriptorSetLayout sceneDescriptorSetLayout{};
 		VkDescriptorSetLayout meshDescriptorSetLayout{};
+		VkDescriptorSetLayout particleDescriptorSetLayout{};
 		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> sceneDescriptorSets{};
 
-		/** Pipelines */
-		VulkanMaterialPipeline opaquePipeline;
+		/** Basic pipelines */
+		VulkanPipeline opaquePipeline{};
+		VulkanPipeline particleGraphicsPipeline{};
+		VulkanPipeline computePipeline{};
 
 		/** Buffers */
 		std::vector<VkFramebuffer> framebuffers{};
@@ -211,11 +249,22 @@ namespace te
 		/** Command pools */
 		VkCommandPool graphicsCommandPool{};
 		VkCommandPool transferCommandPool{};
+		VkCommandPool computeCommandPool{};
 
 		/** Depth buffer */
 		VkImage depthImage{};
 		VkDeviceMemory depthImageMemory{};
 		VkImageView depthImageView{};
+
+		/** TMP hardcoded Compute */
+		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> particleDescriptorSets{};
+
+		/** Multisampling */
+		VkSampleCountFlagBits MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		VkSampleCountFlagBits maxMSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		VkImage colorImage{};
+		VkDeviceMemory colorImageMemory{};
+		VkImageView colorImageView{};
 
 		/** Frames */
 		uint32_t currentFrame = 0;

@@ -27,8 +27,9 @@ namespace te
 
 	SDLWindow::~SDLWindow()
 	{
-		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Destroying SDL Window\n");
+		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Destroying SDL Window\n");
 		SDL_DestroyWindow(windowPtr);
+		SDL::Quit();
 	}
 
 	void	SDLWindow::initWindow(RendererType rType)
@@ -59,16 +60,19 @@ namespace te
 		log += "window";
 		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "%s\n", log.c_str());
 
-		std::string windowName = "Test Engine - SDL Window - Configuration type: ";
+		title = "Test Engine - SDL Window - Configuration type: ";
 #ifdef NDEBUG
-		windowName += " Release";
+		title += " Release";
 #else
-		windowName += " Debug";
+		title += " Debug";
 		#endif
 #ifdef ENABLE_VALIDATION_LAYERS
-		windowName += " with Vulkan Validation layers";
+		title += " with Vulkan Validation layers";
 #endif
-		windowPtr = SDL_CreateWindow(windowName.c_str(), w, h, flags);
+
+		title += " | 0.0ms - 0 fps";
+		
+		windowPtr = SDL_CreateWindow(title.c_str(), w, h, flags);
 		if (!windowPtr)
 		{
 			ThrowException("Could not create SDL window: " + std::string(SDL_GetError()) + "\n");
@@ -143,9 +147,34 @@ namespace te
 		return 0;
 	}
 
+	void SDLWindow::hideCursor()
+	{
+		SDL_GetGlobalMouseState(&preHideMousePos.x, &preHideMousePos.y);
+		SDL_HideCursor();
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+	}
+
+	void SDLWindow::showCursor()
+	{
+		SDL_ShowCursor();
+		SDL_SetRelativeMouseMode(SDL_FALSE);
+		SDL_WarpMouseGlobal(preHideMousePos.x, preHideMousePos.y);
+	}
+
+	void SDLWindow::startRecordingMouse()
+	{
+		events->mouseStart = events->mouseRelativePos;
+	}
+
 	int SDLWindow::loadOpenGL()
 	{
 		return 0;
+	}
+
+	void SDLWindow::setTitle(const std::string& newTitle)
+	{
+		title = newTitle;
+		SDL_SetWindowTitle(windowPtr, title.c_str());
 	}
 
 	SDL_Window* SDLWindow::getWindow() const

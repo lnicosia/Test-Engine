@@ -8,7 +8,6 @@ namespace te
 {
 	SDLEvents::SDLEvents() : e()
 	{
-
 	}
 
 	SDLEvents::~SDLEvents()

@@ -25,7 +25,7 @@ namespace te
 		virtual void createVertexBuffer(const std::vector<Vertex>& vertices,
 			const std::vector<uint32_t>& indices, void* outBuffer, void* outBufferMemory) = 0;
 
-		virtual void drawFrame(const Camera& camera) = 0;
+		virtual void drawFrame(const Camera& camera, float deltaTime) = 0;
 		virtual void updateDrawContext(const Scene& scene) = 0;
 		virtual void updateCameraContext(const Camera& camera) = 0;
 		
