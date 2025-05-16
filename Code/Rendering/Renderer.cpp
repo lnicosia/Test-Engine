@@ -3,15 +3,15 @@
 #include "Assets/AssetManager.hpp"
 #include "Window/SDL.hpp"
 
-#include "SDL_ttf.h"
+#include <format>
 
 namespace te
 {
 
 	Renderer::Renderer(RendererType rType, WindowAPI windowAPI):
-		window(nullptr), rType(rType), windowAPI(windowAPI),
 		debugLevel(DebugLevel::TE_SHOW_FPS),
-		uiFont(nullptr), running(true)
+		rType(rType), windowAPI(windowAPI),
+		uiFont(nullptr)
 	{
 		Logger::Init();
 	}
@@ -32,6 +32,11 @@ namespace te
 	{
 		while (running == true)
 		{
+			timerManager.update();
+			if (debugLevel == DebugLevel::TE_SHOW_FPS)
+			{
+				updateWindowTitle();
+			}
 			device->frameStats.drawCallCount = 0;
 			if (window->handleEvents() == 1)
 			{
@@ -48,8 +53,23 @@ namespace te
 				camera.updateView();
 				camera.bIsDirty = false;
 			}
-			device->drawFrame(camera);
+			device->drawFrame(camera, timerManager.getDeltaTimeSec());
 		}
+	}
+
+	void Renderer::updateWindowTitle()
+	{
+		std::string title = window->getTitle();
+		device->frameStats.fps = 1000.0f / timerManager.getDeltaTimeMili();
+		// Can't use std::format because g++ is too old on WSL1 :'(
+		//std::string newStats = std::format("| {:.2f}ms - {:.1f} fps", timerManager.getDeltaTimeMili(), fps);
+		size_t lastDash = title.find_last_of("|");
+		std::stringstream ss;
+		ss << "| " << std::fixed << std::setprecision(2) << timerManager.getDeltaTimeMili() << "ms";
+		ss << " - " << std::fixed << std::setprecision(1) << device->frameStats.fps << " fps";
+		std::string newStats = ss.str();
+		title.replace(lastDash, title.size() - lastDash, newStats);
+		window->setTitle(title);
 	}
 
 	void Renderer::addBinding(const Binding& binding)

@@ -8,6 +8,7 @@
 #include "Rendering/GPUDevice.hpp"
 #include "Window/WindowAPI.hpp"
 #include "Scene/Scene.hpp"
+#include "Misc/TimerManager.hpp"
 #include "Camera.hpp"
 
 #define DEFAULT_TEXTURE_PATH "Resources/Textures/bigdoor3.bmp"
@@ -37,19 +38,24 @@ namespace te
 		void addBinding(const Binding& binding);
 		void addMouseBinding(const MouseBinding& binding);
 
+	private:
+
+		void updateWindowTitle();
+
 	public:
 
 		Scene scene{};
 		Camera camera{};
 	
-		DebugLevel	debugLevel;
+		DebugLevel debugLevel = DebugLevel::TE_SHOW_FPS;
 
-		bool running;
+		bool running = true;
 
 	protected:
 
 		RendererType rType{};
 		WindowAPI windowAPI{};
+		TimerManager timerManager{};
 		
 		std::shared_ptr<Window> window{};
 		std::shared_ptr<Font> uiFont{};

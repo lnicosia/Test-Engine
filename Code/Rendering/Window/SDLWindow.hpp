@@ -29,12 +29,13 @@ namespace te
 		/* OpenGL specifics */
 		int loadOpenGL() override;
 
-		/* Rendering API independant */
-		int getFrameSize(int* w, int* h) override;
 
+		/** Utils */
+		int getFrameSize(int* w, int* h) override;
 		void hideCursor() override;
 		void showCursor() override;
 		void startRecordingMouse() override;
+		void setTitle(const std::string& newTitle) override;
 
 	private:
 

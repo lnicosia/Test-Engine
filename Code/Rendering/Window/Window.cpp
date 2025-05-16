@@ -29,6 +29,11 @@ namespace te
 	{
 	}
 
+	std::string Window::getTitle() const
+	{
+		return title;
+	}
+
 	const int Window::getWidth() const
 	{
 		return w;

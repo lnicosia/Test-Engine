@@ -1,11 +1,11 @@
 #ifndef _VULKAN_VERTEX_HPP_
 #define _VULKAN_VERTEX_HPP_
 
-#include "../Vertex.hpp"
+#include "Rendering/Vertex.hpp"
 
 namespace te
 {
-	struct VulkanVertex
+	struct VulkanVertexDescription
 	{
 		static constexpr VkVertexInputBindingDescription getBindingDescription()
 		{

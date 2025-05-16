@@ -12,13 +12,13 @@ namespace te
 		uint64_t newTime = duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 		uint64_t frameDuration = newTime - frameTime;
 
-		double currFps = 1000.0 / frameDuration;
+		float currFps = 1000.0f / frameDuration;
 		//printf("%f fps\n", fps);
 
 		if (frameTime - lastUpdate >= 1000)
 		{
 			lastUpdate = newTime;
-			fps = static_cast<uint64_t>(currFps);
+			fps = currFps;
 		}
 		frameTime = newTime;
 	}

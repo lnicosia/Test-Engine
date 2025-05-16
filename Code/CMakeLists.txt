@@ -94,6 +94,8 @@ set(SOURCE_LIST
 
 	"Misc/Arena.cpp"
 	"Misc/Arena.hpp"
+	"Misc/TimerManager.cpp"
+	"Misc/TimerManager.hpp"
 
 	"Rendering/D3D/D3DRenderer.cpp"
 	"Rendering/D3D/D3DRenderer.hpp"
@@ -103,6 +105,8 @@ set(SOURCE_LIST
 
 	"Rendering/OpenGL/GLRenderer.cpp"
 	"Rendering/OpenGL/GLRenderer.hpp"
+
+	"Rendering/ParticleSystem/Particle.hpp"
 
 	"Rendering/Shaders/Shader.cpp"
 	"Rendering/Shaders/Shader.hpp"
@@ -127,11 +131,12 @@ set(SOURCE_LIST
 	"Rendering/Vulkan/VulkanMaterial.hpp"
 	"Rendering/Vulkan/VulkanMesh.cpp"
 	"Rendering/Vulkan/VulkanMesh.hpp"
+	"Rendering/Vulkan/VulkanParticleDescription.hpp"
 	"Rendering/Vulkan/VulkanRenderer.cpp"
 	"Rendering/Vulkan/VulkanRenderer.hpp"
 	"Rendering/Vulkan/VulkanUtils.cpp"
 	"Rendering/Vulkan/VulkanUtils.hpp"
-	"Rendering/Vulkan/VulkanVertex.hpp"
+	"Rendering/Vulkan/VulkanVertexDescription.hpp"
 
 	"Rendering/Window/SDL.cpp"
 	"Rendering/Window/SDL.hpp"
