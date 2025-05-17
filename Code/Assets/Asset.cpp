@@ -1,6 +1,7 @@
 #include "Asset.hpp"
 
 #include <iostream>
+#include <utility>
 
 namespace te
 {

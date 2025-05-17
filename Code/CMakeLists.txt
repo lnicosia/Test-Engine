@@ -1,9 +1,12 @@
 ﻿cmake_minimum_required (VERSION 3.10)
 
+include(../cmake/ccache.cmake)
+
 project ("Test-Engine"
 	VERSION 0.0.1
 	DESCRIPTION "Test engine"
 	HOMEPAGE_URL "https://github.com/lnicosia/Test-Engine"
+    LANGUAGES CXX
 )
 
 include(FetchContent)
@@ -28,6 +31,8 @@ FetchContent_Declare(
 	GIT_TAG			c35200e
 )
 FetchContent_MakeAvailable(assimp)
+
+find_package(Vulkan REQUIRED)
 
 set(EXEC_NAME ${PROJECT_NAME}-App)
 
@@ -217,9 +222,11 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 	$<$<CONFIG:Release>:-DNDEBUG>
 	-DTE_COMPILING_DLL
 )
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED ON
+)
 
 get_target_property(SDL3_OG SDL3::SDL3 ALIASED_TARGET)
 get_target_property(SDL3_TTF_OG SDL3_ttf::SDL3_ttf ALIASED_TARGET)
@@ -247,6 +254,7 @@ add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E echo 
 			"Config = $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RenderingDebug>:RenderingDebug>"
 )
+
 if (WIN32)
 
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -257,17 +265,12 @@ if (WIN32)
 			$<TARGET_FILE:sml> ${CMAKE_CURRENT_BINARY_DIR}
 	)
 
-	target_link_libraries(${PROJECT_NAME} PUBLIC
-		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/vulkan-1.lib"
-	)
+endif (WIN32)
 
-elseif (UNIX)
 
-	target_link_libraries(${PROJECT_NAME} PUBLIC
-		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/libvulkan.so.1"
-	)
-
-endif ()
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	Vulkan::Vulkan
+)
 
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor)

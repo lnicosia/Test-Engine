@@ -1,6 +1,8 @@
 #ifndef _ENTITY_HPP_
 #define _ENTITY_HPP_
 
+#include <cstdint>
+
 namespace te
 {
 	struct Entity

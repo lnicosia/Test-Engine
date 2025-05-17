@@ -2,6 +2,7 @@
 #define _VERTEX_HPP_
 
 #include "Maths/Vector.hpp"
+#include <cstdint>
 
 namespace te
 {
