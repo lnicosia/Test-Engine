@@ -48,18 +48,18 @@ namespace te
 
 		std::shared_ptr<Events> events{};
 
-	private:
-
-		bool resizable;
-		double ratio;
-		RendererType rType;
-
 	protected:
 
 		int w = 1600;
 		int h = 900;
 		
 		std::string title;
+		
+	private:
+
+		bool resizable;
+		double ratio;
+		RendererType rType;
 	};
 
 
