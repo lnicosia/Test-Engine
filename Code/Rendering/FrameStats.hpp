@@ -9,10 +9,11 @@ namespace te
 {
 	struct FrameStats
 	{
-		uint64_t frameTime = 0;
 		float fps = 0;
+		uint64_t frameTime = 0;
 		uint64_t uiFrameTime = 0;
-		size_t drawCallCount = 0;
+		uint64_t drawCallCount = 0;
+		uint64_t triangleCount = 0;
 
 		void updateFrameStats();
 	};

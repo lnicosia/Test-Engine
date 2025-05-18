@@ -72,6 +72,7 @@ namespace te
 
 		title += " | 0.0ms - 0 fps";
 		
+		flags |= SDL_WINDOW_RESIZABLE;
 		windowPtr = SDL_CreateWindow(title.c_str(), w, h, flags);
 		if (!windowPtr)
 		{

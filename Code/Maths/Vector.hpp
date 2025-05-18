@@ -49,7 +49,7 @@ namespace sml
 	{
 		union
 		{
-			std::array<T,2> data;
+			std::array<T, 2> data;
 			struct { T x; T y; };
 			struct { T s; T t; };
 			struct { T u; T v; };
@@ -73,7 +73,7 @@ namespace sml
 	{
 		union
 		{
-			std::array<T,3> data;
+			std::array<T, 3> data;
 			struct { T x; T y; T z; };
 			struct { T s; T t; T p; };
 			struct { T r; T g; T b; };
@@ -89,6 +89,27 @@ namespace sml
 		} 
 		constexpr VectorUnion<T, 3>( T x, T y, T z): data{x, y, z} {}
 		constexpr VectorUnion<T, 3>(const std::array<T, 3>& from): data(from) {}
+	};
+
+	template < typename T >
+	struct VectorUnion<T, 4>
+	{
+		union
+		{
+			std::array<T, 4> data;
+			struct { T x; T y; T z; T w; };
+		};
+
+		constexpr VectorUnion<T, 4>() = default;
+		constexpr VectorUnion<T, 4>(T value)
+		{
+			for (size_t i = 0; i < 4; i++)
+			{
+				data[i] = value;
+			}
+		} 
+		constexpr VectorUnion<T, 4>( T x, T y, T z, T w): data{x, y, z, w} {}
+		constexpr VectorUnion<T, 4>(const std::array<T, 4>& from): data(from) {}
 	};
 
     template < typename T, size_t size >
@@ -369,6 +390,32 @@ namespace sml
 			return this->length();
 		}
 
+		constexpr T min() const
+		{
+			T m = (*this)[0];
+			for (size_t i = 1; i < size; i++)
+			{
+				if ((*this)[i] < m)
+				{
+					m = ((*this)[i]);
+				}
+			}
+			return m;
+		}
+
+		constexpr T max() const
+		{
+			T m = (*this)[0];
+			for (size_t i = 1; i < size; i++)
+			{
+				if ((*this)[i] > m)
+				{
+					m = ((*this)[i]);
+				}
+			}
+			return m;
+		}
+
 	};
 
 	using vec2 = Vector<float, 2>;
@@ -381,6 +428,28 @@ namespace sml
 		T x = p2.x - p1.x;
 		T y = p2.y - p1.y;
 		return sqrt(x * x + y * y);
+	}
+
+	template < typename T, size_t size >
+	constexpr Vector<T, size> min(const Vector<T, size>& v1, const Vector<T, size>& v2)
+	{
+		Vector<T, size> res;
+		for (size_t i = 0; i < size; i++)
+		{
+			res[i] = std::min(v1[i], v2[i]);
+		}
+		return res;
+	}
+
+	template < typename T, size_t size >
+	constexpr Vector<T, size> max(const Vector<T, size>& v1, const Vector<T, size>& v2)
+	{
+		Vector<T, size> res;
+		for (size_t i = 0; i < size; i++)
+		{
+			res[i] = std::max(v1[i], v2[i]);
+		}
+		return res;
 	}
 
 } // namespace sml

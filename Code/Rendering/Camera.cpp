@@ -7,7 +7,7 @@
 namespace te
 {
 	Camera::Camera():
-		moveSpeed{0.01f}, rotationSpeed{0.001f},
+		moveSpeed{3.f}, rotationSpeed{1.f},
 		pos{2.0f, 2.0f, 2.0f}, view{},
 		front{},
 		right{},
@@ -68,27 +68,27 @@ namespace te
 		return roll;
 	}
 
-	void Camera::moveForward()
+	void Camera::moveForward(float deltaTime)
 	{
-		pos += front * moveSpeed;
+		pos += front * moveSpeed * deltaTime;
 		bIsDirty = true;
 	}
 
-	void Camera::moveBackward()
+	void Camera::moveBackward(float deltaTime)
 	{
-		pos -= front * moveSpeed;
+		pos -= front * moveSpeed * deltaTime;
 		bIsDirty = true;
 	}
 
-	void Camera::moveLeft()
+	void Camera::moveLeft(float deltaTime)
 	{
-		pos -= right * moveSpeed;
+		pos -= right * moveSpeed * deltaTime;
 		bIsDirty = true;
 	}
 
-	void Camera::moveRight()
+	void Camera::moveRight(float deltaTime)
 	{
-		pos += right * moveSpeed;
+		pos += right * moveSpeed * deltaTime;
 		bIsDirty = true;
 	}
 

@@ -23,28 +23,28 @@ void initBasicBindings(te::Renderer* renderer)
 	te::Binding forward("forward", SDLK_UP, SDLK_w, true);
 	forward.whenPressed = std::make_shared<te::Action<void>>([renderer]()
 	{
-		renderer->camera.moveForward();
+		renderer->camera.moveForward(renderer->getDeltaTime());
 	});
 	renderer->addBinding(forward);
 
 	te::Binding backward("backward", SDLK_DOWN, SDLK_s, true);
 	backward.whenPressed = std::make_shared<te::Action<void>>([renderer]()
 	{
-		renderer->camera.moveBackward();
+		renderer->camera.moveBackward(renderer->getDeltaTime());
 	});
 	renderer->addBinding(backward);
 
 	te::Binding left("left", SDLK_LEFT, SDLK_a, true);
 	left.whenPressed = std::make_shared<te::Action<void>>([renderer]()
 	{
-		renderer->camera.moveLeft();
+		renderer->camera.moveLeft(renderer->getDeltaTime());
 	});
 	renderer->addBinding(left);
 
 	te::Binding right("right", SDLK_RIGHT, SDLK_d, true);
 	right.whenPressed = std::make_shared<te::Action<void>>([renderer]()
 	{
-		renderer->camera.moveRight();
+		renderer->camera.moveRight(renderer->getDeltaTime());
 	});
 	renderer->addBinding(right);
 
@@ -59,11 +59,11 @@ void initBasicBindings(te::Renderer* renderer)
 		renderer->camera.setYaw(
 			renderer->camera.getYaw() +
 			-(renderer->getWindow()->events->mouseRelativePos.x
-			) * renderer->camera.rotationSpeed);
+			) * renderer->camera.rotationSpeed * renderer->getDeltaTime());
 		renderer->camera.setPitch(
 			renderer->camera.getPitch() +
 			-(renderer->getWindow()->events->mouseRelativePos.y
-			) * renderer->camera.rotationSpeed);
+			) * renderer->camera.rotationSpeed * renderer->getDeltaTime());
 		renderer->getWindow()->startRecordingMouse();
 	});
 	mouseMove.onRelease = std::make_shared<te::Action<void>>([renderer]()
@@ -89,6 +89,7 @@ int main()
 
 		std::shared_ptr<te::MeshInternal> loadedMesh =
 			renderer->loadMesh(te::Logger::getRootDirPath() + "Resources/Objects/viking_room/viking_room.obj");
+			//renderer->loadMesh(te::Logger::getRootDirPath() + "..\\3D objects\\Pulse pilot\\scene.gltf");
 
 		te::Actor* actor = renderer->scene.createActor();
 		te::Component* component = renderer->scene.createComponent();

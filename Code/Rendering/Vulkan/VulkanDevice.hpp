@@ -26,6 +26,7 @@ namespace te
 	{
 		alignas(16) sml::mat4 view;
 		alignas(16) sml::mat4 projection;
+		alignas(16) sml::mat4 viewProj;
 	};
 
 	class VulkanDevice : public GPUDevice
@@ -155,7 +156,7 @@ namespace te
 		void createSyncObjects();
 		
 		/** Command records */
-		void recordGraphicsCommandBuffer(VkCommandBuffer commandBuffer,
+		void recordGeometryCommandBuffer(VkCommandBuffer commandBuffer,
 			uint32_t imageIndex);
 		void recordComputeCommandBuffer(VkCommandBuffer commandBuffer,
 			uint32_t imageIndex, float deltaTime);
@@ -297,6 +298,7 @@ namespace te
 			VkDeviceSize vertexBufferOffset{0};
 			std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> desc{};
 			sml::mat4 transform;
+			MeshBounds bounds;
 		};
 		std::vector<RenderObject> renderObjects{};
 		SceneBufferObject sceneBufferObject;

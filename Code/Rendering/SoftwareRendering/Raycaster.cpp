@@ -20,22 +20,22 @@ namespace te
 
 	void Forward(Camera& camera)
 	{
-		camera.moveForward();
+		camera.moveForward(1.0f);
 	}
 
 	void Backward(Camera& camera)
 	{
-		camera.moveBackward();
+		camera.moveBackward(1.0f);
 	}
 
 	void Right(Camera& camera)
 	{
-		camera.moveRight();
+		camera.moveRight(1.0f);
 	}
 
 	void Left(Camera& camera)
 	{
-		camera.moveLeft();
+		camera.moveLeft(1.0f);
 	}
 
 	Raycaster::Raycaster(SoftwareRenderer* renderer): running(true),

@@ -28,13 +28,18 @@ namespace te
 
 	void Renderer::render()
 	{
+		timerManager.update();
+		if (debugLevel == DebugLevel::TE_SHOW_FPS)
+		{
+			timerManager.setTimer(std::make_unique<Action<void>>([this]()
+			{
+				updateWindowTitle();
+			}), 1, true);
+		}
+		
 		while (running == true)
 		{
 			timerManager.update();
-			if (debugLevel == DebugLevel::TE_SHOW_FPS)
-			{
-				updateWindowTitle();
-			}
 			device->frameStats.drawCallCount = 0;
 			if (window->handleEvents() == 1)
 			{
@@ -47,8 +52,9 @@ namespace te
 			}
 			if (camera.bIsDirty)
 			{
-				device->updateCameraContext(camera);
 				camera.updateView();
+				device->updateCameraContext(camera);
+				device->updateDrawContext(scene);
 				camera.bIsDirty = false;
 			}
 			device->drawFrame(camera, timerManager.getDeltaTimeSec());
@@ -91,12 +97,12 @@ namespace te
 		return device;
 	}
 
-	const RendererType Renderer::getType() const
+	RendererType Renderer::getType() const
 	{
 		return rType;
 	}
 
-	const WindowAPI Renderer::getWindowAPI() const
+	WindowAPI Renderer::getWindowAPI() const
 	{
 		return windowAPI;
 	}
@@ -104,5 +110,10 @@ namespace te
 	const Scene& Renderer::getScene() const
 	{
 		return scene;
+	}
+
+	float Renderer::getDeltaTime() const
+	{
+		return timerManager.deltaTimeSec;
 	}
 }

@@ -32,6 +32,7 @@ namespace te
 		setupVertices(geometry.vertices);
 		setupIndices(geometry.indices);
 		setupDescriptors();
+		bounds = geometry.bounds;
 	}
 
 	void VulkanMesh::setup(AssimpImporter& importer)
@@ -43,8 +44,10 @@ namespace te
 		}
 		for (const MeshGeometry& geometry: importer.meshes)
 		{
+			// TODO: handle multiple meshes
 			setupVertices(geometry.vertices);
 			setupIndices(geometry.indices);
+			bounds = geometry.bounds;
 		}
 		setupDescriptors();
 	}

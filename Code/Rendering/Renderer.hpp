@@ -31,9 +31,10 @@ namespace te
 
 		std::shared_ptr<Window> getWindow() const;
 		std::shared_ptr<GPUDevice> getDevice() const;
-		const RendererType getType() const;
-		const WindowAPI getWindowAPI() const;
+		RendererType getType() const;
+		WindowAPI getWindowAPI() const;
 		const Scene& getScene() const;
+		float getDeltaTime() const;
 
 		void addBinding(const Binding& binding);
 		void addMouseBinding(const MouseBinding& binding);
