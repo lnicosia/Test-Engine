@@ -233,6 +233,7 @@ namespace te
 			//std::cout << "Reading mesh " << mesh->mName.C_Str() << std::endl;
 			// OPTI !! Multiple nodes can refer to the same mesh
 			meshes.emplace_back(processMesh(mesh, scene));
+			//meshes.back().
 		}
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{

@@ -34,7 +34,6 @@ namespace te
 
 		public:
 
-			const TimerManager& getInstance() const;
 			float getDeltaTimeSec() const;
 			float getDeltaTimeMili() const;
 			uint64_t getDeltaTimeNano() const;

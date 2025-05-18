@@ -1599,6 +1599,7 @@ namespace te
 		sceneBufferObject.view = sml::lookAt(sml::vec3(2.0f, 2.0f, 2.0f), sml::vec3(0.0f, 0.0f, 0.0f), sml::vec3(0.0f, 0.0f, 1.0f));
 		sceneBufferObject.projection = sml::perspective(SML_TO_RADIANS * 45.0f, swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
 		sceneBufferObject.projection[1][1] *= -1;
+		sceneBufferObject.viewProj = sceneBufferObject.projection * sceneBufferObject.view;
 
 		memcpy(frames[currentFrame].sceneBufferMapped, &sceneBufferObject, sizeof(sceneBufferObject));
 	}
@@ -1770,7 +1771,7 @@ namespace te
 		}
 	}
 
-	void VulkanDevice::recordGraphicsCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+	void VulkanDevice::recordGeometryCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 	{
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1792,7 +1793,7 @@ namespace te
 
 		std::array<VkClearValue, 3> clearColors{};
 		clearColors[0].color = {0.8f, 0.8f, 0.4f, 1.0f};
-		clearColors[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
+		//clearColors[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
 		clearColors[1].depthStencil = {1.0f, 0};
 		clearColors[2].color = {0.0f, 0.0f, 0.0f, 1.0f};
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
@@ -1832,6 +1833,7 @@ namespace te
 			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(obj.indexBufferSize), 1, 0, 0, 0);
 
 			frameStats.drawCallCount++;
+			frameStats.triangleCount += obj.indexBufferSize / 3;
 		}
 
 		/** Draw particles */
@@ -1892,7 +1894,6 @@ namespace te
 		if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR || frameBufferResized)
 		{
 			frameBufferResized = false;
-			// TODO: Allow window resize
 			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Swap chain needs recreation\n");
 			recreateSwapChain();
 			return;
@@ -1905,7 +1906,7 @@ namespace te
 	
 		vkResetCommandBuffer(frames[currentFrame].graphicsCommandBuffer, 0);
 	
-		recordGraphicsCommandBuffer(frames[currentFrame].graphicsCommandBuffer, imageIndex);
+		recordGeometryCommandBuffer(frames[currentFrame].graphicsCommandBuffer, imageIndex);
 
 		VkSemaphore waitSemaphores[] =
 		{
@@ -1945,7 +1946,20 @@ namespace te
 		presentInfo.pSwapchains = swapChains;
 		presentInfo.pImageIndices = &imageIndex;
 
-		vkQueuePresentKHR(presentQueue, &presentInfo);
+		res = vkQueuePresentKHR(presentQueue, &presentInfo);
+
+		if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR || frameBufferResized)
+		{
+			frameBufferResized = false;
+			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Swap chain needs recreation\n");
+			recreateSwapChain();
+			return;
+		}
+		else if (res != VK_SUCCESS)
+		{
+			ThrowException("Failed to acquire swap chain image");
+		}
+
 		currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
@@ -2208,6 +2222,7 @@ namespace te
 	void VulkanDevice::updateCameraContext(const Camera& camera)
 	{
 		sceneBufferObject.view = camera.view;
+		sceneBufferObject.viewProj = sceneBufferObject.projection * sceneBufferObject.view;
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			memcpy(frames[i].sceneBufferMapped, &sceneBufferObject, sizeof(sceneBufferObject));
@@ -2236,9 +2251,8 @@ namespace te
 		for (std::shared_ptr<MeshInternal> mesh : scene.getInternalMeshes())
 		{
 			std::shared_ptr<VulkanMesh> vulkanMesh = std::dynamic_pointer_cast<VulkanMesh>(mesh);
-			if (!vulkanMesh || !vulkanMesh->isVisible())
+			if (!vulkanMesh || !vulkanMesh->isVisible() || vulkanMesh->shouldCull(sceneBufferObject.viewProj))
 			{
-				TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Failed to cast internal mesh to vulkan mesh\n");
 				continue;
 			}
 			meshCount++;
@@ -2259,8 +2273,8 @@ namespace te
 					renderObjects[i].desc = vulkanMesh->getDescriptorSets();
 				}
 				// TMP
-				renderObjects[i].transform = sml::mat4(1.0f);
-				renderObjects[i].transform *= sml::translate(sml::vec3{static_cast<float>(i), 0.0f, 0.0f});
+				renderObjects[i].transform = vulkanMesh->getWorldTransform();
+				renderObjects[i].bounds = vulkanMesh->getBounds();
 			}
 		}
 	}

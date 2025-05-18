@@ -21,9 +21,14 @@ namespace te
 		MeshInternal(const std::string& path);
 		~MeshInternal();
 
-		bool isVisible() const;
-		
 		virtual void setMaterial(std::shared_ptr<Material> newMat) = 0;
+
+		MeshBounds getBounds() const;
+		sml::mat4 getLocalTransform() const;
+		sml::mat4 getWorldTransform() const;
+		bool isVisible() const;
+
+		bool shouldCull(const sml::mat4& viewProj) const;
 
 	protected:
 
@@ -34,14 +39,17 @@ namespace te
 		
 		const std::string getAssetType() const override;
 
+		void updateTransform(const sml::mat4& parentMat);
+
 	protected:
 
 		std::shared_ptr<Material> material{};
 
 		bool bIsVisible = true;
 
-		sml::mat4 localTransform;
-		sml::mat4 worldTransform;
+		sml::mat4 localTransform{};
+		sml::mat4 worldTransform{};
+		MeshBounds bounds{};
 	};
 	
 } // namespace te

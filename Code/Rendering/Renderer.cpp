@@ -52,8 +52,9 @@ namespace te
 			}
 			if (camera.bIsDirty)
 			{
-				device->updateCameraContext(camera);
 				camera.updateView();
+				device->updateCameraContext(camera);
+				device->updateDrawContext(scene);
 				camera.bIsDirty = false;
 			}
 			device->drawFrame(camera, timerManager.getDeltaTimeSec());
@@ -96,12 +97,12 @@ namespace te
 		return device;
 	}
 
-	const RendererType Renderer::getType() const
+	RendererType Renderer::getType() const
 	{
 		return rType;
 	}
 
-	const WindowAPI Renderer::getWindowAPI() const
+	WindowAPI Renderer::getWindowAPI() const
 	{
 		return windowAPI;
 	}
@@ -109,5 +110,10 @@ namespace te
 	const Scene& Renderer::getScene() const
 	{
 		return scene;
+	}
+
+	float Renderer::getDeltaTime() const
+	{
+		return timerManager.deltaTimeSec;
 	}
 }

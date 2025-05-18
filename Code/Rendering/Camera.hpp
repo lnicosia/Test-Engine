@@ -30,10 +30,10 @@ namespace te
 		const sml::vec3& getRightVec() const;
 
 		/* Movement */
-		void moveForward();
-		void moveBackward();
-		void moveLeft();
-		void moveRight();
+		void moveForward(float deltaTime);
+		void moveBackward(float deltaTime);
+		void moveLeft(float deltaTime);
+		void moveRight(float deltaTime);
 
 		void updateView();
 

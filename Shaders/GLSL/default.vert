@@ -4,6 +4,7 @@ layout(set = 0, binding = 0, row_major) uniform SceneData
 {
     mat4 view;
     mat4 projection;
+	mat4 viewProj;
 } sceneData;
 
 layout(location = 0) in vec3 inPosition;
@@ -20,7 +21,7 @@ layout(push_constant, row_major) uniform constants
 
 void main()
 {
-    gl_Position = sceneData.projection * sceneData.view * pushConstants.model * vec4(inPosition, 1.0);
+    gl_Position = sceneData.viewProj * pushConstants.model * vec4(inPosition, 1.0);
     outFragColor = inColor;
     outFragTexCoord = inTexCoord;
 }

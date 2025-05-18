@@ -9,11 +9,6 @@ namespace te
 		lastFrameTimeNano = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	}
 
-	const TimerManager& TimerManager::getInstance() const
-	{
-		return *this;
-	}
-
 	void TimerManager::update()
 	{
 		uint64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
