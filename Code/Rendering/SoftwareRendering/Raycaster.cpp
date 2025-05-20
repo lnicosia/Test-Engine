@@ -9,12 +9,12 @@ namespace te
 		if (gameState == PLAYING)
 		{
 			gameState = PAUSED;
-			SDL_SetRelativeMouseMode(SDL_FALSE);
+			// SDL_SetWindowRelativeMouseMode(nullptr, false); // TODO: need to get window
 		}
 		else
 		{
 			gameState = PLAYING;
-			SDL_SetRelativeMouseMode(SDL_TRUE);
+			// SDL_SetWindowRelativeMouseMode(nullptr, true); // TODO: need to get window
 		}
 	}
 
@@ -58,7 +58,7 @@ namespace te
 		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "redbrick.png"));
 		textures.push_back(assetManager.loadAsset<SoftwareTexture>(texturesBasePath + "wood.png"));
 
-		SDL_SetRelativeMouseMode(SDL_TRUE);
+		SDL_SetWindowRelativeMouseMode(nullptr, true); // TODO: need to get window
 
 		map = {
 			{8,8,8,8,8,8,8,8,8,8,8,4,4,6,4,4,6,4,6,4,4,4,6,4},
@@ -89,22 +89,22 @@ namespace te
 
 		camera.pos = { 5.0f, 5.0f, 0.0f };
 
-		Binding forward("forward", SDLK_UP, SDLK_w, true);
+		Binding forward("forward", SDLK_UP, SDLK_W, true);
 		std::function<void(Camera&)> func = Forward;
 		forward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void, Camera&>(func, camera));
 		renderer->getWindow()->events->bindings.push_back(forward);
 
-		Binding backward("backward", SDLK_DOWN, SDLK_s, true);
+		Binding backward("backward", SDLK_DOWN, SDLK_S, true);
 		func = Backward;
 		backward.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void, Camera&>(func, camera));
 		renderer->getWindow()->events->bindings.push_back(backward);
 
-		Binding left("left", SDLK_LEFT, SDLK_a, true);
+		Binding left("left", SDLK_LEFT, SDLK_A, true);
 		func = Left;
 		left.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void, Camera&>(func, camera));
 		renderer->getWindow()->events->bindings.push_back(left);
 
-		Binding right("right", SDLK_RIGHT, SDLK_d, true);
+		Binding right("right", SDLK_RIGHT, SDLK_D, true);
 		func = Right;
 		right.whenPressed = std::shared_ptr<ActionWrapper>(new Action<void, Camera&>(func, camera));
 		renderer->getWindow()->events->bindings.push_back(right);

@@ -1,24 +1,31 @@
 ﻿cmake_minimum_required (VERSION 3.10)
 
+include(../cmake/ccache.cmake)
+
 project ("Test-Engine"
 	VERSION 0.0.1
 	DESCRIPTION "Test engine"
 	HOMEPAGE_URL "https://github.com/lnicosia/Test-Engine"
+    LANGUAGES CXX
 )
 
+find_package(Vulkan REQUIRED)
+
 include(FetchContent)
+
+set(TESTENGINE_USE_VALIDATION_LAYERS OFF CACHE BOOL "Use validation layers")
 
 FetchContent_Declare(
 	SDL3
 	GIT_REPOSITORY	https://github.com/libsdl-org/SDL
-	GIT_TAG			53bde3abee6bc64c3f5368c37e1b685ac18aafb3
+	GIT_TAG			release-3.2.14
 )
 FetchContent_MakeAvailable(SDL3)
 
 FetchContent_Declare(
 	SDL_ttf
 	GIT_REPOSITORY	https://github.com/libsdl-org/SDL_ttf
-	GIT_TAG			1659723b95254600ba044964c8e23fd3db4b9bfd
+	GIT_TAG			release-3.2.2
 )
 FetchContent_MakeAvailable(SDL_ttf)
 
@@ -29,12 +36,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(assimp)
 
+
 set(EXEC_NAME ${PROJECT_NAME}-App)
 
 add_executable (${EXEC_NAME}
 	"../Resources/Test-Engine.rc"
 	"main.cpp"
 )
+
 
 target_include_directories(${EXEC_NAME}
 	PRIVATE "ThirdParty"
@@ -177,6 +186,11 @@ set(SOURCE_LIST
 )
 
 add_library (${PROJECT_NAME} SHARED ${SOURCE_LIST})
+
+if (TESTENGINE_USE_VALIDATION_LAYERS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC -DENABLE_VALIDATION_LAYERS)
+endif()
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS 1)
@@ -217,9 +231,11 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 	$<$<CONFIG:Release>:-DNDEBUG>
 	-DTE_COMPILING_DLL
 )
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED ON
+)
 
 get_target_property(SDL3_OG SDL3::SDL3 ALIASED_TARGET)
 get_target_property(SDL3_TTF_OG SDL3_ttf::SDL3_ttf ALIASED_TARGET)
@@ -247,6 +263,7 @@ add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
 		COMMAND ${CMAKE_COMMAND} -E echo 
 			"Config = $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RenderingDebug>:RenderingDebug>"
 )
+
 if (WIN32)
 
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -257,17 +274,12 @@ if (WIN32)
 			$<TARGET_FILE:sml> ${CMAKE_CURRENT_BINARY_DIR}
 	)
 
-	target_link_libraries(${PROJECT_NAME} PUBLIC
-		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/vulkan-1.lib"
-	)
+endif (WIN32)
 
-elseif (UNIX)
 
-	target_link_libraries(${PROJECT_NAME} PUBLIC
-		"${CMAKE_CURRENT_SOURCE_DIR}/../Binaries/ThirdParty/Vulkan/1.3.239.0/libvulkan.so.1"
-	)
-
-endif ()
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	Vulkan::Vulkan
+)
 
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor)

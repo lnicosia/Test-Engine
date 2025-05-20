@@ -1,7 +1,7 @@
 #ifndef _TTF_FONT_HPP_
 # define _TTF_FONT_HPP_
 
-#include "SDL_ttf.h"
+#include "SDL3_ttf/SDL_ttf.h"
 
 #include "Assets/Fonts/Font.hpp"
 

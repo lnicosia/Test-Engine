@@ -125,8 +125,8 @@ namespace te
 			{
 				for (auto& binding : this->bindings)
 				{
-					if (e.key.keysym.sym == binding.getKey1()
-						|| e.key.keysym.sym == binding.getKey2())
+					if (e.key.key == binding.getKey1()
+						|| e.key.key == binding.getKey2())
 					{
 					if (binding.getState() == InputState::TE_RELEASED)
 						{
@@ -140,8 +140,8 @@ namespace te
 			{
 				for (auto& binding : this->bindings)
 				{
-					if (e.key.keysym.sym == binding.getKey1()
-						|| e.key.keysym.sym == binding.getKey2())
+					if (e.key.key == binding.getKey1()
+						|| e.key.key == binding.getKey2())
 					{
 						binding.setState(InputState::TE_RELEASE);
 					}
