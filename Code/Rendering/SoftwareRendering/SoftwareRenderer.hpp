@@ -1,7 +1,7 @@
 #ifndef _SOFTWARE_RENDERER_HPP_
 # define _SOFTWARE_RENDERER_HPP_
 
-#include "SDL_ttf.h"
+#include "SDL3_ttf/SDL_ttf.h"
 
 #include "../Renderer.hpp"
 #include "../Window/SDLWindow.hpp"

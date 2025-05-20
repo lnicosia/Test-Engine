@@ -20,28 +20,28 @@
 
 void initBasicBindings(te::Renderer* renderer)
 {
-	te::Binding forward("forward", SDLK_UP, SDLK_w, true);
+	te::Binding forward("forward", SDLK_UP, SDLK_W, true);
 	forward.whenPressed = std::make_shared<te::Action<void>>([renderer]()
 	{
 		renderer->camera.moveForward(renderer->getDeltaTime());
 	});
 	renderer->addBinding(forward);
 
-	te::Binding backward("backward", SDLK_DOWN, SDLK_s, true);
+	te::Binding backward("backward", SDLK_DOWN, SDLK_S, true);
 	backward.whenPressed = std::make_shared<te::Action<void>>([renderer]()
 	{
 		renderer->camera.moveBackward(renderer->getDeltaTime());
 	});
 	renderer->addBinding(backward);
 
-	te::Binding left("left", SDLK_LEFT, SDLK_a, true);
+	te::Binding left("left", SDLK_LEFT, SDLK_A, true);
 	left.whenPressed = std::make_shared<te::Action<void>>([renderer]()
 	{
 		renderer->camera.moveLeft(renderer->getDeltaTime());
 	});
 	renderer->addBinding(left);
 
-	te::Binding right("right", SDLK_RIGHT, SDLK_d, true);
+	te::Binding right("right", SDLK_RIGHT, SDLK_D, true);
 	right.whenPressed = std::make_shared<te::Action<void>>([renderer]()
 	{
 		renderer->camera.moveRight(renderer->getDeltaTime());

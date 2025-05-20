@@ -9,19 +9,23 @@ project ("Test-Engine"
     LANGUAGES CXX
 )
 
+find_package(Vulkan REQUIRED)
+
 include(FetchContent)
+
+set(TESTENGINE_USE_VALIDATION_LAYERS OFF CACHE BOOL "Use validation layers")
 
 FetchContent_Declare(
 	SDL3
 	GIT_REPOSITORY	https://github.com/libsdl-org/SDL
-	GIT_TAG			53bde3abee6bc64c3f5368c37e1b685ac18aafb3
+	GIT_TAG			release-3.2.14
 )
 FetchContent_MakeAvailable(SDL3)
 
 FetchContent_Declare(
 	SDL_ttf
 	GIT_REPOSITORY	https://github.com/libsdl-org/SDL_ttf
-	GIT_TAG			1659723b95254600ba044964c8e23fd3db4b9bfd
+	GIT_TAG			release-3.2.2
 )
 FetchContent_MakeAvailable(SDL_ttf)
 
@@ -32,7 +36,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(assimp)
 
-find_package(Vulkan REQUIRED)
 
 set(EXEC_NAME ${PROJECT_NAME}-App)
 
@@ -40,6 +43,7 @@ add_executable (${EXEC_NAME}
 	"../Resources/Test-Engine.rc"
 	"main.cpp"
 )
+
 
 target_include_directories(${EXEC_NAME}
 	PRIVATE "ThirdParty"
@@ -182,6 +186,11 @@ set(SOURCE_LIST
 )
 
 add_library (${PROJECT_NAME} SHARED ${SOURCE_LIST})
+
+if (TESTENGINE_USE_VALIDATION_LAYERS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC -DENABLE_VALIDATION_LAYERS)
+endif()
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS 1)

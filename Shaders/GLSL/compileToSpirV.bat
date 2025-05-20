@@ -1,7 +1,14 @@
 @echo off
-IF "%1"=="" (
-	ECHO Please give a shader file to compile
-	EXIT /B
+if "%~1"=="" (
+    echo Please give a shader file to compile
+    exit /b 1
 )
-
-..\..\Binaries\ThirdParty\vulkan\1.3.239.0\glslc.exe %1 -o ..\SPIR-V\%1.spv
+if not exist "..\SPIR-V" (
+    mkdir "..\SPIR-V"
+)
+:loop
+if "%~1"=="" goto :eof
+echo Compiling %1 to ..\SPIR-V\%~nx1.spv
+glslc "%~1" -o "..\SPIR-V\%~nx1.spv"
+shift
+goto loop

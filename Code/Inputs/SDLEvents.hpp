@@ -1,7 +1,7 @@
 #ifndef _SDLEVENTS_HPP_
 # define _SDLEVENTS_HPP_
 
-#include "SDL.h"
+#include "SDL3/SDL.h"
 #include "Events.hpp"
 #include "Maths/math_tmp.hpp"
 #include <vector>

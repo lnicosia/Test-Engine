@@ -4,7 +4,7 @@
 #include "Window.hpp"
 #include "Debug/Log.hpp"
 
-#include "SDL.h"
+#include "SDL3/SDL.h"
 
 #include <iostream>
 

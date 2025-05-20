@@ -2,8 +2,8 @@
 #include "Debug/Log.hpp"
 #include "Debug/Exception.hpp"
 
-#include "SDL.h"
-#include "SDL_ttf.h"
+#include "SDL3/SDL.h"
+#include "SDL3_ttf/SDL_ttf.h"
 
 #include <string>
 #include <stdexcept>
@@ -17,7 +17,7 @@ namespace te
 
 		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Initializing SDL\n");
 
-		if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
+		if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
 		{
 			ThrowException( "Couldn't initialize SDL Video subsystem : " + std::string(SDL_GetError()) + "\n" );
 		}
@@ -45,9 +45,9 @@ namespace te
 		//}
 
 		TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Initializing SDL_ttf\n");
-		if (TTF_Init() == -1)
+		if (!TTF_Init())
 		{
-			ThrowException( "Couldn't initialize SDL_ttf : \n" + std::string(TTF_GetError()) + "\n" );
+			ThrowException( "Couldn't initialize SDL_ttf : \n" + std::string(SDL_GetError()) + "\n" );
 		}
 
 		/** Don't atexit in shared libraries..
@@ -85,7 +85,7 @@ namespace te
 			TTF_Quit();
 			/* LEAK ?? */
 			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL subsystems\n");
-			SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
+			SDL_QuitSubSystem(SDL_INIT_VIDEO);
 			TE_LOG(TE_RENDERING_LOG, TE_VERYVERBOSE, "Quitting SDL\n");
 			SDL_Quit();
 			initialized = false;

@@ -9,6 +9,7 @@
 #include "Rendering/SoftwareRendering/SoftwareMesh.hpp"
 
 #include "Debug/Exception.hpp"
+#include <cstring>
 
 namespace te
 {
@@ -22,7 +23,7 @@ namespace te
 		h = window->getHeight();
 
 		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "Initializing SDL renderer\n");
-		SDLRendererPtr = SDL_CreateRenderer(winPtr->getWindow(), nullptr, SDL_RENDERER_SOFTWARE);
+		SDLRendererPtr = SDL_CreateRenderer(winPtr->getWindow(), NULL);
 		if (!SDLRendererPtr)
 		{
 			ThrowException("Could not create SDL renderer");
@@ -97,16 +98,16 @@ namespace te
 		}
 
 		SDL_Color color{ 255, 255, 255 };
-		SDL_Surface* surf = TTF_RenderText_Blended(ttfFont->getPtr(), text, color);
+		SDL_Surface* surf = TTF_RenderText_Blended(ttfFont->getPtr(), text, std::strlen(text), color);
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(SDLRendererPtr, surf);
-		int texW = 0;
-		int texH = 0;
-		SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+		auto texW = 0.f;
+		auto texH = 0.f;
+		SDL_GetTextureSize(texture, &texW, &texH);
 		SDL_FRect rec{
-			(float)(w - texW - 10),
-			(float)(h - texH - 10),
-			(float)(texW),
-			(float)(texH)
+			(w - texW - 10),
+			(h - texH - 10),
+			(texW),
+			(texH)
 		};
 		SDL_RenderTexture(SDLRendererPtr, texture, nullptr, &rec);
 		SDL_DestroyTexture(texture);
