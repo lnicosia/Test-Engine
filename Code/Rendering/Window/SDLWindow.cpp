@@ -8,7 +8,8 @@
 # include <windows.h>
 #endif
 
-#include "SDL_vulkan.h"
+#include "SDL3/SDL_vulkan.h"
+#include "SDL3/SDL_video.h"
 
 #include "vulkan/vulkan.h"
 
@@ -72,7 +73,6 @@ namespace te
 
 		title += " | 0.0ms - 0 fps";
 		
-		flags |= SDL_WINDOW_RESIZABLE;
 		windowPtr = SDL_CreateWindow(title.c_str(), w, h, flags);
 		if (!windowPtr)
 		{
@@ -90,16 +90,20 @@ namespace te
 	int SDLWindow::getVulkanInstanceExtensions(uint32_t* count, std::vector<const char*>& names,
 		bool enableValidationLayers)
 	{
-		if (SDL_Vulkan_GetInstanceExtensions(count, nullptr) == SDL_FALSE)
-		{
-			ThrowException("Could not querry Vulkan instance extensions count");
-		}
+        auto instance_extensions = SDL_Vulkan_GetInstanceExtensions(count);
+        if (instance_extensions == nullptr)
+        {
+            ThrowException("Could not query Vulkan instance extensions count");
+            return 1;
+        }
+
 		TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "SDL requires %d vulkan extensions:\n", *count);
 		names.resize(*count);
-		if (SDL_Vulkan_GetInstanceExtensions(count, names.data()) == SDL_FALSE)
-		{
-			ThrowException("Could not querry Vulkan instance extensions names");
-		}
+        // copy the extensions to the vector
+        for (auto i = 0u; i < *count; i++)
+        {
+            names[i] = instance_extensions[i];
+        }
 		for (const char* name : names)
 		{
 			TE_LOG(TE_RENDERING_LOG, TE_VERBOSE, "\t'%s'\n", name);
@@ -133,10 +137,14 @@ namespace te
 		{
 			TE_LOG(TE_RENDERING_LOG, TE_ERROR, "Vulkan surface already exists\n");
 		}
-		if (SDL_Vulkan_CreateSurface(windowPtr, instance, surface) == SDL_FALSE
+		if (!SDL_Vulkan_CreateSurface(windowPtr, instance, nullptr, surface)
 			|| surface == nullptr)
 		{
-			ThrowException("Could not create SDL Vulkan surface:" + std::string(SDL_GetError()));
+            if (surface == nullptr)
+            {
+                std::cout << "C'est d'la merde" << std::endl;
+            }
+			ThrowException("Could not create SDL Vulkan surface: " + std::string(SDL_GetError()));
 		}
 
 		return 0;
@@ -152,13 +160,13 @@ namespace te
 	{
 		SDL_GetGlobalMouseState(&preHideMousePos.x, &preHideMousePos.y);
 		SDL_HideCursor();
-		SDL_SetRelativeMouseMode(SDL_TRUE);
+		SDL_SetWindowRelativeMouseMode(windowPtr, true);
 	}
 
 	void SDLWindow::showCursor()
 	{
 		SDL_ShowCursor();
-		SDL_SetRelativeMouseMode(SDL_FALSE);
+		SDL_SetWindowRelativeMouseMode(windowPtr, false);
 		SDL_WarpMouseGlobal(preHideMousePos.x, preHideMousePos.y);
 	}
 

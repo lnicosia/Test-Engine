@@ -11,12 +11,7 @@
 
 namespace te
 {
-
-    /**
-     * @brief C'est un Axe mon pote
-     * @note Attention si tu l'enleve ca compile plus
-     */
-	enum Axis
+	enum class Axis
 	{
 		X_UP,
 		Y_UP,

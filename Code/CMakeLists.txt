@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.10)
 
-include(../cmake/ccache.cmake)
+include(../CMake/ccache.cmake)
 
 project ("Test-Engine"
 	VERSION 0.0.1
@@ -12,8 +12,6 @@ project ("Test-Engine"
 find_package(Vulkan REQUIRED)
 
 include(FetchContent)
-
-set(TESTENGINE_USE_VALIDATION_LAYERS OFF CACHE BOOL "Use validation layers")
 
 FetchContent_Declare(
 	SDL3
@@ -36,23 +34,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(assimp)
 
-
-set(EXEC_NAME ${PROJECT_NAME}-App)
+set(EXEC_NAME Test-App)
 
 add_executable (${EXEC_NAME}
 	"../Resources/Test-Engine.rc"
 	"main.cpp"
 )
 
-
-target_include_directories(${EXEC_NAME}
-	PRIVATE "ThirdParty"
-	PRIVATE "./"
-	PRIVATE "Maths"
-)
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${EXEC_NAME})
 target_link_libraries(${EXEC_NAME} PUBLIC ${PROJECT_NAME})
 
 set(SOURCE_LIST
@@ -198,16 +186,9 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS 1)
 add_subdirectory(Maths)
 add_subdirectory(Tests)
 
-set(SDL_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl3-build)
-set(SDL_TTF_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/sdl_ttf-build)
-set(ASSIMP_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/_deps/assimp-build)
-
-target_link_directories(${PROJECT_NAME}
-	PRIVATE ${SDL_BUILD_DIR}
-	PRIVATE ${SDL_TTF_BUILD_DIR}
-	PRIVATE ${ASSIMP_BUILD_DIR}
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	Vulkan::Vulkan
 )
-
 target_link_libraries(${PROJECT_NAME} PUBLIC
 	SDL3::SDL3
 	SDL3_ttf::SDL3_ttf
@@ -222,9 +203,10 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 target_include_directories(${PROJECT_NAME}
 	PUBLIC "ThirdParty"
 	PUBLIC "./"
-	PUBLIC "Maths"
 )
 
+# TODO: handle configurations correctly
+set(TESTENGINE_USE_VALIDATION_LAYERS OFF CACHE BOOL "Use validation layers")
 target_compile_definitions(${PROJECT_NAME} PUBLIC
 	$<$<CONFIG:Debug>:>
 	$<$<CONFIG:RenderingDebug>:-DENABLE_VALIDATION_LAYERS>
@@ -240,6 +222,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 get_target_property(SDL3_OG SDL3::SDL3 ALIASED_TARGET)
 get_target_property(SDL3_TTF_OG SDL3_ttf::SDL3_ttf ALIASED_TARGET)
 
+# Setup for Visual Studio and XCode
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${EXEC_NAME})
+# Create a target tree for Visual Studio and XCode
 function(create_target_tree DIR LIB)
     get_property(TGTS DIRECTORY "${DIR}" PROPERTY BUILDSYSTEM_TARGETS)
     foreach(TGT IN LISTS TGTS)
@@ -254,9 +240,11 @@ function(create_target_tree DIR LIB)
     endforeach()
 endfunction()
 
-create_target_tree("${ASSIMP_BUILD_DIR}" assimp)
-create_target_tree("${SDL_BUILD_DIR}" ${SDL3_OG})
-create_target_tree("${SDL_TTF_BUILD_DIR}" ${SDL3_TTF_OG})
+create_target_tree("${assimp_BINARY_DIR}" assimp)
+create_target_tree("${SDL3_BINARY_DIR}" ${SDL3_OG})
+create_target_tree("${SDL3_ttf_BINARY_DIR}" ${SDL3_TTF_OG})
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "")
+set_target_properties(${EXEC_NAME} PROPERTIES FOLDER "")
 set_target_properties(sml PROPERTIES FOLDER "Lib/")
 
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
@@ -276,13 +264,6 @@ if (WIN32)
 
 endif (WIN32)
 
-
-target_link_libraries(${PROJECT_NAME} PUBLIC
-	Vulkan::Vulkan
-)
-
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor)
 endif(MSVC)
-
-# TODO: Add tests and install targets if needed.

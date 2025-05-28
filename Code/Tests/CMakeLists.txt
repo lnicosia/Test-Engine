@@ -5,15 +5,15 @@ set(SOURCE_LIST
 	"ArenaTest.cpp"
 	"ArenaTest.hpp"
 )
-add_executable(Tests ${SOURCE_LIST})
+add_executable(UnitTests ${SOURCE_LIST})
 
-target_link_libraries(Tests PUBLIC Test-Engine)
+target_link_libraries(UnitTests PUBLIC Test-Engine)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
 
 if (WIN32)
 
-	add_custom_command(TARGET Tests POST_BUILD
+	add_custom_command(TARGET UnitTests POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			$<TARGET_FILE:SDL3::SDL3> ${CMAKE_CURRENT_BINARY_DIR}
 			$<TARGET_FILE:SDL3_ttf::SDL3_ttf> ${CMAKE_CURRENT_BINARY_DIR}
@@ -25,5 +25,5 @@ if (WIN32)
 endif ()
 
 if (MSVC)
-	target_compile_options(Tests PRIVATE /Zc:preprocessor)
+	target_compile_options(UnitTests PRIVATE /Zc:preprocessor)
 endif(MSVC)
