@@ -5,6 +5,7 @@
 * CMake 3.10 minimum
 * C++ 20 compiler
 * gcc 10 minimum
+* Vulkan SDK
 
 ## Tested builds
 
