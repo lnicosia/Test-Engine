@@ -93,31 +93,19 @@ namespace te
 #endif
 
 		std::filesystem::path currentDirPath = executablePath.parent_path();
+		printf("Executable path = %s\n", executablePath.string().c_str());
 		bool found = false;
-		bool binariesFound = false;
-		bool shadersFound = false;
-		bool resourcesFound = false;
+		bool tagFound = false;
 		while (!found)
 		{
-			binariesFound = false;
-			shadersFound = false;
-			resourcesFound = false;
 			for (const auto& it : std::filesystem::directory_iterator(currentDirPath))
 			{
-				if (it.path().filename() == "Binaries")
+				if (it.path().filename() == "Test-Engine.tag")
 				{
-					binariesFound = true;
-				}
-				else if (it.path().filename() == "Shaders")
-				{
-					shadersFound = true;
-				}
-				else if (it.path().filename() == "Resources")
-				{
-					resourcesFound = true;
+					tagFound = true;
 				}
 			}
-			found = binariesFound && shadersFound && resourcesFound;
+			found = tagFound;
 			if (!currentDirPath.has_relative_path() || found)
 			{
 				break;
